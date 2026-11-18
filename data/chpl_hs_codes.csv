@@ -1,0 +1,51 @@
+hs6,tier,description
+854231,1,Integrated circuits: processors and controllers
+854232,1,Integrated circuits: memories
+854233,1,Integrated circuits: amplifiers
+854239,1,Integrated circuits: other
+851762,2,Machines for reception/conversion/transmission of data
+852691,2,Radio navigational aid apparatus
+853221,2,Tantalum capacitors
+853224,2,Ceramic dielectric multilayer capacitors
+854800,2,Electrical parts of machinery n.e.s. in ch. 85
+847150,3A,Processing units for ADP machines
+850440,3A,Static converters
+851769,3A,Other apparatus for transmission/reception of data
+852589,3A,Other TV cameras/digital cameras/video recorders
+852910,3A,Aerials and aerial reflectors; parts
+852990,3A,Other parts for apparatus of headings 8524-8528
+853669,3A,Plugs and sockets <=1000 V
+853690,3A,Other apparatus for connections <=1000 V
+854110,3A,Diodes (not photosensitive or LED)
+854121,3A,Transistors <1 W
+854129,3A,Other transistors
+854130,3A,"Thyristors, diacs and triacs"
+854149,3A,Photosensitive semiconductor devices (excl. PV)
+854151,3A,Semiconductor-based transducers
+854159,3A,Other semiconductor devices
+854160,3A,Mounted piezo-electric crystals
+848210,3B,Ball bearings
+848220,3B,Tapered roller bearings
+848230,3B,Spherical roller bearings
+848250,3B,Other cylindrical roller bearings
+880730,3B,Other parts of aeroplanes/helicopters/UAVs
+901310,3B,Telescopic sights; periscopes; telescopes
+901380,3B,Other optical devices
+901420,3B,Aeronautical/space navigation instruments
+901480,3B,Other navigational instruments
+847180,4A,Other units for ADP machines
+848610,4A,Machines for manufacture of boules or wafers
+848620,4A,Machines for manufacture of semiconductor devices/ICs
+848640,4A,Machines specified in note 11(C) ch. 84
+853400,4A,Printed circuits
+854320,4A,Signal generators
+902750,4A,Instruments using optical radiations
+903020,4A,Oscilloscopes and oscillographs
+903032,4A,Multimeters with recording device
+903039,4A,Other instruments for voltage/current with recording device
+903082,4A,Instruments for checking semiconductor wafers/devices
+845710,4B,Machining centres for working metal
+845811,4B,"Horizontal lathes, numerically controlled"
+845891,4B,"Other lathes, numerically controlled"
+845961,4B,"Milling machines for metal, numerically controlled"
+846693,4B,Parts for machines of headings 8456-8461
