@@ -11,6 +11,8 @@ CHPL_CSV = DATA / "chpl_hs_codes.csv"
 
 YEARS = list(range(2019, 2026))
 SANCTIONS_YEAR = 2022
+# Pre-war baseline: the average of these years. 2021 alone is a second option.
+BASELINE_YEARS = [2019, 2020, 2021]
 
 # Country codes: ISO2 for Comext, UN M49 for Comtrade.
 COUNTRIES = {

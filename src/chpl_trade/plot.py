@@ -11,7 +11,6 @@ from . import config  # noqa: E402
 
 EU_FLOW = "EU-27 exports to country"
 RU_FLOW = "Country exports to Russia"
-BASE_YEAR = 2021
 
 # Colors from the reference categorical palette (fixed order).
 FLOW_COLOR = {EU_FLOW: "#2a78d6", RU_FLOW: "#eb6834"}
@@ -68,9 +67,10 @@ def _line(ax, x, y, color, marker, label, end_label=True, suffix="", dy=0):
         x, y, color=color, lw=2, marker=marker, ms=6,
         markeredgecolor=SURFACE, markeredgewidth=1.5, label=label,
     )
-    if end_label:
+    ok = y.notna()
+    if end_label and ok.any():
         ax.annotate(
-            f"{y.iloc[-1]:,.0f}{suffix}", (x.iloc[-1], y.iloc[-1]), xytext=(6, dy),
+            f"{y[ok].iloc[-1]:,.0f}{suffix}", (x[ok].iloc[-1], y[ok].iloc[-1]), xytext=(6, dy),
             textcoords="offset points", va="center", fontsize=9, color=INK,
         )
 
@@ -104,15 +104,25 @@ def plot_country(totals, country):
 
 
 def comparison_table(totals):
-    p = totals.pivot_table(index=["country", "year"], columns="flow", values="usd")
-    p = p.reset_index()
-    base = p[p["year"] == BASE_YEAR].set_index("country")
-    p["eu_index"] = p.apply(lambda r: 100 * r[EU_FLOW] / base.loc[r["country"], EU_FLOW], axis=1)
-    p["ru_index"] = p.apply(lambda r: 100 * r[RU_FLOW] / base.loc[r["country"], RU_FLOW], axis=1)
-    p["ru_to_eu_ratio_pct"] = 100 * p[RU_FLOW] / p[EU_FLOW]
-    p = p.rename(columns={EU_FLOW: "eu_exports_usd", RU_FLOW: "exports_to_ru_usd"})
+    """Multiples against two baselines, and the scale ratio between the two flows.
+
+    The main baseline is the 2019-2021 average. One year (2021) can be
+    unusual, and small values make a one-year base unstable.
+    """
+    p = totals.pivot_table(index=["country", "year"], columns="flow", values="usd", dropna=False)
+    p = p.reset_index().rename(columns={EU_FLOW: "eu_exports_usd", RU_FLOW: "exports_to_ru_usd"})
     p.columns.name = None
-    p = p.round({"eu_index": 1, "ru_index": 1, "ru_to_eu_ratio_pct": 1, "eu_exports_usd": 0, "exports_to_ru_usd": 0})
+    pre = p[p["year"].isin(config.BASELINE_YEARS)].groupby("country")
+    avg = pre[["eu_exports_usd", "exports_to_ru_usd"]].mean()
+    y21 = p[p["year"] == 2021].set_index("country")[["eu_exports_usd", "exports_to_ru_usd"]]
+    for col, short in [("eu_exports_usd", "eu"), ("exports_to_ru_usd", "ru")]:
+        p[f"{short}_index_avg1921"] = 100 * p[col] / p["country"].map(avg[col])
+        p[f"{short}_index_2021"] = 100 * p[col] / p["country"].map(y21[col])
+    # Exports to Russia divided by EU exports to the country. This is a scale
+    # ratio, not a re-export share: other suppliers (mainly China) and local
+    # stock also feed the exports to Russia.
+    p["scale_ratio_pct"] = 100 * p["exports_to_ru_usd"] / p["eu_exports_usd"]
+    p = p.round(1)
     p.to_csv(config.PROCESSED / "comparison.csv", index=False)
     return p
 
@@ -120,9 +130,9 @@ def comparison_table(totals):
 def plot_comparison(comp):
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.6))
     panels = [
-        ("eu_index", f"EU-27 exports to country\nindex, {BASE_YEAR} = 100 (log scale)", True),
-        ("ru_index", f"Country exports to Russia\nindex, {BASE_YEAR} = 100 (log scale)", True),
-        ("ru_to_eu_ratio_pct", "Exports to Russia as % of\nEU-27 exports to country", False),
+        ("eu_index_avg1921", "EU-27 exports to country\nindex, 2019–21 average = 100 (log)", True),
+        ("ru_index_avg1921", "Country exports to Russia\nindex, 2019–21 average = 100 (log)", True),
+        ("scale_ratio_pct", "Scale ratio: exports to Russia ÷\nEU-27 exports (not a re-export share)", False),
     ]
     for ax, (col, title, log) in zip(axes, panels):
         last = comp[comp["year"] == config.YEARS[-1]].set_index("country")[col]

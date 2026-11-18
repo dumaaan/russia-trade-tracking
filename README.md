@@ -43,18 +43,30 @@ CHPL basket (49 codes, see *Method*), USD million:
 
 - **Size.** Kazakhstan is much larger. In 2023, EU exports to Kazakhstan were about 6.5 times
   the EU exports to Kyrgyzstan. Kazakhstan exports to Russia were about 9 times the Kyrgyz exports.
-- **Growth.** Kyrgyzstan grew much faster from a very small base. From 2021 to the 2023 peak,
-  EU exports to Kyrgyzstan increased about 14 times and Kyrgyz exports to Russia about 17 times.
-  For Kazakhstan, EU exports increased about 2 times (peak in 2023) and exports to Russia about
-  5 times (peak in 2022).
-- **Ratio.** Kazakhstan exports to Russia were 28% of EU exports to Kazakhstan in 2021. The ratio
-  went to 74% in 2022. Then it went down to 48% in 2025. The Kyrgyz ratio was between 29% and 49%
-  after 2021, with no clear direction.
-- **After the peak.** Both flows went down after 2023, but they stay far above the 2021 level.
-  In 2025, Kazakhstan exports to Russia are 3 times the 2021 level, and Kyrgyz exports are 8.5 times.
+- **Growth.** Kyrgyzstan grew much faster from a very small base. Against the 2019–21 average,
+  EU exports to Kyrgyzstan were 10 times higher at the 2023 peak, and Kyrgyz exports to Russia
+  21 times higher. For Kazakhstan, the peaks were 2.3 times (EU exports, 2023) and 4.3 times
+  (exports to Russia, 2022).
+- **After the peak.** Both flows went down after 2023, but they stay far above the pre-war level.
+  In 2025, Kazakhstan exports to Russia are 2.6 times the 2019–21 average, and Kyrgyz exports are
+  10.8 times.
+- **Scale ratio.** Kazakhstan exports to Russia were 28% of EU exports to Kazakhstan in 2021,
+  74% in 2022 and 48% in 2025. This is **not a re-export share**. Other suppliers, mainly China,
+  also sell these goods to Kazakhstan and Kyrgyzstan. For example, Kazakhstan's Tier 3.B exports
+  to Russia (bearings, optics) are larger than EU Tier 3.B exports to Kazakhstan in every year.
 
-The comparison table for all years is in
+The comparison table for all years and both baselines (2019–21 average and 2021) is in
 [`data/processed/comparison.csv`](data/processed/comparison.csv).
+
+### Cross-checks
+
+| Check | Published | Ours | Result |
+|---|---|---|---|
+| KZ → RU, 2022 vs 2021 | +401% ([The Moscow Times](https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf), Comtrade) | +390% | Match |
+| KZ → RU, 2023 vs 2022 | −5% (same source) | −4.3% | Match |
+| EU → KG, Jan–Oct 2025 vs pre-war | +800% (EU, [via RFE/RL](https://www.globalsecurity.org/military/library/news/2026/02/mil-260226-rferl02.htm), search summary only) | ×4.7 vs 2019–21, ×6.6 vs 2021 | Ours lower; EU baseline and code list unknown |
+| KG → RU, Jan–Oct 2025 vs pre-war | +1,200% (same source) | ×10.8 vs 2019–21, ×8.5 vs 2021 | Ours lower; our base is only about $1.5M |
+| KG → RU, 2023 | $98M, Jan–Oct, Kyrgyz sellers in Russian customs data ([KSE](https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf)) | $31.3M, full year | Kyrgyz-reported data is about one third: under-reported |
 
 ## Method
 
@@ -73,6 +85,19 @@ The comparison table for all years is in
 - **Basket of 49 codes.** The HS 2017 code `854140` also includes solar cells and LEDs. This makes
   2019–2021 values much too high. So the totals and charts do not include `854149`. The data for
   this code stays in `data/processed/trade_by_code.csv` (`in_basket = False`).
+- **CHPL versions.** Earlier lists had 9 codes (May 2023) and 45 codes (September 2023). Totals
+  from studies of 2023 are not directly comparable with our 49-code basket.
+- **Baseline.** The main baseline is the 2019–2021 average. One year can be unusual, and small
+  values (Kyrgyzstan) make a one-year base unstable. `comparison.csv` also gives 2021 as a base.
+- **Missing data.** A year with no data from the source is missing (NaN), not zero. In a year that
+  the source reports, a code with no row is zero trade. `availability.csv` shows each source,
+  country and year, with the HS edition and the release date.
+- **Comtrade rows.** Only total rows are used (all transport modes, all customs procedures, no
+  second partner). The pipeline stops if a preview call returns 500 records, the preview cap.
+- **Currency.** The values are in USD and in EUR. Both use the ECB annual average rate.
+- **Event dates.** The site marks key dates: the CHPL versions, the US sanctions on Keremet Bank
+  (Jan 2025) and the first EU Art. 12f export ban on Kyrgyzstan (23 Apr 2026, codes 8457.10 and
+  8517.62). Each date has a source link.
 
 ### Limits
 
@@ -83,6 +108,15 @@ The comparison table for all years is in
   go to a third country first.
 - An HS6 code is wider than the controlled goods. Not all goods under a CHPL code are sanctioned.
 - 2025 data can change when the agencies revise it.
+- Two rising lines can show re-export, but they do not prove it. The EU leg also has normal
+  post-2022 import growth. Later versions will add control goods and control countries.
+
+## Licence and citation
+
+The code has the MIT licence ([LICENSE](LICENSE)). The data stays under the terms of Eurostat,
+UN Comtrade and the ECB. To cite the project, use [CITATION.cff](CITATION.cff). Method changes
+are in [CHANGELOG.md](CHANGELOG.md). The research behind the next steps is in
+[`reports/`](reports/).
 
 ## Website
 
@@ -112,7 +146,7 @@ The first run saves the API responses in `data/raw/` (not in git). Later runs us
 ```
 data/
   chpl_hs_codes.csv        CHPL HS codes and tiers
-  processed/               tidy tables made by the pipeline
+  processed/               tidy tables, availability.csv, sources.json
   raw/                     API responses (not in git)
 docs/                      website (GitHub Pages)
 figures/                   charts
@@ -121,7 +155,7 @@ src/chpl_trade/
   fetch.py                 download from Comext, Comtrade, ECB
   build.py                 make tidy tables
   plot.py                  make charts and comparison table
-  site.py                  write docs/data.js for the website
+  site.py                  write docs/data.js and docs/data/*.csv for the website
 ```
 
 ## Ideas for later

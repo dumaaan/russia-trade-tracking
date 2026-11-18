@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this project or its data, please cite it as below."
+title: "Russia trade tracking: CHPL goods via Central Asia"
+type: software
+authors:
+  - family-names: Kuandyk
+    given-names: Duman
+version: 0.2.0
+date-released: 2026-11-18
+license: MIT
+keywords:
+  - sanctions
+  - Russia
+  - Common High Priority List
+  - Kazakhstan
+  - Kyrgyzstan
+  - trade data
+references:
+  - type: data
+    title: "EU trade since 1988 by HS2-4-6 and CN8 (DS-045409)"
+    authors:
+      - name: Eurostat
+  - type: data
+    title: "UN Comtrade database"
+    authors:
+      - name: United Nations Statistics Division
+  - type: data
+    title: "List of Common High Priority Items (Version of February 2024)"
+    authors:
+      - name: European Commission

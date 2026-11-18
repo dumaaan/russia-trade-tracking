@@ -1,10 +1,13 @@
-"""Write docs/data.js for the website (GitHub Pages serves docs/).
+"""Write the website data (GitHub Pages serves docs/).
 
-The file sets window.CHPL_DATA, so the page also works when you open
+docs/data.js sets window.CHPL_DATA, so the page also works when you open
 docs/index.html directly from disk (no fetch, no server).
+docs/data/*.csv are the download files linked from the page.
 """
 
 import json
+import math
+import shutil
 from datetime import date
 
 import pandas as pd
@@ -12,48 +15,75 @@ import pandas as pd
 from . import config
 
 DOCS = config.ROOT / "docs"
+FLOWS = {"EU-27 exports to country": "eu", "Country exports to Russia": "ru"}
+
+# Dated events for the chart notes. Keep each one short and give a source.
+EVENTS = [
+    {"date": "2022-02-24", "label": "Russia invades Ukraine; EU export bans widen",
+     "url": "https://finance.ec.europa.eu/eu-and-world/sanctions-restrictive-measures/sanctions-adopted-following-russias-military-aggression-against-ukraine_en"},
+    {"date": "2023-05-19", "label": "FinCEN–BIS alert: first 9 high-priority HS codes",
+     "url": "https://www.fincen.gov/news/news-releases/supplemental-alert-fincen-and-us-department-commerces-bureau-industry-and"},
+    {"date": "2023-09-19", "label": "Common list grows to 45 HS codes in 4 tiers",
+     "url": "https://www.thompsonhinesmartrade.com/2023/09/u-s-uk-and-eu-announce-updated-list-of-controlled-high-priority-items-restricted-for-export-to-russia/"},
+    {"date": "2024-02-23", "label": "List grows to 50 codes (CNC tools, Tier 4.B)",
+     "url": "https://www.bis.gov/licensing/country-guidance/common-high-priority-items-list-chpl"},
+    {"date": "2025-01-15", "label": "US sanctions Keremet Bank (Kyrgyzstan)", "country": "Kyrgyzstan",
+     "url": "https://www.akchabar.kg/en/article/banki-qfocdypwkrljimms/posledstviya-sankczij-keremet-bank-poteryal-svyshe-40-klientskikh-sredstv"},
+    {"date": "2026-04-23", "label": "EU bans exports of 8457.10 and 8517.62 to Kyrgyzstan (first use of Art. 12f)", "country": "Kyrgyzstan",
+     "url": "https://www.nortonrosefulbright.com/en/knowledge/publications/ac68233a/beyond-the-no-russia-clause-kyrgyzstan-becomes-the-first-test"},
+]
+
+# The two codes in the first EU Art. 12f export ban (Kyrgyzstan, April 2026).
+ART12F_CODES = ["845710", "851762"]
+
+
+def _num(v, nd=4):
+    return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), nd)
 
 
 def export():
-    totals = pd.read_csv(config.PROCESSED / "trade_totals.csv")
-    comp = pd.read_csv(config.PROCESSED / "comparison.csv")
-    by_code = pd.read_csv(config.PROCESSED / "trade_by_code.csv", dtype={"hs6": str})
-    chpl = pd.read_csv(config.CHPL_CSV, dtype={"hs6": str})
+    by_code = pd.read_csv(config.PROCESSED / "trade_by_code.csv", dtype={"hs6": str, "tier": str})
+    avail = pd.read_csv(config.PROCESSED / "availability.csv")
+    fx = pd.read_csv(config.RAW / "ecb_usd_per_eur.csv")
+    chpl = pd.read_csv(config.CHPL_CSV, dtype={"hs6": str, "tier": str})
+    sources = json.loads((config.PROCESSED / "sources.json").read_text())
 
-    flows = {"EU-27 exports to country": "eu", "Country exports to Russia": "ru"}
-
-    series = {}
-    for (flow, country), g in totals.groupby(["flow", "country"]):
-        g = g.sort_values("year")
-        series.setdefault(country, {})[flows[flow]] = [round(v, 3) for v in g["usd"] / 1e6]
-
-    comparison = {}
-    for country, g in comp.groupby("country"):
-        g = g.sort_values("year")
-        comparison[country] = {
-            "eu_index": g["eu_index"].tolist(),
-            "ru_index": g["ru_index"].tolist(),
-            "ratio": g["ru_to_eu_ratio_pct"].tolist(),
-        }
-
-    codes = []
-    for r in by_code.itertuples():
-        codes.append([flows[r.flow], r.country, int(r.year), r.hs6, round(r.usd / 1e6, 4)])
+    codes = [
+        [FLOWS[r.flow], r.country, int(r.year), r.hs6, _num(r.usd / 1e6)]
+        for r in by_code.itertuples()
+    ]
+    availability = [
+        {"flow": FLOWS[r.flow], "country": r.country, "year": int(r.year), "available": bool(r.available),
+         "codes": int(r.codes_reported), "hs": r.hs_edition if isinstance(r.hs_edition, str) else "",
+         "released": r.released if isinstance(r.released, str) else ""}
+        for r in avail.itertuples()
+    ]
 
     data = {
         "years": config.YEARS,
-        "baseYear": 2021,
+        "baselineYears": config.BASELINE_YEARS,
         "countries": [c["name"] for c in config.COUNTRIES.values()],
-        "series": series,
-        "comparison": comparison,
         "codes": codes,
+        "availability": availability,
+        "fx": dict(zip(fx["year"].astype(int).astype(str), fx["usd_per_eur"].round(6))),
         "chpl": chpl.to_dict(orient="records"),
+        "chplVersion": "February 2024 (50 HS codes)",
         "excluded": sorted(config.EXCLUDED_FROM_BASKET),
+        "art12f": ART12F_CODES,
+        "events": EVENTS,
+        "sources": sources,
         "built": date.today().isoformat(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
     out.write_text("window.CHPL_DATA = " + json.dumps(data, separators=(",", ":")) + ";\n")
+
+    # Download files.
+    dl = DOCS / "data"
+    dl.mkdir(exist_ok=True)
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv"]:
+        shutil.copy(config.PROCESSED / name, dl / name)
+    shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")
     return out
 
 

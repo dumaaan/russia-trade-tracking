@@ -9,6 +9,7 @@ import csv
 import io
 import json
 import time
+from datetime import datetime, timezone
 
 import requests
 
@@ -18,6 +19,8 @@ COMEXT_URL = (
     "https://ec.europa.eu/eurostat/api/comext/dissemination/statistics/1.0/data/DS-045409"
 )
 COMTRADE_URL = "https://comtradeapi.un.org/public/v1/preview/C/A/HS"
+COMTRADE_DA_URL = "https://comtradeapi.un.org/public/v1/getDA/C/A/HS"
+COMTRADE_PREVIEW_CAP = 500
 ECB_URL = "https://data-api.ecb.europa.eu/service/data/EXR/A.USD.EUR.SP00.A"
 
 
@@ -59,7 +62,9 @@ def fetch_comext(partner, refresh=False):
     ]
     params += [("product", c) for c in query_codes()]
     params += [("time", str(y)) for y in config.YEARS]
-    out.write_text(_get(COMEXT_URL, params).text)
+    body = _get(COMEXT_URL, params).json()
+    body["_downloaded"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out.write_text(json.dumps(body))
     return out
 
 
@@ -81,8 +86,32 @@ def fetch_comtrade(reporter_iso2, year, refresh=False):
     body = r.json()
     if "data" not in body:
         raise RuntimeError(f"Comtrade error for {reporter_iso2} {year}: {body}")
+    # The public preview returns at most 500 records and does not say when it
+    # cuts the result. A full result means that rows can be missing.
+    if len(body["data"]) >= COMTRADE_PREVIEW_CAP:
+        raise RuntimeError(
+            f"Comtrade returned {len(body['data'])} records for {reporter_iso2} {year}. "
+            "This is the preview cap, so the result can be incomplete. Split the query."
+        )
+    body["_downloaded"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     out.write_text(json.dumps(body))
     time.sleep(2)
+    return out
+
+
+def fetch_comtrade_release(reporter_iso2, year, refresh=False):
+    """Release information (first/last release, HS edition) for one reporter-year.
+
+    An empty result means that the reporter has not reported that year.
+    """
+    m49 = config.COUNTRIES[reporter_iso2]["m49"]
+    out = config.RAW / "comtrade" / f"{reporter_iso2}_release_{year}.json"
+    if out.exists() and not refresh:
+        return out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    body = _get(COMTRADE_DA_URL, {"reporterCode": m49, "period": year}).json()
+    out.write_text(json.dumps(body))
+    time.sleep(1)
     return out
 
 
@@ -115,6 +144,7 @@ def fetch_all(refresh=False):
         for year in config.YEARS:
             print(f"Comtrade: {iso2} -> RU {year}")
             fetch_comtrade(iso2, year, refresh)
+            fetch_comtrade_release(iso2, year, refresh)
 
 
 if __name__ == "__main__":
