@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=0.5">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -102,6 +102,19 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" aria-labelledby="tiers-h">
+    <div class="ch-text">
+      <h2 id="tiers-h">Tier by tier</h2>
+      <p class="finding" id="tiers-sub"></p>
+      <div class="seg" role="radiogroup" aria-label="Country" id="tiers-country"></div>
+    </div>
+    <div class="ch-figure">
+      <div class="legend" id="tiers-legend"></div>
+      <div class="grid3 tiers" id="tiers-grid"></div>
+      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart. The goods filter does not apply here.</p>
+    </div>
+  </section>
+
   <section class="chapter wrap" aria-labelledby="goods-h">
     <div class="ch-text">
       <h2 id="goods-h">Which goods</h2>
@@ -166,7 +179,7 @@
 </footer>
 
 <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=0.5"></script>
+<script src="app.js?v=0.5"></script>
 </body>
 </html>

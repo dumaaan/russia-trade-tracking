@@ -2,6 +2,23 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.5.0 — 2026-11-19
+
+### Charts (review after Tufte, The Visual Display of Quantitative Information)
+- **Integrity:** the route bands had a minimum width of 1.5 px. For small values this distorted
+  the comparison (Lie Factor 0.34 for Kyrgyzstan 2019 against Kazakhstan). Bands are now exactly
+  to scale. The route caption now says that the two legs are measured separately and that the
+  second leg also carries goods from other suppliers.
+- **Context:** the mirror chart shows each country's pre-war level as a dashed line, so the excess
+  gap is visible on the chart.
+- **Labels:** the flows and mirror charts label each line at its end (name and value) instead of
+  a separate legend. The unit is on the top tick ("$500M").
+- **Scale:** the comparison charts show multiples of the baseline (×1, ×2, ×5) on one shared log
+  scale, instead of "index = 100" on two different scales.
+- **New:** "Tier by tier", six small charts on one shared scale, so all tiers can be compared at
+  once (before, only one tier at a time through the filter).
+- Asset links carry a version (`?v=0.5`), so browsers load the new files.
+
 ## 0.4.0 — 2026-11-19
 
 ### Site redesign

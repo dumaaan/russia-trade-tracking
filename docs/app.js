@@ -30,7 +30,7 @@
   const state = {
     basket: "all", currency: "USD", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru", goodsYear: 2023,
-    routeYear: YEARS[YEARS.length - 1],
+    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan",
   };
 
   // ---------- data ----------
@@ -163,7 +163,8 @@
     const W = container.clientWidth, H = container.clientHeight;
     if (W < 120 || H < 80) return; // not laid out yet; the resize handler draws it later
     const small = W < 420;
-    const m = { top: opts.events ? 30 : 22, right: small ? 48 : 60, bottom: 26, left: small ? 40 : 50 };
+    const right = opts.endNames ? (small ? 96 : 132) : (small ? 48 : 60);
+    const m = { top: opts.events ? 30 : 22, right, bottom: 26, left: small ? 42 : 52 };
     const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
     const all = opts.series.flatMap((s) => s.values).filter((v) => v != null && (opts.log ? v > 0 : true));
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "" });
@@ -176,22 +177,30 @@
 
     let y, ticks;
     if (opts.log) {
-      const lo = Math.min(...all, opts.baseline || Infinity) * 0.8, hi = Math.max(...all, opts.baseline || 0) * 1.15;
+      const lo = opts.domain ? opts.domain[0] : Math.min(...all, opts.baseline || Infinity) * 0.8;
+      const hi = opts.domain ? opts.domain[1] : Math.max(...all, opts.baseline || 0) * 1.15;
       ticks = logTicks(lo, hi);
       const l0 = Math.log10(lo), l1 = Math.log10(hi);
       y = (v) => m.top + ih - ((Math.log10(Math.max(v, lo)) - l0) / (l1 - l0)) * ih;
     } else {
-      ticks = niceTicks(Math.max(...all) * 1.05);
+      ticks = niceTicks(Math.max(...all, ...(opts.refs || []).map((r) => r.value || 0)) * 1.05);
       const top = ticks[ticks.length - 1];
       y = (v) => m.top + ih - (v / top) * ih;
     }
     const x = (i) => m.left + (iw * i) / (YEARS.length - 1);
     const surface = css("--surface-1");
 
+    const topTick = Math.max(...ticks);
     for (const t of ticks) {
       el("line", { x1: m.left, x2: W - m.right + 8, y1: y(t), y2: y(t), stroke: css("--grid"), "stroke-width": 1 }, svg);
       const lab = el("text", { x: m.left - 8, y: y(t) + 4, "text-anchor": "end" }, svg);
-      lab.textContent = opts.tickFmt ? opts.tickFmt(t) : t.toLocaleString("en-US");
+      // the unit rides on the top tick only, so it reads left to right and is said once
+      lab.textContent = t === topTick && opts.topTickFmt ? opts.topTickFmt(t) : opts.tickFmt ? opts.tickFmt(t) : t.toLocaleString("en-US");
+    }
+    // Reference lines (e.g. a pre-war level), thin and dashed, labelled at the right.
+    for (const r of opts.refs || []) {
+      if (r.value == null) continue;
+      el("line", { x1: m.left, x2: W - m.right + 8, y1: y(r.value), y2: y(r.value), stroke: css(r.color), "stroke-width": 1, "stroke-dasharray": "2 4", "stroke-opacity": 0.9 }, svg);
     }
     if (opts.baseline) {
       el("line", { x1: m.left, x2: W - m.right + 8, y1: y(opts.baseline), y2: y(opts.baseline), stroke: css("--axis"), "stroke-width": 1 }, svg);
@@ -233,13 +242,19 @@
       });
       let li = s.values.length - 1;
       while (li >= 0 && (s.values[li] == null || (opts.log && s.values[li] <= 0))) li--;
-      if (li >= 0) ends.push({ x: x(li), y: y(s.values[li]), text: opts.fmt(s.values[li]) });
+      if (li >= 0) ends.push({ x: x(li), y: y(s.values[li]), text: opts.fmt(s.values[li]), name: s.endName || s.label });
     }
     ends.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+    const step = opts.endNames ? 32 : 16;
+    for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < step) ends[i].y = ends[i - 1].y + step;
     for (const e of ends) {
-      const t = el("text", { x: e.x + 9, y: e.y + 4, class: "end" }, svg);
+      // Direct label: the value, and (when named) the series name under it. Text in ink, not series colour.
+      const t = el("text", { x: e.x + 9, y: e.y + (opts.endNames ? 0 : 4), class: "end" }, svg);
       t.textContent = e.text;
+      if (opts.endNames) {
+        const n = el("text", { x: e.x + 9, y: e.y + 14, class: "end-name" }, svg);
+        n.textContent = e.name;
+      }
     }
 
     const cross = el("line", { y1: m.top - 6, y2: m.top + ih, stroke: css("--text-muted"), "stroke-width": 1, visibility: "hidden" }, svg);
@@ -304,7 +319,7 @@
     });
     const top = small ? 54 : 58, gap = small ? 40 : 46;
     const k = maxTot > 0 ? (H - top - gap - (small ? 70 : 64)) / maxTot : 0;
-    const th = (v) => (v == null ? 0 : Math.max(v * k, v > 0 ? 1.5 : 0));
+    const th = (v) => (v == null ? 0 : v * k); // true to scale; no minimum width
     const nodeW = 8;
     const xEU = 0, xMid = Math.round(W * 0.5) - nodeW / 2, xRU = W - nodeW;
 
@@ -400,7 +415,7 @@
     cap.replaceChildren(
       `In ${yr} the EU exported `, h("b", { text: g(kz, "eu") }), ` of ${state.basket === "all" ? "these goods" : "the selected goods"} to ${kz} and `,
       h("b", { text: g(kg, "eu") }), ` to ${kg}. ${kz} reported `, h("b", { text: g(kz, "ru") }), ` of the same goods exported to Russia, and ${kg} `,
-      h("b", { text: g(kg, "ru") }), ". Band widths are to scale.",
+      h("b", { text: g(kg, "ru") }), ". Band widths are to scale. The two legs are measured separately: the second leg also carries goods from China and other suppliers, so it is not only EU goods passing through.",
     );
   }
   function routeAll() { routeCaption(); routeDiagram(); }
@@ -408,7 +423,7 @@
   // ---------- section 1 ----------
   function flows() {
     const c = state.flowsCountry;
-    const s = ["eu", "ru"].map((f) => ({ label: FLOW[f].label(c), color: FLOW[f].color, values: series(f, c) }));
+    const s = ["eu", "ru"].map((f) => ({ label: FLOW[f].label(c), endName: f === "eu" ? "from the EU" : "to Russia", color: FLOW[f].color, values: series(f, c) }));
     // The finding, from the data: the pre-war level against the latest year, for each leg.
     const last = YEARS.length - 1, ly = YEARS[last];
     const say = (vals, what) => {
@@ -418,10 +433,11 @@
     };
     document.getElementById("flows-sub").textContent =
       `${say(s[0].values, `EU exports to ${c}`)} ${say(s[1].values, `${c}'s exports to Russia`)}`;
-    legend(document.getElementById("flows-legend"), s);
+    document.getElementById("flows-legend").replaceChildren();
     const ev = eventsFor(c);
     lineChart(document.getElementById("flows-chart"), {
-      series: s, fmt: fmtMoney, events: ev,
+      series: s, fmt: fmtMoney, events: ev, endNames: true,
+      topTickFmt: (t) => `${cur()}${t.toLocaleString("en-US")}M`,
       aria: `${c}: EU-27 exports and exports to Russia, ${basketLabel()}, ${state.currency} million, 2019 to 2025`,
     });
     const lastPos = YEARS.length - 0.5;
@@ -444,23 +460,27 @@
     for (const c of D.countries) {
       const eu = series("eu", c), ru = series("ru", c);
       data[c] = {
-        eu: indexOf(eu), ru: indexOf(ru),
+        eu: indexOf(eu).map((v) => (v == null ? null : v / 100)), ru: indexOf(ru).map((v) => (v == null ? null : v / 100)),
         ratio: YEARS.map((_, i) => (eu[i] && ru[i] != null ? (100 * ru[i]) / eu[i] : null)),
       };
     }
     const mk = (key) => D.countries.map((c) => ({ label: c, color: COUNTRY[c].color, marker: COUNTRY[c].marker, values: data[c][key] }));
-    const cap = `index, ${baseLabel()} = 100, log scale`;
+    const cap = `times the ${baseLabel()}, log scale`;
     document.getElementById("cmp-eu-cap").textContent = cap;
     document.getElementById("cmp-ru-cap").textContent = cap;
     legend(document.getElementById("cmp-legend"), mk("eu"));
-    lineChart(document.getElementById("cmp-eu"), { series: mk("eu"), fmt: fmtIdx, log: true, baseline: 100, aria: `Index of EU-27 exports, ${baseLabel()} = 100` });
-    lineChart(document.getElementById("cmp-ru"), { series: mk("ru"), fmt: fmtIdx, log: true, baseline: 100, aria: `Index of exports to Russia, ${baseLabel()} = 100` });
+    // One log scale for both panels, so a step up means the same growth in each.
+    const allX = D.countries.flatMap((c) => [...data[c].eu, ...data[c].ru]).filter((v) => v > 0);
+    const dom = [Math.min(...allX, 1) * 0.8, Math.max(...allX, 1) * 1.15];
+    const xt = (t) => `×${t < 1 ? t : t.toLocaleString("en-US")}`;
+    lineChart(document.getElementById("cmp-eu"), { series: mk("eu"), fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom, aria: `EU-27 exports as a multiple of the ${baseLabel()}` });
+    lineChart(document.getElementById("cmp-ru"), { series: mk("ru"), fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom, aria: `Exports to Russia as a multiple of the ${baseLabel()}` });
     lineChart(document.getElementById("cmp-ratio"), { series: mk("ratio"), fmt: fmtPct, tickFmt: (t) => t + "%", aria: "Scale ratio: exports to Russia as percent of EU-27 exports" });
     const head = ["Year"];
-    for (const c of D.countries) head.push(`${c}: EU idx`, `${c}: RU idx`, `${c}: ratio`);
+    for (const c of D.countries) head.push(`${c}: EU exports, ×`, `${c}: to Russia, ×`, `${c}: ratio`);
     table(document.getElementById("cmp-table"), head, YEARS.map((yr, i) => {
       const row = [String(yr)];
-      for (const c of D.countries) row.push(fmtIdx(data[c].eu[i]), fmtIdx(data[c].ru[i]), fmtPct(data[c].ratio[i]));
+      for (const c of D.countries) row.push(fmtX(data[c].eu[i]), fmtX(data[c].ru[i]), fmtPct(data[c].ratio[i]));
       return row;
     }));
   }
@@ -486,9 +506,11 @@
       };
     }
     const s = D.countries.map((c) => ({ label: c, color: COUNTRY[c].color, marker: COUNTRY[c].marker, values: data[c].ratio }));
-    legend(document.getElementById("mirror-legend"), s);
+    const legendEl = document.getElementById("mirror-legend");
+    legendEl.replaceChildren(h("span", {}, [h("i", { class: "dash" }), "Dashed: each country's pre-war level"]));
     lineChart(document.getElementById("mirror-chart"), {
-      series: s, fmt: fmtPct, tickFmt: (t) => t + "%", baseline: 100,
+      series: s, fmt: fmtPct, tickFmt: (t) => t + "%", baseline: 100, endNames: true,
+      refs: D.countries.map((c) => ({ value: data[c].pre, color: COUNTRY[c].color })),
       aria: "Mirror ratio: imports from EU-27 as recorded by the country, divided by EU-27 exports, percent",
     });
 
@@ -515,6 +537,54 @@
       }
       return row;
     }));
+  }
+
+  // ---------- tier small multiples ----------
+  function tiers() {
+    const c = state.tiersCountry;
+    const grid = document.getElementById("tiers-grid");
+    const keys = Object.keys(TIER_NAMES);
+    const panels = keys.map((t) => {
+      const eu = series("eu", c, t), ru = series("ru", c, t);
+      const be = baseOf(eu), br = baseOf(ru);
+      return {
+        t, eu, ru,
+        xeu: eu.map((v) => (v == null || !be ? null : v / be)),
+        xru: ru.map((v) => (v == null || !br ? null : v / br)),
+      };
+    });
+    const all = panels.flatMap((p) => [...p.xeu, ...p.xru]).filter((v) => v > 0);
+    const dom = [Math.min(...all, 1) * 0.8, Math.max(...all, 1) * 1.15];
+    const last = YEARS.length - 1, ly = YEARS[last];
+    grid.replaceChildren(...panels.map((p) => {
+      const [name, what] = TIER_NAMES[p.t].split(": ");
+      const box = h("div", { class: "chart sm" });
+      const fig = h("figure", {}, [
+        h("figcaption", {}, [`${name}, ${what}`, h("span", { text: `${ly}: ${fmtMoney(p.eu[last])} from the EU, ${fmtMoney(p.ru[last])} to Russia` })]),
+        box,
+      ]);
+      fig.dataset.tier = p.t;
+      return fig;
+    }));
+    const xt = (t) => `×${t < 1 ? t : t.toLocaleString("en-US")}`;
+    panels.forEach((p, i) => {
+      lineChart(grid.children[i].querySelector(".chart"), {
+        series: [
+          { label: `from the EU`, color: FLOW.eu.color, values: p.xeu },
+          { label: `to Russia`, color: FLOW.ru.color, values: p.xru },
+        ],
+        fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom,
+        aria: `${TIER_NAMES[p.t]}, ${c}: EU exports and exports to Russia as multiples of the ${baseLabel()}`,
+      });
+    });
+    legend(document.getElementById("tiers-legend"), [
+      { label: `EU exports to ${c}`, color: FLOW.eu.color }, { label: `${c}'s exports to Russia`, color: FLOW.ru.color },
+    ]);
+    // Finding: which tier grew most on the Russia leg.
+    const ranked = panels.filter((p) => p.xru[last] != null).sort((a, b) => b.xru[last] - a.xru[last]);
+    document.getElementById("tiers-sub").textContent = ranked.length
+      ? `In ${ly}, ${c}'s exports to Russia grew most in ${TIER_NAMES[ranked[0].t].split(": ")[0].replace("Tier", "tier")} (${TIER_NAMES[ranked[0].t].split(": ")[1]}), ${fmtX(ranked[0].xru[last])} the ${baseLabel()}, and least in ${TIER_NAMES[ranked[ranked.length - 1].t].split(": ")[0].replace("Tier", "tier")}, ${fmtX(ranked[ranked.length - 1].xru[last])}.`
+      : "Not enough data for this country.";
   }
 
   // ---------- section 3 ----------
@@ -637,6 +707,7 @@
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
+  seg(document.getElementById("tiers-country"), countryOpts, () => state.tiersCountry, (v) => { state.tiersCountry = v; tiers(); });
   seg(document.getElementById("goods-country"), countryOpts, () => state.goodsCountry, (v) => { state.goodsCountry = v; goods(); });
   seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
   const sel = document.getElementById("goods-year");
@@ -649,12 +720,12 @@
 
   function renderFiltered() {
     document.getElementById("f-note").textContent = `Every chart shows ${basketPhrase()} in ${state.currency}, against the ${baseLabel()}.`;
-    routeAll(); flows(); comparison(); mirror(); goods();
+    routeAll(); flows(); comparison(); mirror(); tiers(); goods();
   }
   function renderAll() { renderFiltered(); crossChecks(); availability(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

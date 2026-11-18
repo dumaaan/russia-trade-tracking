@@ -191,9 +191,14 @@ h3 { margin: 0 0 6px; font-stretch: 125%; font-weight: 700; font-size: 17px; }
 .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .chart text { font-stretch: 75%; font-size: 13px; fill: var(--ink-3); }
 .chart .end { font-weight: 650; fill: var(--ink); }
+.chart .end-name { font-size: 12.5px; fill: var(--ink-2); }
+.legend i.dash { height: 0; border-top: 1.5px dashed var(--ink-3); background: none; }
+.legend i.dash::after { display: none; }
 .chart .evn { font-size: 11px; font-weight: 700; fill: var(--ink-2); }
 
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 10px; }
+.grid3.tiers { row-gap: 36px; }
+.grid3.tiers .chart.sm { height: 200px; }
 figure { margin: 0; min-width: 0; }
 figcaption { font-size: 15px; font-weight: 650; }
 figcaption span { display: block; font-weight: 400; color: var(--ink-3); font-size: 13.5px; }
@@ -272,6 +277,10 @@ table.xc a { color: var(--ink-2); }
 @media (max-width: 960px) {
   .chapter { grid-template-columns: minmax(0, 1fr); }
   .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .grid3.tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
+}
+@media (max-width: 560px) {
+  .grid3.tiers { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .route-diagram { height: 270px; }
