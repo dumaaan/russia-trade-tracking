@@ -2,6 +2,18 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.4.0 — 2026-11-19
+
+### Site redesign
+- New hero: a route diagram drawn from the data (EU → Kazakhstan / Kyrgyzstan → Russia). Band
+  widths are to scale across all years; a year control changes the year.
+- New look: security-paper colour and navy ink; one type family (Archivo) with its width axis
+  (wide for headings, condensed for data). No cards: the page reads as chapters along the route.
+- Each chapter states its finding next to its chart; the first chapter's finding comes from the data.
+- Removed the summary tiles (the route diagram shows those values), all-caps labels and middle-dot
+  text. Added a skip link and keyboard access to the route bands.
+- No data or method changed.
+
 ## 0.3.0 — 2026-11-18
 
 ### Added

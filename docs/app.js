@@ -16,12 +16,12 @@
     Kyrgyzstan: { color: "--kg", marker: "square" },
   };
   const TIER_NAMES = {
-    "1": "Tier 1 · integrated circuits",
-    "2": "Tier 2 · communication, navigation, capacitors",
-    "3A": "Tier 3.A · discrete parts, connectors, cameras",
-    "3B": "Tier 3.B · bearings, optics, aircraft parts",
-    "4A": "Tier 4.A · electronics production and test",
-    "4B": "Tier 4.B · CNC machine tools",
+    "1": "Tier 1: integrated circuits",
+    "2": "Tier 2: communication, navigation, capacitors",
+    "3A": "Tier 3.A: discrete parts, connectors, cameras",
+    "3B": "Tier 3.B: bearings, optics, aircraft parts",
+    "4A": "Tier 4.A: electronics production and testing",
+    "4B": "Tier 4.B: CNC machine tools",
   };
   const chplByCode = Object.fromEntries(D.chpl.map((r) => [r.hs6, r]));
   const fmtCode = (c) => c.replace(/^(\d{4})(\d{2})$/, "$1.$2");
@@ -30,6 +30,7 @@
   const state = {
     basket: "all", currency: "USD", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru", goodsYear: 2023,
+    routeYear: YEARS[YEARS.length - 1],
   };
 
   // ---------- data ----------
@@ -63,7 +64,8 @@
   }
   const baseLabel = (mode = state.baseline) => (mode === "avg" ? "2019–21 average" : "2021");
   const indexOf = (vals, mode) => { const b = baseOf(vals, mode); return vals.map((v) => (v == null || b == null ? null : (100 * v) / b)); };
-  const basketLabel = () => (state.basket === "all" ? "CHPL basket (49 codes)" : state.basket === "art12f" ? "EU ban codes (8457.10, 8517.62)" : TIER_NAMES[state.basket]);
+  const basketLabel = () => (state.basket === "all" ? "All 49 codes" : state.basket === "art12f" ? "The two EU-ban codes (8457.10, 8517.62)" : TIER_NAMES[state.basket]);
+  const basketPhrase = () => (state.basket === "all" ? "all 49 codes" : state.basket === "art12f" ? "the two EU-ban codes" : TIER_NAMES[state.basket].replace(/^Tier ([^:]+): (.*)$/, "tier $1 goods ($2)"));
   const cur = () => (state.currency === "EUR" ? "€" : "$");
 
   // ---------- helpers ----------
@@ -282,36 +284,140 @@
     render();
   }
 
-  // ---------- tiles ----------
-  function tiles() {
-    const last = YEARS.length - 1;
-    const items = [];
-    for (const c of D.countries) {
-      const ru = series("ru", c), b = baseOf(ru);
-      items.push({ c, v: fmtX(ru[last] != null && b ? ru[last] / b : null), k: `exports to Russia, ${YEARS[last]} vs ${baseLabel()}` });
+  // ---------- route diagram (hero) ----------
+  // Bands to scale: EU -> Kazakhstan / Kyrgyzstan (leg 1), then -> Russia (leg 2).
+  const route = { paths: null, first: true };
+  function routeDiagram() {
+    const box = document.getElementById("route");
+    const W = box.clientWidth, H = box.clientHeight;
+    if (W < 200 || H < 120) return;
+    const small = W < 560;
+    const yi = YEARS.indexOf(state.routeYear);
+    const S = {};
+    for (const c of D.countries) S[c] = { eu: series("eu", c), ru: series("ru", c) };
+    // one scale for all years, so a year's bands can be compared with another year's
+    let maxTot = 0;
+    YEARS.forEach((_, i) => {
+      const a = D.countries.reduce((t, c) => t + (S[c].eu[i] || 0), 0);
+      const b = D.countries.reduce((t, c) => t + (S[c].ru[i] || 0), 0);
+      maxTot = Math.max(maxTot, a, b);
+    });
+    const top = small ? 54 : 58, gap = small ? 40 : 46;
+    const k = maxTot > 0 ? (H - top - gap - (small ? 70 : 64)) / maxTot : 0;
+    const th = (v) => (v == null ? 0 : Math.max(v * k, v > 0 ? 1.5 : 0));
+    const nodeW = 8;
+    const xEU = 0, xMid = Math.round(W * 0.5) - nodeW / 2, xRU = W - nodeW;
+
+    const kz = D.countries[0], kg = D.countries[1];
+    const v = (c, f) => S[c][f][yi];
+    const hIn = (c) => th(v(c, "eu")), hOut = (c) => th(v(c, "ru"));
+    const hMid = (c) => Math.max(hIn(c), hOut(c), 2);
+    const yKZ = top, yKG = top + hMid(kz) + gap;
+    const midCentre = (yKZ + yKG + hMid(kg)) / 2;
+    const euH = hIn(kz) + hIn(kg), ruH = hOut(kz) + hOut(kg);
+    const yEU = Math.max(top, midCentre - euH / 2), yRU = Math.max(top, midCentre - ruH / 2);
+
+    const band = (x1, a0, a1, x2, b0, b1) => {
+      const xm = (x1 + x2) / 2;
+      return `M${x1},${a0}C${xm},${a0} ${xm},${b0} ${x2},${b0}L${x2},${b1}C${xm},${b1} ${xm},${a1} ${x1},${a1}Z`;
+    };
+    const geo = {
+      [`eu-${kz}`]: band(xEU + nodeW, yEU, yEU + hIn(kz), xMid, yKZ, yKZ + hIn(kz)),
+      [`eu-${kg}`]: band(xEU + nodeW, yEU + hIn(kz), yEU + euH, xMid, yKG, yKG + hIn(kg)),
+      [`ru-${kz}`]: band(xMid + nodeW, yKZ, yKZ + hOut(kz), xRU, yRU, yRU + hOut(kz)),
+      [`ru-${kg}`]: band(xMid + nodeW, yKG, yKG + hOut(kg), xRU, yRU + hOut(kz), yRU + ruH),
+    };
+
+    // Build once; later calls move the bands (CSS transition on d).
+    if (!route.paths || route.w !== W || route.h !== H) {
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+      route.svg = svg; route.w = W; route.h = H; route.paths = {}; route.nodes = {}; route.labels = el("g", { class: "lbl" });
+      for (const key of Object.keys(geo)) {
+        const [f, c] = key.split("-");
+        const p = el("path", { class: `band leg${f === "eu" ? 1 : 2}`, fill: css(f === "eu" ? "--flow-eu" : "--flow-ru"), "fill-opacity": 0.88, tabindex: 0 }, svg);
+        p.addEventListener("pointermove", (e) => bandTip(e.clientX, e.clientY, f, c));
+        p.addEventListener("pointerleave", hideTip);
+        p.addEventListener("focus", () => { const r = p.getBoundingClientRect(); bandTip(r.left + r.width / 2, r.top, f, c); });
+        p.addEventListener("blur", hideTip);
+        route.paths[key] = p;
+      }
+      for (const n of ["eu", kz, kg, "ru"]) route.nodes[n] = el("rect", { width: nodeW, fill: css("--text-primary"), rx: 1 }, svg);
+      svg.appendChild(route.labels);
+      box.replaceChildren(svg);
+      if (route.first) { box.classList.add("enter"); route.first = false; setTimeout(() => box.classList.remove("enter"), 2000); }
     }
-    for (const c of D.countries) {
-      const eu = series("eu", c), b = baseOf(eu);
-      const vals = eu.filter((v) => v != null);
-      const peak = vals.length ? Math.max(...vals) : null;
-      const py = peak == null ? "" : YEARS[eu.indexOf(peak)];
-      items.push({ c, v: fmtX(peak != null && b ? peak / b : null), k: `EU exports at peak (${py}) vs ${baseLabel()}` });
+    for (const [key, d] of Object.entries(geo)) {
+      const p = route.paths[key];
+      p.setAttribute("d", d);
+      p.style.d = `path("${d}")`;
+      const [f, c] = key.split("-");
+      p.setAttribute("aria-label", `${f === "eu" ? `EU exports to ${c}` : `${c} exports to Russia`}, ${state.routeYear}: ${fmtMoney(v(c, f))}`);
     }
-    document.getElementById("tiles").replaceChildren(...items.map((it) =>
-      h("div", { class: "tile" }, [
-        h("div", { class: "who" }, [h("span", { class: "dot", style: { background: css(COUNTRY[it.c].color) } }), it.c]),
-        h("div", { class: "v", text: it.v }),
-        h("div", { class: "k", text: it.k }),
-      ])
-    ));
+    const setNode = (n, x, y, h) => { const r = route.nodes[n]; r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("height", Math.max(h, 2)); };
+    setNode("eu", xEU, yEU, euH); setNode(kz, xMid, yKZ, hMid(kz)); setNode(kg, xMid, yKG, hMid(kg)); setNode("ru", xRU, yRU, ruH);
+
+    // Labels: node names on top, values beside each band.
+    const L = route.labels;
+    L.replaceChildren();
+    const txt = (x, y, cls, t, anchor = "start") => { const n = el("text", { x, y, class: cls, "text-anchor": anchor }, L); n.textContent = t; return n; };
+    txt(xEU, yEU - 30, "node", "EU-27");
+    txt(xEU, yEU - 12, "node-sub", small ? "exports" : "exports, as the EU records them");
+    txt(xRU + nodeW, yRU - 30, "node", "Russia", "end");
+    txt(xRU + nodeW, yRU - 12, "node-sub", small ? "no own data" : "no data of its own since 2021", "end");
+    txt(xMid + nodeW / 2, yKZ - 12, "node", kz, "middle");
+    txt(xMid + nodeW / 2, yKG + hMid(kg) + 22, "node", kg, "middle");
+    // A thick band carries its value inside; a thin one has it just under the band.
+    const q1 = xEU + nodeW + (xMid - xEU - nodeW) / 2, q3 = xMid + nodeW + (xRU - xMid - nodeW) / 2;
+    const bandLabel = (x, a0, a1, b0, b1, val, sub, leg) => {
+      const t = ((a1 - a0) + (b1 - b0)) / 2, c = (a0 + a1 + b0 + b1) / 4;
+      if (t >= 46) {
+        txt(x, c + (small ? 5 : -1), `val val-in ${leg}`, val, "middle");
+        if (!small) txt(x, c + 16, `val-sub val-in ${leg}`, sub, "middle");
+      } else {
+        const y = (a1 + b1) / 2 + 20;
+        txt(x, y, "val", val, "middle");
+        if (!small) txt(x, y + 16, "val-sub", sub, "middle");
+      }
+    };
+    bandLabel(q1, yEU, yEU + hIn(kz), yKZ, yKZ + hIn(kz), fmtMoney(v(kz, "eu")), `EU to ${kz}`, "on1");
+    bandLabel(q3, yKZ, yKZ + hOut(kz), yRU, yRU + hOut(kz), fmtMoney(v(kz, "ru")), `${kz} to Russia`, "on2");
+    bandLabel(q1, yEU + hIn(kz), yEU + euH, yKG, yKG + hIn(kg), fmtMoney(v(kg, "eu")), `EU to ${kg}`, "on1");
+    bandLabel(q3, yKG, yKG + hOut(kg), yRU + hOut(kz), yRU + ruH, fmtMoney(v(kg, "ru")), `${kg} to Russia`, "on2");
+    route.svg.setAttribute("aria-label", `Route diagram for ${state.routeYear}. ${document.getElementById("route-caption").textContent}`);
   }
+  function bandTip(x, y, f, c) {
+    const vals = series(f, c), i = YEARS.indexOf(state.routeYear), b = baseOf(vals);
+    showTip(x, y, `${state.routeYear}`, [
+      { color: css(f === "eu" ? "--flow-eu" : "--flow-ru"), value: fmtMoney(vals[i]), label: f === "eu" ? `EU exports to ${c}` : `${c} exports to Russia` },
+      ...(vals[i] != null && b ? [{ color: "transparent", value: fmtX(vals[i] / b), label: `vs the ${baseLabel()}` }] : []),
+    ]);
+  }
+  function routeCaption() {
+    const i = YEARS.indexOf(state.routeYear), yr = state.routeYear;
+    const [kz, kg] = D.countries;
+    const g = (c, f) => fmtMoney(series(f, c)[i]);
+    const cap = document.getElementById("route-caption");
+    cap.replaceChildren(
+      `In ${yr} the EU exported `, h("b", { text: g(kz, "eu") }), ` of ${state.basket === "all" ? "these goods" : "the selected goods"} to ${kz} and `,
+      h("b", { text: g(kg, "eu") }), ` to ${kg}. ${kz} reported `, h("b", { text: g(kz, "ru") }), ` of the same goods exported to Russia, and ${kg} `,
+      h("b", { text: g(kg, "ru") }), ". Band widths are to scale.",
+    );
+  }
+  function routeAll() { routeCaption(); routeDiagram(); }
 
   // ---------- section 1 ----------
   function flows() {
     const c = state.flowsCountry;
-    document.getElementById("flows-sub").textContent =
-      `${basketLabel()}, ${state.currency} million. Exports to Russia as reported by ${c}.`;
     const s = ["eu", "ru"].map((f) => ({ label: FLOW[f].label(c), color: FLOW[f].color, values: series(f, c) }));
+    // The finding, from the data: the pre-war level against the latest year, for each leg.
+    const last = YEARS.length - 1, ly = YEARS[last];
+    const say = (vals, what) => {
+      const b = baseOf(vals), l = vals[last];
+      if (b == null || l == null) return `${what}: not enough data for this selection.`;
+      return `${what} went from ${fmtMoney(b)} a year (${baseLabel()}) to ${fmtMoney(l)} in ${ly}, ${fmtX(l / b)}.`;
+    };
+    document.getElementById("flows-sub").textContent =
+      `${say(s[0].values, `EU exports to ${c}`)} ${say(s[1].values, `${c}'s exports to Russia`)}`;
     legend(document.getElementById("flows-legend"), s);
     const ev = eventsFor(c);
     lineChart(document.getElementById("flows-chart"), {
@@ -519,13 +625,15 @@
   // ---------- wire up ----------
   const basketSel = document.getElementById("f-basket");
   basketSel.replaceChildren(
-    h("option", { value: "all", text: "All CHPL (49 codes)" }),
+    h("option", { value: "all", text: "All 49 codes" }),
     ...Object.entries(TIER_NAMES).map(([k, v]) => h("option", { value: k, text: v })),
-    h("option", { value: "art12f", text: "EU ban codes on Kyrgyzstan (8457.10, 8517.62)" }),
+    h("option", { value: "art12f", text: "The two EU-ban codes (8457.10, 8517.62)" }),
   );
   basketSel.addEventListener("change", () => { state.basket = basketSel.value; renderFiltered(); });
   seg(document.getElementById("f-currency"), [{ value: "USD", label: "USD" }, { value: "EUR", label: "EUR" }], () => state.currency, (v) => { state.currency = v; renderFiltered(); });
   seg(document.getElementById("f-baseline"), [{ value: "avg", label: "Base 2019–21" }, { value: "2021", label: "Base 2021" }], () => state.baseline, (v) => { state.baseline = v; renderFiltered(); });
+
+  seg(document.getElementById("route-years"), YEARS.map((y) => ({ value: y, label: String(y) })), () => state.routeYear, (v) => { state.routeYear = v; routeAll(); });
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
@@ -540,13 +648,13 @@
     `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;
 
   function renderFiltered() {
-    document.getElementById("f-note").textContent = `${basketLabel()} · ${state.currency} · baseline ${baseLabel()}`;
-    tiles(); flows(); comparison(); mirror(); goods();
+    document.getElementById("f-note").textContent = `Every chart shows ${basketPhrase()} in ${state.currency}, against the ${baseLabel()}.`;
+    routeAll(); flows(); comparison(); mirror(); goods();
   }
   function renderAll() { renderFiltered(); crossChecks(); availability(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { flows(); comparison(); mirror(); }, 120); });
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); }, 120); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

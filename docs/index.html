@@ -3,145 +3,168 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Russia Trade Tracking</title>
-  <meta name="description" content="EU exports of Common High Priority List goods to Kazakhstan and Kyrgyzstan, and their exports of the same goods to Russia, 2019–2025.">
+  <title>The Central Asian Detour</title>
+  <meta name="description" content="EU exports of battlefield goods (the Common High Priority List) to Kazakhstan and Kyrgyzstan, and those countries' exports of the same goods to Russia, 2019–2025.">
+  <meta name="theme-color" content="#EEF1EC" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121A25" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="page">
+<a class="skip" href="#legs">Skip to the charts</a>
 
-  <header class="hero">
-    <p class="eyebrow">Russia trade tracking · CHPL goods · 2019–2025</p>
-    <h1>Battlefield goods via Central Asia</h1>
-    <p class="lede">
-      After February 2022, EU exports of <strong>Common High Priority List (CHPL)</strong> goods to
-      Kazakhstan and Kyrgyzstan went up sharply. At the same time, both countries reported much higher
-      exports of the same goods to Russia. This page shows both flows and compares the two countries.
-      The exports to Russia are a <strong>lower bound</strong>: trade inside the Eurasian Economic Union
-      has no customs declarations and is under-reported.
+<header class="hero">
+  <div class="wrap">
+    <h1>The Central Asian detour</h1>
+    <p class="dek">
+      Battlefield goods are the 50 types of electronics, bearings and machine tools that Western
+      governments found in Russian weapons in Ukraine. This page follows them on one route:
+      exported by the EU to Kazakhstan and Kyrgyzstan, then exported by those two countries to Russia.
     </p>
-  </header>
+  </div>
+  <figure class="route wrap" aria-labelledby="route-caption">
+    <div class="route-diagram" id="route"></div>
+    <div class="route-foot">
+      <div class="years" role="radiogroup" aria-label="Year shown on the route" id="route-years"></div>
+      <figcaption id="route-caption"></figcaption>
+    </div>
+  </figure>
+</header>
 
-  <div class="filterbar" role="group" aria-label="Filters for all charts">
+<div class="filterbar" role="group" aria-label="Filters for every chart on the page">
+  <div class="wrap filterbar-in">
     <label class="select">Goods
       <select id="f-basket"></select>
     </label>
     <div class="seg" role="radiogroup" aria-label="Currency" id="f-currency"></div>
     <div class="seg" role="radiogroup" aria-label="Baseline" id="f-baseline"></div>
-    <span class="filter-note" id="f-note"></span>
+    <p class="filter-note" id="f-note"></p>
   </div>
+</div>
 
-  <div class="tiles" id="tiles"></div>
-
-  <section class="card" aria-labelledby="flows-h">
-    <div class="card-head">
-      <div>
-        <h2 id="flows-h">In from the EU, out to Russia</h2>
-        <p class="sub" id="flows-sub"></p>
-      </div>
+<main>
+  <section class="chapter wrap" id="legs" aria-labelledby="flows-h">
+    <div class="ch-text">
+      <h2 id="flows-h">Both legs, year by year</h2>
+      <p class="finding" id="flows-sub"></p>
       <div class="seg" role="radiogroup" aria-label="Country" id="flows-country"></div>
     </div>
-    <div class="legend" id="flows-legend"></div>
-    <div class="chart" id="flows-chart"></div>
-    <ol class="events" id="flows-events"></ol>
-    <details class="table-view"><summary>Show data table</summary><div id="flows-table"></div></details>
+    <div class="ch-figure">
+      <div class="legend" id="flows-legend"></div>
+      <div class="chart" id="flows-chart"></div>
+      <ol class="events" id="flows-events" aria-label="Events marked on the chart"></ol>
+      <details class="table-view"><summary>Show the numbers</summary><div id="flows-table"></div></details>
+    </div>
   </section>
 
-  <section class="card" aria-labelledby="cmp-h">
-    <div class="card-head">
-      <div>
-        <h2 id="cmp-h">Kazakhstan versus Kyrgyzstan</h2>
-        <p class="sub">Kazakhstan's flows are much larger. Kyrgyzstan's grew much faster from a small base.</p>
+  <section class="chapter chapter-wide wrap" aria-labelledby="cmp-h">
+    <div class="ch-text">
+      <h2 id="cmp-h">Kazakhstan and Kyrgyzstan compared</h2>
+      <p class="finding">Kazakhstan's flows are six to ten times larger. Kyrgyzstan's grew much faster, from a very small base.</p>
+    </div>
+    <div class="ch-figure">
+      <div class="legend" id="cmp-legend"></div>
+      <div class="grid3">
+        <figure><figcaption>EU exports to the country<span id="cmp-eu-cap"></span></figcaption><div class="chart sm" id="cmp-eu"></div></figure>
+        <figure><figcaption>The country's exports to Russia<span id="cmp-ru-cap"></span></figcaption><div class="chart sm" id="cmp-ru"></div></figure>
+        <figure><figcaption>Exports to Russia as a share of EU exports<span>percent, a scale ratio</span></figcaption><div class="chart sm" id="cmp-ratio"></div></figure>
+      </div>
+      <p class="aside">
+        The ratio is not a re-export share. The EU is not the only supplier: China and other countries
+        also sell these goods to Kazakhstan and Kyrgyzstan. Kazakhstan's Tier 3.B exports to Russia
+        (bearings, optics) are larger than the EU's Tier 3.B exports to Kazakhstan in every year.
+      </p>
+      <details class="table-view"><summary>Show the numbers</summary><div id="cmp-table"></div></details>
+    </div>
+  </section>
+
+  <section class="chapter wrap" aria-labelledby="mirror-h">
+    <div class="ch-text">
+      <h2 id="mirror-h">Does the EU shipment arrive?</h2>
+      <p class="finding">
+        Each line divides what the country records as imports from the EU by what the EU records as
+        exports to it. Below 100%, part of the shipments is missing from the country's records.
+      </p>
+      <p class="aside">
+        Some gap is normal: goods arrive in another year, importers record the country of origin, and
+        import values include freight. So each year is compared with the country's own pre-war ratio.
+        The excess gap is the part above that level. Kazakhstan gives no product detail for imports
+        by partner for 2020–2022, so its pre-war ratio uses 2019 only.
+      </p>
+    </div>
+    <div class="ch-figure">
+      <div class="legend" id="mirror-legend"></div>
+      <div class="chart" id="mirror-chart"></div>
+      <p class="readout" id="mirror-summary"></p>
+      <details class="table-view"><summary>Show the numbers</summary><div id="mirror-table"></div></details>
+    </div>
+  </section>
+
+  <section class="chapter wrap" aria-labelledby="goods-h">
+    <div class="ch-text">
+      <h2 id="goods-h">Which goods</h2>
+      <p class="finding">The ten largest codes for one country, flow and year. Point at a bar for its share.</p>
+      <p class="aside"><span class="ban-key">EU ban</span> marks the two codes in the first EU anti-circumvention export ban on Kyrgyzstan, April 2026.</p>
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
+        <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
+        <label class="select">Year
+          <select id="goods-year"></select>
+        </label>
       </div>
     </div>
-    <div class="legend" id="cmp-legend"></div>
-    <div class="grid3">
-      <figure><figcaption>EU-27 exports to country<span id="cmp-eu-cap"></span></figcaption><div class="chart sm" id="cmp-eu"></div></figure>
-      <figure><figcaption>Country exports to Russia<span id="cmp-ru-cap"></span></figcaption><div class="chart sm" id="cmp-ru"></div></figure>
-      <figure><figcaption>Scale ratio: exports to Russia ÷ EU exports<span>percent · not a re-export share</span></figcaption><div class="chart sm" id="cmp-ratio"></div></figure>
+    <div class="ch-figure">
+      <p class="readout" id="goods-total"></p>
+      <div id="goods-bars" class="bars"></div>
     </div>
-    <p class="callout">
-      <strong>Read the ratio with care.</strong> The EU is not the only supplier. China and other
-      countries also sell these goods to Kazakhstan and Kyrgyzstan, so the exports to Russia can be
-      larger than the EU exports. For example, Kazakhstan's Tier 3.B exports to Russia (bearings,
-      optics) are larger than the EU's Tier 3.B exports to Kazakhstan in every year.
-    </p>
-    <details class="table-view"><summary>Show data table</summary><div id="cmp-table"></div></details>
   </section>
 
-  <section class="card" aria-labelledby="mirror-h">
-    <div class="card-head">
-      <div>
-        <h2 id="mirror-h">Mirror check: does the EU export arrive?</h2>
-        <p class="sub">What Kazakhstan and Kyrgyzstan record as imports from the EU-27, divided by what the EU records as exports to them. Below 100%, part of the EU exports is not in the country's import records.</p>
-      </div>
+  <section class="chapter chapter-wide wrap" aria-labelledby="xc-h">
+    <div class="ch-text">
+      <h2 id="xc-h">How our numbers compare</h2>
+      <p class="finding">Our figures next to published ones. Ours always use all 49 codes in USD, whatever the filters say.</p>
     </div>
-    <div class="legend" id="mirror-legend"></div>
-    <div class="chart" id="mirror-chart"></div>
-    <p class="callout" id="mirror-summary"></p>
-    <p class="sub">
-      A gap is normal before the war too: goods can arrive in another year, importers record the country of origin
-      (the EU records the destination), and imports include freight and insurance (CIF). So compare each year with the
-      country's own pre-war ratio. The <strong>excess gap</strong> is the part of the gap above that pre-war level.
-      Kazakhstan gives no product detail for imports by partner for 2020–2022, so its pre-war ratio uses 2019 only.
-    </p>
-    <details class="table-view"><summary>Show data table</summary><div id="mirror-table"></div></details>
-  </section>
-
-  <section class="card" aria-labelledby="goods-h">
-    <div class="card-head">
-      <div>
-        <h2 id="goods-h">Which goods?</h2>
-        <p class="sub">Top 10 codes by value. Hover a bar for its share. <span class="ban-key">EU ban</span> marks the two codes in the first EU anti-circumvention export ban on Kyrgyzstan (April 2026).</p>
-      </div>
+    <div class="ch-figure">
+      <div class="table-wrap"><table class="xc" id="xc-table"></table></div>
     </div>
-    <div class="controls">
-      <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
-      <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
-      <label class="select">Year
-        <select id="goods-year"></select>
-      </label>
+  </section>
+
+  <section class="chapter wrap" aria-labelledby="data-h">
+    <div class="ch-text">
+      <h2 id="data-h">Data and method</h2>
+      <p class="finding" id="asof"></p>
+      <ul class="downloads">
+        <li><a href="data/trade_totals.csv" download>trade_totals.csv</a> <span>totals by flow, country and year, in USD and EUR</span></li>
+        <li><a href="data/trade_by_code.csv" download>trade_by_code.csv</a> <span>values by HS code and tier</span></li>
+        <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes, ratios and mirror gaps</span></li>
+        <li><a href="data/availability.csv" download>availability.csv</a> <span>which source has which year</span></li>
+        <li><a href="data/chpl_hs_codes.csv" download>chpl_hs_codes.csv</a> <span>the list of codes and tiers</span></li>
+      </ul>
     </div>
-    <p class="sub" id="goods-total"></p>
-    <div id="goods-bars" class="bars"></div>
+    <div class="ch-figure prose">
+      <h3>Method</h3>
+      <ul>
+        <li><strong>The list.</strong> The EU version of February 2024 of the Common High Priority List: 50 HS codes in four tiers. Earlier versions had 9 codes (May 2023) and 45 codes (September 2023), so totals from 2023 studies are not directly comparable.</li>
+        <li><strong>49 codes, not 50.</strong> Code 854149 is left out of the totals. Its 2017 code, 854140, also holds solar cells and LEDs, which would make 2019–2021 much too high.</li>
+        <li><strong>EU exports.</strong> Eurostat Comext, dataset DS-045409, EU-27, in EUR. USD values use the ECB annual average rate.</li>
+        <li><strong>Exports to Russia and imports from the EU.</strong> UN Comtrade, as reported by Kazakhstan and Kyrgyzstan. Russia stopped publishing product-level trade data after 2021.</li>
+        <li><strong>HS editions.</strong> 2019–2021 data uses HS 2017. Codes 880730 and 852589 use their 2017 codes, 880330 and 852580, in those years.</li>
+        <li><strong>Baseline.</strong> The 2019–2021 average, because one year can be unusual and small values make a one-year base unstable. 2021 alone is the second option.</li>
+        <li><strong>Missing data.</strong> A year that the source does not report is missing, not zero.</li>
+        <li><strong>Limits.</strong> Exports to Russia are probably under-reported, because trade inside the Eurasian Economic Union has no customs declarations. An HS code is wider than the sanctioned goods. Two rising lines can show re-export, but they do not prove it.</li>
+      </ul>
+      <details class="table-view"><summary>Show which source has which year</summary><div id="avail-table"></div></details>
+    </div>
   </section>
-
-  <section class="card" aria-labelledby="xc-h">
-    <h2 id="xc-h">Cross-checks with other sources</h2>
-    <p class="sub">Our numbers next to published figures. "Ours" uses the full 49-code basket in USD, whatever the filters above.</p>
-    <div class="table-wrap"><table class="xc" id="xc-table"></table></div>
-  </section>
-
-  <section class="card" aria-labelledby="data-h">
-    <h2 id="data-h">Data and downloads</h2>
-    <p class="sub" id="asof"></p>
-    <ul class="downloads">
-      <li><a href="data/trade_totals.csv" download>trade_totals.csv</a> <span>basket totals by flow, country and year (USD and EUR)</span></li>
-      <li><a href="data/trade_by_code.csv" download>trade_by_code.csv</a> <span>values by HS6 code and tier</span></li>
-      <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes against both baselines, scale ratio, mirror ratio and gaps</span></li>
-      <li><a href="data/availability.csv" download>availability.csv</a> <span>which source has which year, HS edition, release date</span></li>
-      <li><a href="data/chpl_hs_codes.csv" download>chpl_hs_codes.csv</a> <span>the CHPL codes and tiers</span></li>
-    </ul>
-    <details class="table-view" open><summary>Data availability (HS edition · number of codes with trade)</summary><div id="avail-table"></div></details>
-  </section>
-
-  <section class="card prose" aria-labelledby="method-h">
-    <h2 id="method-h">Method and limits</h2>
-    <ul>
-      <li><strong>CHPL list.</strong> EU version of February 2024: 50 HS codes in Tiers 1–4 (integrated circuits, communication parts, bearings, optics, CNC machine tools and others). Earlier versions had 9 codes (May 2023) and 45 codes (September 2023), so totals from 2023 studies are not directly comparable.</li>
-      <li><strong>Basket of 49 codes.</strong> Code 854149 is not in the totals: its HS 2017 code (854140) also has solar cells and LEDs, so the 2019–2021 values would be much too high. Its data stays in the code-level file.</li>
-      <li><strong>EU exports.</strong> Eurostat Comext, dataset DS-045409, reporter EU-27, HS6 level, in EUR. The USD values use the ECB annual average rate. The EUR view uses the same rate, so the Comext values are the original ones and the Comtrade values are converted.</li>
-      <li><strong>Mirror check.</strong> UN Comtrade imports reported by Kazakhstan and Kyrgyzstan from each of the 27 EU states, summed. Importers record the country of origin and CIF values; the EU records the destination and FOB values.</li>
-      <li><strong>Exports to Russia.</strong> UN Comtrade, as reported by Kazakhstan and Kyrgyzstan. Russia does not publish product-level trade data after 2021.</li>
-      <li><strong>HS versions.</strong> Data for 2019–2021 uses HS 2017. Codes 880730 and 852589 use their HS 2017 codes (880330, 852580) in those years.</li>
-      <li><strong>Baseline.</strong> The main baseline is the 2019–2021 average, because one year can be unusual and small values make a one-year base unstable. 2021 alone is a second option.</li>
-      <li><strong>Missing data.</strong> When a source has no data for a year, the value is missing, not zero. When a source has data for a year, a code with no row is zero trade.</li>
-      <li><strong>Limits.</strong> Exports to Russia are probably under-reported (see the cross-checks). An HS6 code is wider than the sanctioned goods. Two rising lines can show re-export, but they do not prove it: the EU leg also has normal post-2022 import growth.</li>
-    </ul>
-    <p class="foot" id="built"></p>
-  </section>
-
 </main>
+
+<footer class="foot wrap">
+  <p id="built"></p>
+  <p><a href="https://github.com/dumaaan/russia-trade-tracking">Code and data on GitHub</a></p>
+</footer>
+
 <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
 <script src="data.js"></script>
 <script src="app.js"></script>
