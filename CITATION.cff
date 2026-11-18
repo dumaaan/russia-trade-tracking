@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Kuandyk
     given-names: Duman
-version: 0.2.0
+version: 0.3.0
 date-released: 2026-11-18
 license: MIT
 keywords:

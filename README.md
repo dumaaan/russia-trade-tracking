@@ -58,10 +58,34 @@ CHPL basket (49 codes, see *Method*), USD million:
 The comparison table for all years and both baselines (2019–21 average and 2021) is in
 [`data/processed/comparison.csv`](data/processed/comparison.csv).
 
+### Mirror check: does the EU export arrive?
+
+![Mirror check](figures/mirror_check.png)
+
+We compare what the EU records as exports to each country (Comext) with what the country records
+as imports from the 27 EU states (Comtrade). Below 100%, part of the EU exports is not in the
+country's import records. A gap is normal before the war too (timing, country of origin vs
+destination, CIF vs FOB), so we compare each year with the country's own pre-war ratio.
+
+| | Pre-war ratio | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|
+| Kazakhstan | 89% (2019 only) | no data | 76% | 87% | 88% |
+| Kyrgyzstan | 61% (2019–21) | 37% | 35% | 59% | 76% |
+
+- **Kyrgyzstan.** In 2022–2023 the ratio fell by about 25 points below its pre-war level. In 2023,
+  $45.4M of the $69.8M of EU exports is not in Kyrgyz import records. $17.9M of it is above the
+  pre-war gap. After 2023 the ratio goes back up, and in 2025 it is above the pre-war level.
+- **Kazakhstan.** In 2023 the ratio is 13 points below 2019: a gap of $107M, of which $59M is above
+  the pre-war gap. In 2024–2025 it is near the pre-war level again.
+- **No Kazakh data for 2020–2022.** Kazakhstan gives only a total for imports by partner for these
+  years, with no product detail. The EBRD reported the same problem.
+- The fall in 2022 agrees in direction with the EBRD "lost in transit" result for 2022.
+
 ### Cross-checks
 
 | Check | Published | Ours | Result |
 |---|---|---|---|
+| KG mirror ratio, 2022 vs pre-war | about −50 points, Armenia + Kyrgyzstan, sanctioned goods ([EBRD](https://users.ox.ac.uk/~econ0247/Roundabout.pdf)) | −24 points (61% → 37%) | Same direction; EBRD uses a wider goods list and Mar–Dec only |
 | KZ → RU, 2022 vs 2021 | +401% ([The Moscow Times](https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf), Comtrade) | +390% | Match |
 | KZ → RU, 2023 vs 2022 | −5% (same source) | −4.3% | Match |
 | EU → KG, Jan–Oct 2025 vs pre-war | +800% (EU, [via RFE/RL](https://www.globalsecurity.org/military/library/news/2026/02/mil-260226-rferl02.htm), search summary only) | ×4.7 vs 2019–21, ×6.6 vs 2021 | Ours lower; EU baseline and code list unknown |
@@ -75,6 +99,11 @@ The comparison table for all years and both baselines (2019–21 average and 202
   The codes are in [`data/chpl_hs_codes.csv`](data/chpl_hs_codes.csv).
 - **EU exports.** Eurostat Comext, dataset `DS-045409`, reporter `EU27_2020`, flow = export,
   HS6 level. Values are in EUR. We convert them to USD with the ECB annual average rate.
+- **Mirror check.** UN Comtrade imports reported by Kazakhstan and Kyrgyzstan from each of the
+  27 EU states (Comtrade codes in `config.py`), summed. Queries are split into groups of 12 codes,
+  so that no call comes near the 500-record cap. Importers record the country of origin and CIF
+  values; the EU records the destination and FOB values. The *excess gap* is
+  EU exports × (pre-war ratio − ratio).
 - **Exports to Russia.** UN Comtrade public API, reporter = Kazakhstan (398) or Kyrgyzstan (417),
   partner = Russia (643), flow = export, HS6 level, USD.
 - **HS versions.** The CHPL uses HS 2022 codes. Data for 2019–2021 uses HS 2017. For three codes we
@@ -110,6 +139,8 @@ The comparison table for all years and both baselines (2019–21 average and 202
 - 2025 data can change when the agencies revise it.
 - Two rising lines can show re-export, but they do not prove it. The EU leg also has normal
   post-2022 import growth. Later versions will add control goods and control countries.
+- A mirror gap shows goods that the EU sent but the country did not record. It does not show
+  where these goods went.
 
 ## Licence and citation
 

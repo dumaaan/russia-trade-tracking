@@ -9,6 +9,7 @@
   const FLOW = {
     eu: { label: (c) => `EU-27 exports to ${c}`, short: "From the EU", color: "--flow-eu" },
     ru: { label: (c) => `${c} exports to Russia`, short: "To Russia", color: "--flow-ru" },
+    mi: { label: (c) => `${c} imports from EU-27 (recorded)`, short: "Recorded imports from EU", color: "--flow-eu" },
   };
   const COUNTRY = {
     Kazakhstan: { color: "--kz", marker: "circle" },
@@ -358,6 +359,58 @@
     }));
   }
 
+  // ---------- mirror check ----------
+  function mirror() {
+    const data = {};
+    for (const c of D.countries) {
+      const eu = series("eu", c), mi = series("mi", c);
+      const ratio = YEARS.map((_, i) => (eu[i] && mi[i] != null ? (100 * mi[i]) / eu[i] : null));
+      // Pre-war ratio: sum over the baseline years that have both values.
+      const pick = state.baseline === "avg" ? D.baselineYears : [2021];
+      let se = 0, sm = 0, used = [];
+      for (const y of pick) {
+        const i = YEARS.indexOf(y);
+        if (eu[i] && mi[i] != null) { se += eu[i]; sm += mi[i]; used.push(y); }
+      }
+      const pre = se ? (100 * sm) / se : null;
+      data[c] = {
+        eu, mi, ratio, pre, used,
+        gap: YEARS.map((_, i) => (eu[i] != null && mi[i] != null ? eu[i] - mi[i] : null)),
+        excess: YEARS.map((_, i) => (pre != null && ratio[i] != null ? (eu[i] * (pre - ratio[i])) / 100 : null)),
+      };
+    }
+    const s = D.countries.map((c) => ({ label: c, color: COUNTRY[c].color, marker: COUNTRY[c].marker, values: data[c].ratio }));
+    legend(document.getElementById("mirror-legend"), s);
+    lineChart(document.getElementById("mirror-chart"), {
+      series: s, fmt: fmtPct, tickFmt: (t) => t + "%", baseline: 100,
+      aria: "Mirror ratio: imports from EU-27 as recorded by the country, divided by EU-27 exports, percent",
+    });
+
+    // Summary: the year with the largest excess gap for each country.
+    const parts = D.countries.map((c) => {
+      const d = data[c];
+      let bi = -1;
+      d.excess.forEach((v, i) => { if (v != null && (bi < 0 || v > d.excess[bi])) bi = i; });
+      if (bi < 0 || d.pre == null) return `${c}: not enough data for this selection.`;
+      const yr = YEARS[bi];
+      return `${c}: in ${yr}, the import records show ${fmtPct(d.ratio[bi])} of the EU exports (pre-war: ${fmtPct(d.pre)}, ${d.used.length > 1 ? `${d.used[0]}–${String(d.used[d.used.length - 1]).slice(2)}` : d.used[0]}). ` +
+        `The gap is ${fmtMoney(d.gap[bi])}, of which ${fmtMoney(Math.max(0, d.excess[bi]))} is above the pre-war level.`;
+    });
+    const sum = document.getElementById("mirror-summary");
+    sum.replaceChildren(h("strong", { text: `${basketLabel()}. ` }), ...parts.flatMap((p, i) => (i ? [h("br"), p] : [p])));
+
+    const head = ["Year"];
+    for (const c of D.countries) head.push(`${c}: EU exports`, `${c}: recorded imports`, `${c}: ratio`, `${c}: excess gap`);
+    table(document.getElementById("mirror-table"), head, YEARS.map((yr, i) => {
+      const row = [String(yr)];
+      for (const c of D.countries) {
+        const d = data[c];
+        row.push(fmtM(d.eu[i]), fmtM(d.mi[i]), fmtPct(d.ratio[i]), d.excess[i] == null ? "—" : fmtM(d.excess[i]));
+      }
+      return row;
+    }));
+  }
+
   // ---------- section 3 ----------
   function goods() {
     const { goodsCountry: c, goodsFlow: f, goodsYear: yr } = state;
@@ -414,7 +467,13 @@
     const pct = (a, b) => (a == null || !b ? "—" : `${a >= b ? "+" : "−"}${Math.abs(100 * (a / b - 1)).toFixed(1)}%`);
     const x = (a, b) => (a == null || !b ? "—" : `×${(a / b).toFixed(1)}`);
     const avg = (v) => baseOf(v, "avg"), y21 = (v) => baseOf(v, "2021");
+    const kgmi = series("mi", "Kyrgyzstan", "all", true);
+    const kgRatio = (y) => { const e = at(kgeu, y), m = at(kgmi, y); return e && m != null ? (100 * m) / e : null; };
+    const kgPre = (() => { let se = 0, sm = 0; for (const y of D.baselineYears) { const e = at(kgeu, y), m = at(kgmi, y); if (e && m != null) { se += e; sm += m; } } return se ? (100 * sm) / se : null; })();
     const rows = [
+      ["Mirror ratio, Kyrgyzstan: 2022 vs pre-war", "about −50 points (Armenia and Kyrgyzstan, sanctioned goods)", "EBRD, “The Eurasian roundabout” (2023)", "https://users.ox.ac.uk/~econ0247/Roundabout.pdf",
+        kgRatio(2022) == null || kgPre == null ? "—" : `${String(Math.round(kgRatio(2022) - kgPre)).replace("-", "−")} points (${Math.round(kgPre)}% → ${Math.round(kgRatio(2022))}%)`,
+        "Same direction. EBRD uses a wider list of sanctioned goods and Mar–Dec only."],
       ["Kazakhstan → Russia, 2022 vs 2021", "+401%", "The Moscow Times, from Comtrade", "https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf",
         pct(at(kzru, 2022), at(kzru, 2021)), "Match"],
       ["Kazakhstan → Russia, 2023 vs 2022", "−5%", "The Moscow Times, from Comtrade", "https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf",
@@ -446,7 +505,7 @@
       `Data as of: Comext updated ${s.comext.Kazakhstan.updated}. Comtrade: Kazakhstan ${lastRel(kz)}, Kyrgyzstan ${lastRel(kg)}. Downloaded ${s.comext.Kazakhstan.downloaded}. CHPL version: ${D.chplVersion}.`;
     const head = ["Source", ...YEARS.map(String)];
     const rows = [];
-    for (const f of ["eu", "ru"]) {
+    for (const f of ["eu", "ru", "mi"]) {
       for (const c of D.countries) {
         rows.push([`${f === "eu" ? "Comext" : "Comtrade"}: ${FLOW[f].label(c)}`, ...YEARS.map((y) => {
           const a = avail[`${f}|${c}|${y}`];
@@ -471,7 +530,7 @@
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
   seg(document.getElementById("goods-country"), countryOpts, () => state.goodsCountry, (v) => { state.goodsCountry = v; goods(); });
-  seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
+  seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
   const sel = document.getElementById("goods-year");
   sel.replaceChildren(...YEARS.map((y) => h("option", { value: y, text: String(y) })));
   sel.value = String(state.goodsYear);
@@ -482,12 +541,12 @@
 
   function renderFiltered() {
     document.getElementById("f-note").textContent = `${basketLabel()} · ${state.currency} · baseline ${baseLabel()}`;
-    tiles(); flows(); comparison(); goods();
+    tiles(); flows(); comparison(); mirror(); goods();
   }
   function renderAll() { renderFiltered(); crossChecks(); availability(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { flows(); comparison(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { flows(); comparison(); mirror(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

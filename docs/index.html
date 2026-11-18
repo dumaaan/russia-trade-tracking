@@ -69,6 +69,25 @@
     <details class="table-view"><summary>Show data table</summary><div id="cmp-table"></div></details>
   </section>
 
+  <section class="card" aria-labelledby="mirror-h">
+    <div class="card-head">
+      <div>
+        <h2 id="mirror-h">Mirror check: does the EU export arrive?</h2>
+        <p class="sub">What Kazakhstan and Kyrgyzstan record as imports from the EU-27, divided by what the EU records as exports to them. Below 100%, part of the EU exports is not in the country's import records.</p>
+      </div>
+    </div>
+    <div class="legend" id="mirror-legend"></div>
+    <div class="chart" id="mirror-chart"></div>
+    <p class="callout" id="mirror-summary"></p>
+    <p class="sub">
+      A gap is normal before the war too: goods can arrive in another year, importers record the country of origin
+      (the EU records the destination), and imports include freight and insurance (CIF). So compare each year with the
+      country's own pre-war ratio. The <strong>excess gap</strong> is the part of the gap above that pre-war level.
+      Kazakhstan gives no product detail for imports by partner for 2020–2022, so its pre-war ratio uses 2019 only.
+    </p>
+    <details class="table-view"><summary>Show data table</summary><div id="mirror-table"></div></details>
+  </section>
+
   <section class="card" aria-labelledby="goods-h">
     <div class="card-head">
       <div>
@@ -99,7 +118,7 @@
     <ul class="downloads">
       <li><a href="data/trade_totals.csv" download>trade_totals.csv</a> <span>basket totals by flow, country and year (USD and EUR)</span></li>
       <li><a href="data/trade_by_code.csv" download>trade_by_code.csv</a> <span>values by HS6 code and tier</span></li>
-      <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes against both baselines, scale ratio</span></li>
+      <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes against both baselines, scale ratio, mirror ratio and gaps</span></li>
       <li><a href="data/availability.csv" download>availability.csv</a> <span>which source has which year, HS edition, release date</span></li>
       <li><a href="data/chpl_hs_codes.csv" download>chpl_hs_codes.csv</a> <span>the CHPL codes and tiers</span></li>
     </ul>
@@ -112,6 +131,7 @@
       <li><strong>CHPL list.</strong> EU version of February 2024: 50 HS codes in Tiers 1–4 (integrated circuits, communication parts, bearings, optics, CNC machine tools and others). Earlier versions had 9 codes (May 2023) and 45 codes (September 2023), so totals from 2023 studies are not directly comparable.</li>
       <li><strong>Basket of 49 codes.</strong> Code 854149 is not in the totals: its HS 2017 code (854140) also has solar cells and LEDs, so the 2019–2021 values would be much too high. Its data stays in the code-level file.</li>
       <li><strong>EU exports.</strong> Eurostat Comext, dataset DS-045409, reporter EU-27, HS6 level, in EUR. The USD values use the ECB annual average rate. The EUR view uses the same rate, so the Comext values are the original ones and the Comtrade values are converted.</li>
+      <li><strong>Mirror check.</strong> UN Comtrade imports reported by Kazakhstan and Kyrgyzstan from each of the 27 EU states, summed. Importers record the country of origin and CIF values; the EU records the destination and FOB values.</li>
       <li><strong>Exports to Russia.</strong> UN Comtrade, as reported by Kazakhstan and Kyrgyzstan. Russia does not publish product-level trade data after 2021.</li>
       <li><strong>HS versions.</strong> Data for 2019–2021 uses HS 2017. Codes 880730 and 852589 use their HS 2017 codes (880330, 852580) in those years.</li>
       <li><strong>Baseline.</strong> The main baseline is the 2019–2021 average, because one year can be unusual and small values make a one-year base unstable. 2021 alone is a second option.</li>

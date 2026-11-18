@@ -49,6 +49,35 @@ def load_comext(partner):
 
 EU_FLOW = "EU-27 exports to country"
 RU_FLOW = "Country exports to Russia"
+MI_FLOW = "Country imports from EU-27"
+
+
+def _total_rows(data):
+    """Keep only total rows: all transport modes, all customs procedures, no
+    second partner. Other rows are breakdowns of the same trade and would
+    count it two times."""
+    return [r for r in data if (r["motCode"], r["customsCode"], r["partner2Code"]) == (0, "C00", 0)]
+
+
+def build_imports_from_eu():
+    """KZ/KG-reported imports from the 27 EU states (the mirror of EU exports).
+
+    Importers report the country of origin and CIF values. EU exports use the
+    country of destination and FOB values. See the README for what this means.
+    """
+    rows = []
+    for iso2, info in config.COUNTRIES.items():
+        for year in config.YEARS:
+            path = config.RAW / "comtrade" / f"{iso2}_imports_from_EU27_{year}.json"
+            for r in _total_rows(json.loads(path.read_text())["data"]):
+                rows.append({"hs6": r["cmdCode"], "year": int(r["refYear"]),
+                             "usd": float(r["primaryValue"]), "country": info["name"]})
+    df = pd.DataFrame(rows, columns=["hs6", "year", "usd", "country"])
+    # Sum over the 27 partner countries.
+    df = df.groupby(["hs6", "year", "country"], as_index=False)["usd"].sum()
+    df["flow"] = MI_FLOW
+    df["source"] = "UN Comtrade, imports reported by country from EU-27 partners (USD, CIF)"
+    return df
 
 
 def build_eu_exports():
@@ -70,12 +99,7 @@ def build_exports_to_russia():
     for iso2, info in config.COUNTRIES.items():
         for year in config.YEARS:
             path = config.RAW / "comtrade" / f"{iso2}_exports_to_RU_{year}.json"
-            for r in json.loads(path.read_text())["data"]:
-                # Keep only total rows: all transport modes, all customs
-                # procedures, no second partner. Other rows are breakdowns
-                # of the same trade and would count it two times.
-                if (r["motCode"], r["customsCode"], r["partner2Code"]) != (0, "C00", 0):
-                    continue
+            for r in _total_rows(json.loads(path.read_text())["data"]):
                 rows.append(
                     {
                         "hs6": r["cmdCode"],
@@ -117,6 +141,18 @@ def availability():
                 "hs_edition": {"H5": "HS 2017", "H6": "HS 2022"}.get(rel[0]["classificationCode"], rel[0]["classificationCode"]) if rel else "",
                 "released": rel[0]["lastReleased"][:10] if rel else "",
             })
+            # Imports from the EU: the reporter can report a year but give no
+            # product detail by partner (Kazakhstan 2020-2022). Then the year
+            # is missing for this flow.
+            imp = _total_rows(json.loads((config.RAW / "comtrade" / f"{iso2}_imports_from_EU27_{year}.json").read_text())["data"])
+            rows.append({
+                "flow": MI_FLOW, "country": info["name"], "year": year,
+                "source": "UN Comtrade",
+                "available": bool(rel) and bool(imp),
+                "codes_reported": len({r["cmdCode"] for r in imp}),
+                "hs_edition": rows[-1]["hs_edition"] if imp else "",
+                "released": rows[-1]["released"] if imp else "",
+            })
     return pd.DataFrame(rows)
 
 
@@ -138,7 +174,7 @@ def source_dates():
 
 
 def build():
-    df = pd.concat([build_eu_exports(), build_exports_to_russia()], ignore_index=True)
+    df = pd.concat([build_eu_exports(), build_exports_to_russia(), build_imports_from_eu()], ignore_index=True)
     df["source_hs6"] = df["hs6"]
     df["hs6"] = df["hs6"].map(_to_chpl)
     df = df[df["hs6"].isin(chpl_codes())]

@@ -7,12 +7,19 @@ EU-27 exports to country,Kazakhstan,2023,Comext DS-045409,True,50,CN 2023,2026-1
 EU-27 exports to country,Kazakhstan,2024,Comext DS-045409,True,46,CN 2024,2026-11-13
 EU-27 exports to country,Kazakhstan,2025,Comext DS-045409,True,48,CN 2025,2026-11-13
 Country exports to Russia,Kazakhstan,2019,UN Comtrade,True,36,HS 2017,2023-05-29
+Country imports from EU-27,Kazakhstan,2019,UN Comtrade,True,42,HS 2017,2023-05-29
 Country exports to Russia,Kazakhstan,2020,UN Comtrade,True,35,HS 2017,2024-07-20
+Country imports from EU-27,Kazakhstan,2020,UN Comtrade,False,0,,
 Country exports to Russia,Kazakhstan,2021,UN Comtrade,True,38,HS 2017,2024-07-22
+Country imports from EU-27,Kazakhstan,2021,UN Comtrade,False,0,,
 Country exports to Russia,Kazakhstan,2022,UN Comtrade,True,44,HS 2022,2024-07-20
+Country imports from EU-27,Kazakhstan,2022,UN Comtrade,False,0,,
 Country exports to Russia,Kazakhstan,2023,UN Comtrade,True,47,HS 2022,2025-04-03
+Country imports from EU-27,Kazakhstan,2023,UN Comtrade,True,48,HS 2022,2025-04-03
 Country exports to Russia,Kazakhstan,2024,UN Comtrade,True,44,HS 2022,2025-10-09
+Country imports from EU-27,Kazakhstan,2024,UN Comtrade,True,46,HS 2022,2025-10-09
 Country exports to Russia,Kazakhstan,2025,UN Comtrade,True,41,HS 2022,2026-08-20
+Country imports from EU-27,Kazakhstan,2025,UN Comtrade,True,46,HS 2022,2026-08-20
 EU-27 exports to country,Kyrgyzstan,2019,Comext DS-045409,True,28,CN 2019,2026-11-13
 EU-27 exports to country,Kyrgyzstan,2020,Comext DS-045409,True,29,CN 2020,2026-11-13
 EU-27 exports to country,Kyrgyzstan,2021,Comext DS-045409,True,31,CN 2021,2026-11-13
@@ -21,9 +28,16 @@ EU-27 exports to country,Kyrgyzstan,2023,Comext DS-045409,True,49,CN 2023,2026-1
 EU-27 exports to country,Kyrgyzstan,2024,Comext DS-045409,True,46,CN 2024,2026-11-13
 EU-27 exports to country,Kyrgyzstan,2025,Comext DS-045409,True,43,CN 2025,2026-11-13
 Country exports to Russia,Kyrgyzstan,2019,UN Comtrade,True,8,HS 2017,2020-09-28
+Country imports from EU-27,Kyrgyzstan,2019,UN Comtrade,True,34,HS 2017,2020-09-28
 Country exports to Russia,Kyrgyzstan,2020,UN Comtrade,True,12,HS 2017,2021-05-26
+Country imports from EU-27,Kyrgyzstan,2020,UN Comtrade,True,30,HS 2017,2021-05-26
 Country exports to Russia,Kyrgyzstan,2021,UN Comtrade,True,21,HS 2017,2023-03-22
+Country imports from EU-27,Kyrgyzstan,2021,UN Comtrade,True,32,HS 2017,2023-03-22
 Country exports to Russia,Kyrgyzstan,2022,UN Comtrade,True,34,HS 2022,2023-10-18
+Country imports from EU-27,Kyrgyzstan,2022,UN Comtrade,True,41,HS 2022,2023-10-18
 Country exports to Russia,Kyrgyzstan,2023,UN Comtrade,True,38,HS 2022,2025-06-19
+Country imports from EU-27,Kyrgyzstan,2023,UN Comtrade,True,44,HS 2022,2025-06-19
 Country exports to Russia,Kyrgyzstan,2024,UN Comtrade,True,30,HS 2022,2025-04-25
+Country imports from EU-27,Kyrgyzstan,2024,UN Comtrade,True,39,HS 2022,2025-04-25
 Country exports to Russia,Kyrgyzstan,2025,UN Comtrade,True,30,HS 2022,2026-03-11
+Country imports from EU-27,Kyrgyzstan,2025,UN Comtrade,True,37,HS 2022,2026-03-11

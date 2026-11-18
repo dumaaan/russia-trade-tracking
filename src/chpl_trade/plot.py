@@ -11,6 +11,7 @@ from . import config  # noqa: E402
 
 EU_FLOW = "EU-27 exports to country"
 RU_FLOW = "Country exports to Russia"
+MI_FLOW = "Country imports from EU-27"
 
 # Colors from the reference categorical palette (fixed order).
 FLOW_COLOR = {EU_FLOW: "#2a78d6", RU_FLOW: "#eb6834"}
@@ -110,7 +111,7 @@ def comparison_table(totals):
     unusual, and small values make a one-year base unstable.
     """
     p = totals.pivot_table(index=["country", "year"], columns="flow", values="usd", dropna=False)
-    p = p.reset_index().rename(columns={EU_FLOW: "eu_exports_usd", RU_FLOW: "exports_to_ru_usd"})
+    p = p.reset_index().rename(columns={EU_FLOW: "eu_exports_usd", RU_FLOW: "exports_to_ru_usd", MI_FLOW: "imports_from_eu_usd"})
     p.columns.name = None
     pre = p[p["year"].isin(config.BASELINE_YEARS)].groupby("country")
     avg = pre[["eu_exports_usd", "exports_to_ru_usd"]].mean()
@@ -122,6 +123,21 @@ def comparison_table(totals):
     # ratio, not a re-export share: other suppliers (mainly China) and local
     # stock also feed the exports to Russia.
     p["scale_ratio_pct"] = 100 * p["exports_to_ru_usd"] / p["eu_exports_usd"]
+    # Mirror ratio: what the country records as imports from the EU, divided by
+    # what the EU records as exports to the country. See plot_mirror().
+    p["mirror_ratio_pct"] = 100 * p["imports_from_eu_usd"] / p["eu_exports_usd"]
+    p["mirror_gap_usd"] = p["eu_exports_usd"] - p["imports_from_eu_usd"]
+    # Part of the gap is normal (timing, CIF/FOB, origin vs destination rules).
+    # The "excess gap" is the gap above the pre-war ratio: EU exports times
+    # (pre-war ratio - this year's ratio). The pre-war ratio uses the baseline
+    # years that have data (Kazakhstan: 2019 only).
+    pre_ratio = (
+        p[p["year"].isin(config.BASELINE_YEARS) & p["imports_from_eu_usd"].notna()]
+        .groupby("country")[["imports_from_eu_usd", "eu_exports_usd"]].sum()
+    )
+    pre_ratio = pre_ratio["imports_from_eu_usd"] / pre_ratio["eu_exports_usd"]
+    p["prewar_mirror_ratio_pct"] = 100 * p["country"].map(pre_ratio)
+    p["excess_gap_usd"] = p["eu_exports_usd"] * (p["prewar_mirror_ratio_pct"] - p["mirror_ratio_pct"]) / 100
     p = p.round(1)
     p.to_csv(config.PROCESSED / "comparison.csv", index=False)
     return p
@@ -166,12 +182,42 @@ def plot_comparison(comp):
     return out
 
 
+def plot_mirror(comp):
+    """Mirror check of the first leg: does the EU export arrive in the records?
+
+    100% means the country records the same value as the EU. Below 100%, part of
+    the EU exports is not in the country's import data ("lost in transit").
+    CIF import values are usually a few percent above FOB export values, so a
+    normal ratio is slightly above 100%.
+    """
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    for country in config.COUNTRIES.values():
+        name = country["name"]
+        s = comp[comp["country"] == name].sort_values("year")
+        _line(ax, s["year"], s["mirror_ratio_pct"], COUNTRY_COLOR[name], COUNTRY_MARKER[name], name, suffix="%")
+    ax.axhline(100, color=INK_2, lw=0.8)
+    ax.text(config.YEARS[-1] + 0.5, 102, "100%: both sides agree", fontsize=8, color=INK_2, va="bottom", ha="right")
+    _mark_sanctions(ax)
+    _finish_x(ax)
+    ax.set_ylim(0, 112)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.0f}%"))
+    ax.set_title("Mirror check: imports from EU-27 as recorded ÷ EU-27 exports")
+    ax.legend(loc="upper left", bbox_to_anchor=(0, -0.1), ncol=2, fontsize=9)
+    fig.text(0.0, -0.13, "Kazakhstan gives no product detail for imports by partner for 2020–2022 (gap in the line).",
+             fontsize=8, color=INK_2)
+    out = config.FIGURES / "mirror_check.png"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
 def plot_all():
     config.FIGURES.mkdir(parents=True, exist_ok=True)
     totals = pd.read_csv(config.PROCESSED / "trade_totals.csv")
     outs = [plot_country(totals, c["name"]) for c in config.COUNTRIES.values()]
     comp = comparison_table(totals)
     outs.append(plot_comparison(comp))
+    outs.append(plot_mirror(comp))
     return outs, comp
 
 

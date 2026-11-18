@@ -99,6 +99,47 @@ def fetch_comtrade(reporter_iso2, year, refresh=False):
     return out
 
 
+def fetch_comtrade_imports_from_eu(reporter_iso2, year, refresh=False):
+    """Imports of one reporter from the 27 EU member states, in USD, by HS6, for one year.
+
+    This is the mirror of the EU export data: the same trade, as the importer
+    records it. The query is split into groups of codes so that no call comes
+    near the 500-record preview cap (codes x 27 partners).
+    """
+    m49 = config.COUNTRIES[reporter_iso2]["m49"]
+    out = config.RAW / "comtrade" / f"{reporter_iso2}_imports_from_EU27_{year}.json"
+    if out.exists() and not refresh:
+        return out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    codes = query_codes()
+    partners = ",".join(str(c) for c in config.EU27_M49.values())
+    data = []
+    for i in range(0, len(codes), config.IMPORT_CODES_PER_CALL):
+        chunk = codes[i : i + config.IMPORT_CODES_PER_CALL]
+        params = {
+            "reporterCode": m49,
+            "partnerCode": partners,
+            "period": year,
+            "flowCode": "M",
+            "cmdCode": ",".join(chunk),
+        }
+        body = _get(COMTRADE_URL, params).json()
+        if "data" not in body:
+            raise RuntimeError(f"Comtrade error for {reporter_iso2} imports {year}: {body}")
+        if len(body["data"]) >= COMTRADE_PREVIEW_CAP:
+            raise RuntimeError(
+                f"Comtrade returned {len(body['data'])} records for {reporter_iso2} imports {year}. "
+                "This is the preview cap. Make IMPORT_CODES_PER_CALL smaller."
+            )
+        data.extend(body["data"])
+        time.sleep(2)
+    out.write_text(json.dumps({
+        "data": data,
+        "_downloaded": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }))
+    return out
+
+
 def fetch_comtrade_release(reporter_iso2, year, refresh=False):
     """Release information (first/last release, HS edition) for one reporter-year.
 
@@ -145,6 +186,8 @@ def fetch_all(refresh=False):
             print(f"Comtrade: {iso2} -> RU {year}")
             fetch_comtrade(iso2, year, refresh)
             fetch_comtrade_release(iso2, year, refresh)
+            print(f"Comtrade: {iso2} imports from EU-27 {year}")
+            fetch_comtrade_imports_from_eu(iso2, year, refresh)
 
 
 if __name__ == "__main__":

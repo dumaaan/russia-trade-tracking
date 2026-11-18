@@ -15,7 +15,7 @@ import pandas as pd
 from . import config
 
 DOCS = config.ROOT / "docs"
-FLOWS = {"EU-27 exports to country": "eu", "Country exports to Russia": "ru"}
+FLOWS = {"EU-27 exports to country": "eu", "Country exports to Russia": "ru", "Country imports from EU-27": "mi"}
 
 # Dated events for the chart notes. Keep each one short and give a source.
 EVENTS = [

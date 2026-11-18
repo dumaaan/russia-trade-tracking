@@ -21,6 +21,18 @@ COUNTRIES = {
 }
 RUSSIA_M49 = 643
 
+# EU-27 member states as Comtrade partner codes (for the mirror check).
+# France is 251 in Comtrade; 250 ("Metropolitan France") is not used by KZ or KG.
+EU27_M49 = {
+    "AT": 40, "BE": 56, "BG": 100, "HR": 191, "CY": 196, "CZ": 203, "DK": 208,
+    "EE": 233, "FI": 246, "FR": 251, "DE": 276, "GR": 300, "HU": 348, "IE": 372,
+    "IT": 380, "LV": 428, "LT": 440, "LU": 442, "MT": 470, "NL": 528, "PL": 616,
+    "PT": 620, "RO": 642, "SK": 703, "SI": 705, "ES": 724, "SE": 752,
+}
+# Codes per import call: about 20 rows per code (one per EU partner) keeps
+# each call far below the 500-record preview cap.
+IMPORT_CODES_PER_CALL = 12
+
 # The CHPL (Feb 2024) uses HS 2022 codes. Data for 2019-2021 uses HS 2017.
 # These CHPL codes have a different HS 2017 code. We add the old code to the
 # query and count it as the CHPL code.

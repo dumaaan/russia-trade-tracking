@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.3.0 — 2026-11-18
+
+### Added
+- **Mirror check of the first leg.** New flow: Kazakhstan and Kyrgyzstan imports from the 27 EU
+  states, as they report them (Comtrade, flow M). New columns in `comparison.csv`:
+  `imports_from_eu_usd`, `mirror_ratio_pct`, `mirror_gap_usd`, `prewar_mirror_ratio_pct`,
+  `excess_gap_usd`. New chart `figures/mirror_check.png` and a new site section.
+- Cross-check with the EBRD "lost in transit" result.
+
+### Data
+- Kazakhstan gives no product detail for imports by partner for 2020–2022. These years are
+  missing for the mirror check. The Kazakh pre-war ratio uses 2019 only.
+
 ## 0.2.0 — 2026-11-18
 
 ### Method changes
