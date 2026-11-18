@@ -1,198 +1,20 @@
 # Russia trade tracking
 
-Tracking how sanctioned goods reach Russia through third countries. The first module covers
-CHPL goods via Kazakhstan and Kyrgyzstan (EU → Central Asia → Russia).
+How sanctioned battlefield goods reach Russia through third countries.
 
-## CHPL goods via Central Asia
+**Site: https://dumaaan.github.io/russia-trade-tracking/**
 
-This module looks at the **Common High Priority List (CHPL)** goods. These are 50 HS codes of
-dual-use and advanced technology goods that the EU, US, UK and Japan found in Russian weapons in
-Ukraine. Examples are integrated circuits, ball bearings and CNC machine tools.
-
-The project compares two flows for 2019–2025:
-
-1. **EU-27 exports** of CHPL goods to Kazakhstan and Kyrgyzstan (source: Eurostat Comext).
-2. **Kazakhstan and Kyrgyzstan exports** of the same goods to Russia (source: UN Comtrade).
-   Russia does not publish trade data after 2021, so we use the data that Kazakhstan and
-   Kyrgyzstan report.
-
-When both lines go up together after 2022, this can show re-export (circumvention) of
-sanctioned goods. The data alone does not prove this.
-
-## Results
+The first module follows the 50 goods on the EU's Common High Priority List (electronics,
+bearings, machine tools found in Russian weapons) on one route: EU exports to Kazakhstan and
+Kyrgyzstan, then those countries' exports of the same goods to Russia, 2019–2025.
 
 ![Kazakhstan](figures/kazakhstan_flows.png)
 
-![Kyrgyzstan](figures/kyrgyzstan_flows.png)
+**Sources:** Eurostat Comext (EU exports), UN Comtrade (exports to Russia and imports from the
+EU, as Kazakhstan and Kyrgyzstan report them), ECB exchange rates. The method, the limits and
+the data downloads are on the site.
 
-![Comparison](figures/comparison_kz_kg.png)
+**Caveat:** rising exports on both legs can show re-export, but they do not prove it.
 
-CHPL basket (49 codes, see *Method*), USD million:
-
-| Year | EU → KZ | KZ → RU | EU → KG | KG → RU |
-|-----:|--------:|--------:|--------:|--------:|
-| 2019 | 192.6 | 89.6 | 10.1 | 1.2 |
-| 2020 | 194.5 | 60.2 | 5.4 | 1.4 |
-| 2021 | 219.1 | 62.5 | 4.9 | 1.8 |
-| 2022 | 411.5 | 306.0 | 37.9 | 10.9 |
-| 2023 | 455.7 | 292.7 | 69.8 | 31.3 |
-| 2024 | 369.6 | 228.7 | 42.3 | 14.4 |
-| 2025 | 392.6 | 186.4 | 32.2 | 15.8 |
-
-**Kazakhstan versus Kyrgyzstan**
-
-- **Size.** Kazakhstan is much larger. In 2023, EU exports to Kazakhstan were about 6.5 times
-  the EU exports to Kyrgyzstan. Kazakhstan exports to Russia were about 9 times the Kyrgyz exports.
-- **Growth.** Kyrgyzstan grew much faster from a very small base. Against the 2019–21 average,
-  EU exports to Kyrgyzstan were 10 times higher at the 2023 peak, and Kyrgyz exports to Russia
-  21 times higher. For Kazakhstan, the peaks were 2.3 times (EU exports, 2023) and 4.3 times
-  (exports to Russia, 2022).
-- **After the peak.** Both flows went down after 2023, but they stay far above the pre-war level.
-  In 2025, Kazakhstan exports to Russia are 2.6 times the 2019–21 average, and Kyrgyz exports are
-  10.8 times.
-- **Scale ratio.** Kazakhstan exports to Russia were 28% of EU exports to Kazakhstan in 2021,
-  74% in 2022 and 48% in 2025. This is **not a re-export share**. Other suppliers, mainly China,
-  also sell these goods to Kazakhstan and Kyrgyzstan. For example, Kazakhstan's Tier 3.B exports
-  to Russia (bearings, optics) are larger than EU Tier 3.B exports to Kazakhstan in every year.
-
-The comparison table for all years and both baselines (2019–21 average and 2021) is in
-[`data/processed/comparison.csv`](data/processed/comparison.csv).
-
-### Mirror check: does the EU export arrive?
-
-![Mirror check](figures/mirror_check.png)
-
-We compare what the EU records as exports to each country (Comext) with what the country records
-as imports from the 27 EU states (Comtrade). Below 100%, part of the EU exports is not in the
-country's import records. A gap is normal before the war too (timing, country of origin vs
-destination, CIF vs FOB), so we compare each year with the country's own pre-war ratio.
-
-| | Pre-war ratio | 2022 | 2023 | 2024 | 2025 |
-|---|---:|---:|---:|---:|---:|
-| Kazakhstan | 89% (2019 only) | no data | 76% | 87% | 88% |
-| Kyrgyzstan | 61% (2019–21) | 37% | 35% | 59% | 76% |
-
-- **Kyrgyzstan.** In 2022–2023 the ratio fell by about 25 points below its pre-war level. In 2023,
-  $45.4M of the $69.8M of EU exports is not in Kyrgyz import records. $17.9M of it is above the
-  pre-war gap. After 2023 the ratio goes back up, and in 2025 it is above the pre-war level.
-- **Kazakhstan.** In 2023 the ratio is 13 points below 2019: a gap of $107M, of which $59M is above
-  the pre-war gap. In 2024–2025 it is near the pre-war level again.
-- **No Kazakh data for 2020–2022.** Kazakhstan gives only a total for imports by partner for these
-  years, with no product detail. The EBRD reported the same problem.
-- The fall in 2022 agrees in direction with the EBRD "lost in transit" result for 2022.
-
-### Cross-checks
-
-| Check | Published | Ours | Result |
-|---|---|---|---|
-| KG mirror ratio, 2022 vs pre-war | about −50 points, Armenia + Kyrgyzstan, sanctioned goods ([EBRD](https://users.ox.ac.uk/~econ0247/Roundabout.pdf)) | −24 points (61% → 37%) | Same direction; EBRD uses a wider goods list and Mar–Dec only |
-| KZ → RU, 2022 vs 2021 | +401% ([The Moscow Times](https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf), Comtrade) | +390% | Match |
-| KZ → RU, 2023 vs 2022 | −5% (same source) | −4.3% | Match |
-| EU → KG, Jan–Oct 2025 vs pre-war | +800% (EU, [via RFE/RL](https://www.globalsecurity.org/military/library/news/2026/02/mil-260226-rferl02.htm), search summary only) | ×4.7 vs 2019–21, ×6.6 vs 2021 | Ours lower; EU baseline and code list unknown |
-| KG → RU, Jan–Oct 2025 vs pre-war | +1,200% (same source) | ×10.8 vs 2019–21, ×8.5 vs 2021 | Ours lower; our base is only about $1.5M |
-| KG → RU, 2023 | $98M, Jan–Oct, Kyrgyz sellers in Russian customs data ([KSE](https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf)) | $31.3M, full year | Kyrgyz-reported data is about one third: under-reported |
-
-## Method
-
-- **CHPL list.** Version of February 2024 (50 HS codes in Tiers 1–4). Source: European Commission,
-  [List of Common High Priority Items](https://finance.ec.europa.eu/document/download/5a2494db-d874-4e2b-bf2a-ec5a191d2dc0_en).
-  The codes are in [`data/chpl_hs_codes.csv`](data/chpl_hs_codes.csv).
-- **EU exports.** Eurostat Comext, dataset `DS-045409`, reporter `EU27_2020`, flow = export,
-  HS6 level. Values are in EUR. We convert them to USD with the ECB annual average rate.
-- **Mirror check.** UN Comtrade imports reported by Kazakhstan and Kyrgyzstan from each of the
-  27 EU states (Comtrade codes in `config.py`), summed. Queries are split into groups of 12 codes,
-  so that no call comes near the 500-record cap. Importers record the country of origin and CIF
-  values; the EU records the destination and FOB values. The *excess gap* is
-  EU exports × (pre-war ratio − ratio).
-- **Exports to Russia.** UN Comtrade public API, reporter = Kazakhstan (398) or Kyrgyzstan (417),
-  partner = Russia (643), flow = export, HS6 level, USD.
-- **HS versions.** The CHPL uses HS 2022 codes. Data for 2019–2021 uses HS 2017. For three codes we
-  use the HS 2017 code for those years:
-  - `880730` ← `880330` (aircraft parts; same scope, UAVs added in HS 2022)
-  - `852589` ← `852580` (cameras; HS 2022 split this code)
-  - `854149` ← `854140` (photosensitive devices)
-- **Basket of 49 codes.** The HS 2017 code `854140` also includes solar cells and LEDs. This makes
-  2019–2021 values much too high. So the totals and charts do not include `854149`. The data for
-  this code stays in `data/processed/trade_by_code.csv` (`in_basket = False`).
-- **CHPL versions.** Earlier lists had 9 codes (May 2023) and 45 codes (September 2023). Totals
-  from studies of 2023 are not directly comparable with our 49-code basket.
-- **Baseline.** The main baseline is the 2019–2021 average. One year can be unusual, and small
-  values (Kyrgyzstan) make a one-year base unstable. `comparison.csv` also gives 2021 as a base.
-- **Missing data.** A year with no data from the source is missing (NaN), not zero. In a year that
-  the source reports, a code with no row is zero trade. `availability.csv` shows each source,
-  country and year, with the HS edition and the release date.
-- **Comtrade rows.** Only total rows are used (all transport modes, all customs procedures, no
-  second partner). The pipeline stops if a preview call returns 500 records, the preview cap.
-- **Currency.** The values are in USD and in EUR. Both use the ECB annual average rate.
-- **Event dates.** The site marks key dates: the CHPL versions, the US sanctions on Keremet Bank
-  (Jan 2025) and the first EU Art. 12f export ban on Kyrgyzstan (23 Apr 2026, codes 8457.10 and
-  8517.62). Each date has a source link.
-
-### Limits
-
-- Exporter data and importer data are not the same. Kazakhstan and Kyrgyzstan export data for
-  Russia can be lower than the true value, because both countries are in the Eurasian Economic
-  Union and there are no customs checks on the border.
-- The EU reports exports by the country of final destination that is known at export. Goods can
-  go to a third country first.
-- An HS6 code is wider than the controlled goods. Not all goods under a CHPL code are sanctioned.
-- 2025 data can change when the agencies revise it.
-- Two rising lines can show re-export, but they do not prove it. The EU leg also has normal
-  post-2022 import growth. Later versions will add control goods and control countries.
-- A mirror gap shows goods that the EU sent but the country did not record. It does not show
-  where these goods went.
-
-## Licence and citation
-
-The code has the MIT licence ([LICENSE](LICENSE)). The data stays under the terms of Eurostat,
-UN Comtrade and the ECB. To cite the project, use [CITATION.cff](CITATION.cff). Method changes
-are in [CHANGELOG.md](CHANGELOG.md). The research behind the next steps is in
-[`reports/`](reports/).
-
-## Website
-
-The interactive site is in [`docs/`](docs/). It has hover tooltips, a country switch, a
-"which goods" chart for each year, data tables, and light and dark mode. It uses no libraries and
-no build step. The pipeline writes the data to `docs/data.js`.
-
-- **Local:** open `docs/index.html` in a browser, or run `make serve` and go to
-  <http://localhost:8770>.
-- **GitHub Pages:** push the repository to GitHub. Then go to *Settings → Pages* and set
-  *Source* to *Deploy from a branch*, branch `main`, folder `/docs`. The site goes to
-  `https://<user>.github.io/russia-trade-tracking/`.
-
-## Use
-
-```bash
-make setup   # create .venv and install packages
-make run     # download (only once), build tables, make charts and site data
-make refresh # download all data again
-make serve   # show the site at http://localhost:8770
-```
-
-The first run saves the API responses in `data/raw/` (not in git). Later runs use these files.
-
-## Project structure
-
-```
-data/
-  chpl_hs_codes.csv        CHPL HS codes and tiers
-  processed/               tidy tables, availability.csv, sources.json
-  raw/                     API responses (not in git)
-docs/                      website (GitHub Pages)
-figures/                   charts
-src/chpl_trade/
-  config.py                years, countries, HS code mapping
-  fetch.py                 download from Comext, Comtrade, ECB
-  build.py                 make tidy tables
-  plot.py                  make charts and comparison table
-  site.py                  write docs/data.js and docs/data/*.csv for the website
-```
-
-## Ideas for later
-
-- Add more countries: Armenia, Georgia, Uzbekistan, Türkiye, UAE.
-- Add mirror data: Kazakhstan and Kyrgyzstan imports from the EU, compared with EU exports.
-- Show each CHPL tier on its own.
-- Use monthly data to see the exact time of changes.
-- Add exports to Russia from China and other sources of CHPL goods.
+Code: MIT ([LICENSE](LICENSE)). Data: under the terms of its sources. Cite with
+[CITATION.cff](CITATION.cff).
