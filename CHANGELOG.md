@@ -2,6 +2,22 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.8.0 — 2026-11-19
+
+### Added: listed goods as a share of all trade
+- New module `src/chpl_trade/control.py` and site chapter "Listed goods as a share of all trade":
+  the value of the listed goods as a percent of the value of all goods in the same flow.
+  If all trade grows, the share stays flat; it rises only when the listed goods grow faster.
+- Destinations: the four route countries (Kyrgyzstan, Armenia, Uzbekistan, Kazakhstan) and
+  comparison countries (Georgia, Azerbaijan, Mongolia, all countries outside the EU).
+  Flows: EU-27 exports (Comext) and each country's exports to Russia (Comtrade), 2019–2025.
+- Layout: one row per country, the two legs in two columns, as in the ban chapter; one linear
+  scale for each column. The goods filter applies.
+- A first version compared listed goods with "similar goods" (other codes in the same 4-digit
+  headings). It was replaced: many of those goods (laptops, smartphones) also went to Russia,
+  and a few products decided the result.
+- Not yet downloaded (daily Comtrade limit): Azerbaijan's and Mongolia's total exports to Russia.
+
 ## 0.7.0 — 2026-11-19
 
 ### Changed

@@ -55,6 +55,18 @@ def ban_data():
     }
 
 
+def control_data():
+    """Listed and similar goods by destination, if the control module has run."""
+    cpath, mpath = config.PROCESSED / "control.csv", config.PROCESSED / "control_meta.json"
+    if not (cpath.exists() and mpath.exists()):
+        return None
+    c = pd.read_csv(cpath, dtype={"code": str})
+    return {
+        "rows": [[r.flow, r.dest, int(r.year), r.kind, r.code, _num(r.usd / 1e6)] for r in c.itertuples()],
+        "meta": json.loads(mpath.read_text()),
+    }
+
+
 def export():
     by_code = pd.read_csv(config.PROCESSED / "trade_by_code.csv", dtype={"hs6": str, "tier": str})
     avail = pd.read_csv(config.PROCESSED / "availability.csv")
@@ -88,6 +100,7 @@ def export():
         "sources": sources,
         "built": date.today().isoformat(),
         "ban": ban_data(),
+        "control": control_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -96,7 +109,7 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")

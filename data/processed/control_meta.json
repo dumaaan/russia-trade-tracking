@@ -1,0 +1,60 @@
+{
+  "destinations": {
+    "KG": {
+      "name": "Kyrgyzstan",
+      "group": "route",
+      "russia": true
+    },
+    "AM": {
+      "name": "Armenia",
+      "group": "route",
+      "russia": true
+    },
+    "UZ": {
+      "name": "Uzbekistan",
+      "group": "route",
+      "russia": true
+    },
+    "KZ": {
+      "name": "Kazakhstan",
+      "group": "route",
+      "russia": true
+    },
+    "GE": {
+      "name": "Georgia",
+      "group": "comparison",
+      "russia": true
+    },
+    "AZ": {
+      "name": "Azerbaijan",
+      "group": "comparison",
+      "russia": true
+    },
+    "MN": {
+      "name": "Mongolia",
+      "group": "comparison",
+      "russia": true
+    },
+    "EXT_EU27_2020": {
+      "name": "All countries outside the EU",
+      "group": "comparison",
+      "russia": false
+    }
+  },
+  "missing": [
+    "ru|AZ|2019",
+    "ru|AZ|2020",
+    "ru|AZ|2021",
+    "ru|AZ|2022",
+    "ru|AZ|2023",
+    "ru|AZ|2024",
+    "ru|AZ|2025",
+    "ru|MN|2019",
+    "ru|MN|2020",
+    "ru|MN|2021",
+    "ru|MN|2022",
+    "ru|MN|2023",
+    "ru|MN|2024",
+    "ru|MN|2025"
+  ]
+}

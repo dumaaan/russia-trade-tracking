@@ -183,7 +183,7 @@
       const l0 = Math.log10(lo), l1 = Math.log10(hi);
       y = (v) => m.top + ih - ((Math.log10(Math.max(v, lo)) - l0) / (l1 - l0)) * ih;
     } else {
-      ticks = niceTicks(Math.max(...all, ...(opts.refs || []).map((r) => r.value || 0)) * 1.05);
+      ticks = niceTicks((opts.ymax != null ? opts.ymax : Math.max(...all, ...(opts.refs || []).map((r) => r.value || 0))) * 1.05);
       const top = ticks[ticks.length - 1];
       y = (v) => m.top + ih - (v / top) * ih;
     }
@@ -587,6 +587,80 @@
       : "Not enough data for this country.";
   }
 
+  // ---------- listed goods as a share of all trade ----------
+  function controlStudy() {
+    const C = D.control, meta = C.meta;
+    const missing = new Set(meta.missing);
+    const basket = new Set(D.chpl.map((r) => r.hs6).filter((c) => inBasket(c, state.basket)));
+    const ser = (flow, dest, kind) => {
+      const sum = Object.fromEntries(YEARS.map((y) => [y, 0]));
+      const seen = new Set();
+      for (const r of C.rows) {
+        if (r[0] !== flow || r[1] !== dest || r[3] !== kind || r[5] == null) continue;
+        if (kind === "listed" && !basket.has(r[4])) continue;
+        sum[r[2]] += r[5];
+        seen.add(r[2]);
+      }
+      return YEARS.map((y) => (missing.has(`${flow}|${dest}|${y}`) || (kind === "total" && !seen.has(y)) ? null : sum[y]));
+    };
+    const rows = Object.keys(meta.destinations).map((d) => {
+      const info = meta.destinations[d];
+      const leg = (flow) => {
+        if (flow === "ru" && !info.russia) return null;
+        const L = ser(flow, d, "listed"), T = ser(flow, d, "total");
+        const share = YEARS.map((_, i) => (L[i] == null || !T[i] ? null : (100 * L[i]) / T[i]));
+        const pick = state.baseline === "avg" ? D.baselineYears : [2021];
+        let sl = 0, st = 0;
+        for (const y of pick) { const i = YEARS.indexOf(y); if (L[i] != null && T[i]) { sl += L[i]; st += T[i]; } }
+        return { listed: L, total: T, share, pre: st ? (100 * sl) / st : null };
+      };
+      return { d, info, eu: leg("eu"), ru: leg("ru") };
+    });
+    const top = (key) => Math.max(...rows.flatMap((r) => (r[key] ? r[key].share : [])).filter((v) => v != null), 0.1);
+    const max = { eu: top("eu"), ru: top("ru") };
+    const pf = (v) => (v == null ? "—" : `${v < 10 ? v.toFixed(1) : Math.round(v)}%`);
+
+    const grid = document.getElementById("ctl-grid");
+    const groupName = { route: "Countries on the route", comparison: "Comparison countries" };
+    const kids = [];
+    let lastGroup = null;
+    rows.forEach((r) => {
+      if (r.info.group !== lastGroup) { kids.push(h("h3", { class: "ctl-group", text: groupName[r.info.group] })); lastGroup = r.info.group; }
+      kids.push(h("div", { class: "ctl-row" }, [
+        h("div", { class: "ctl-name", text: r.info.name }),
+        h("figure", {}, [h("figcaption", { text: "From the EU" }), h("div", { class: "chart sm" })]),
+        r.ru ? h("figure", {}, [h("figcaption", { text: "To Russia" }), h("div", { class: "chart sm" })]) : h("div"),
+      ]));
+    });
+    grid.replaceChildren(...kids);
+    const rowEls = [...grid.querySelectorAll(".ctl-row")];
+    rows.forEach((r, i) => {
+      const charts = rowEls[i].querySelectorAll(".chart");
+      const draw = (el, l, flowKey, title) => lineChart(el, {
+        series: [{ label: "listed goods, % of all goods", color: FLOW[flowKey].color, values: l.share }],
+        fmt: pf, tickFmt: (t) => `${t}%`, ymax: max[flowKey],
+        aria: `${title}: listed goods as a percent of all goods`,
+      });
+      draw(charts[0], r.eu, "eu", `EU exports to ${r.info.name}`);
+      if (r.ru) draw(charts[1], r.ru, "ru", `${r.info.name}'s exports to Russia`);
+    });
+
+    document.getElementById("ctl-sub").textContent =
+      "The value of the listed goods as a percent of the value of all goods in the same flow. Each column has one scale.";
+
+    const ly = YEARS.length - 1;
+    const trows = [];
+    for (const r of rows) {
+      for (const [flow, l] of [["eu", r.eu], ["ru", r.ru]]) {
+        if (!l) continue;
+        trows.push([flow === "eu" ? `EU to ${r.info.name}` : `${r.info.name} to Russia`,
+          pf(l.pre), pf(l.share[ly]), fmtMoney(l.listed[ly] == null ? null : conv(l.listed[ly], YEARS[ly])), fmtMoney(l.total[ly] == null ? null : conv(l.total[ly], YEARS[ly]))]);
+      }
+    }
+    table(document.getElementById("ctl-table"),
+      ["Flow", `Share, ${baseLabel()}`, `Share, ${YEARS[ly]}`, `Listed goods, ${YEARS[ly]}`, `All goods, ${YEARS[ly]}`], trows);
+  }
+
   // ---------- the April 2026 ban: one row per country, leg 1 and leg 2 on one money scale ----------
   const monthName = (mm) => new Date(mm + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
   // Money with one unit for the whole axis: $0, $2M, $4M (or $0, $250k, $500k).
@@ -816,11 +890,12 @@
     document.getElementById("f-note").textContent = `Every chart shows ${basketPhrase()} in ${state.currency}, against the ${baseLabel()}.`;
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
     if (D.ban) banStudy();
+    if (D.control) controlStudy();
   }
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); if (D.control) controlStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();
