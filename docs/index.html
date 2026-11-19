@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.7">
+  <link rel="stylesheet" href="style.css?v=1.8">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -32,7 +32,7 @@
       <figcaption id="route-caption"></figcaption>
     </div>
   </figure>
-  <div class="wrap"><div class="summary" id="summary"></div></div>
+  <div class="wrap"><div class="summary" id="summary"></div><p class="summary-note" id="summary-note"></p></div>
 </header>
 
 <div class="filterbar" role="group" aria-label="Filters for every chart on the page">
@@ -87,12 +87,14 @@
         <figure><figcaption>EU exports to the country<span id="cmp-eu-cap"></span></figcaption><div class="chart sm" id="cmp-eu"></div></figure>
         <figure><figcaption>The country's exports to Russia<span id="cmp-ru-cap"></span></figcaption><div class="chart sm" id="cmp-ru"></div></figure>
       </div>
-      <figure class="scatter-fig"><figcaption>Both legs, one point a year<span>exports to Russia against EU exports, log scales</span></figcaption><div class="chart" id="cmp-ratio"></div></figure>
-      <p class="aside">
-        A point on the dotted line means the country sold Russia as much as it bought from
-        the EU. China and other countries also supply these goods, so the distance from the line is not a
-        re-export share.
-      </p>
+      <div class="scatter-row">
+        <figure class="scatter-fig"><figcaption>Both legs, one point a year<span>exports to Russia against EU exports, log scales</span></figcaption><div class="chart" id="cmp-ratio"></div></figure>
+        <p class="aside">
+          Each point is one year: across, what the EU sold the country; up, what the country sold
+          Russia. A point on the dotted line means the two are equal. China and other countries also
+          supply these goods, so the distance from the line is not a re-export share.
+        </p>
+      </div>
       <details class="table-view"><summary>Show the numbers</summary><div id="cmp-table"></div></details>
     </div>
   </section>
@@ -204,6 +206,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.6"></script>
-<script src="app.js?v=1.7"></script>
+<script src="app.js?v=1.8"></script>
 </body>
 </html>

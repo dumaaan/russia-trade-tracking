@@ -2,6 +2,24 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.4.0 — 2026-11-19
+
+### Changed after a third design review (Tufte principles)
+- **Key numbers:** the 2022–2025 total of shipments missing from import records is now a sentence
+  under the table, not a row in a table of yearly values.
+- **Cross-checks:** the Kyrgyz multiples and pre-war base also show their 2025-price values, so one
+  flow does not show two unexplained numbers on the page.
+- **EU and China chapter:** one shared log scale. The same height is the same money in every
+  panel, and the gap between the lines is the China/EU ratio, also for Armenia and Kyrgyzstan.
+- **Ban table:** the column header explains the bright bars and the ban line.
+- **Share chapter:** charts at about half the height, with fewer ticks.
+- **Goods table:** true zeros are blank, values under $0.05M show as a light "<0.1", and the
+  header explains the dash in the multiple column.
+- **Lines:** Kyrgyzstan is a solid line in a lighter tint of the leg colour, not a dash.
+- **Scatterplot:** sits next to its explanation; the box fits the square plot.
+- **First chart:** the three steps of the goods list are one mark ("List: 9 → 45 → 50 codes").
+- **Tier heading:** one claim (the largest tier); the growth ranking stays in the paragraph.
+
 ## 1.3.0 — 2026-11-19
 
 ### Changed after a second design review (Tufte principles)
