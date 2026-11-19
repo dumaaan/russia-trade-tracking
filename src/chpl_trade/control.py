@@ -26,7 +26,6 @@ RAW = config.RAW / "control"
 # Comext partner code -> name, and Comtrade reporter code (None: no second leg)
 DESTINATIONS = {
     "KG": ("Kyrgyzstan", 417, "route"),
-    "AM": ("Armenia", 51, "route"),
     "UZ": ("Uzbekistan", 860, "route"),
     "KZ": ("Kazakhstan", 398, "route"),
     "GE": ("Georgia", 268, "comparison"),

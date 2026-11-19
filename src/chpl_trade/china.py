@@ -23,7 +23,7 @@ RAW = config.RAW / "suppliers"
 CN = 156
 # Comext partner code -> (name, UN M49)
 DESTINATIONS = {
-    "KG": ("Kyrgyzstan", 417), "AM": ("Armenia", 51), "UZ": ("Uzbekistan", 860), "KZ": ("Kazakhstan", 398),
+    "KG": ("Kyrgyzstan", 417), "UZ": ("Uzbekistan", 860), "KZ": ("Kazakhstan", 398),
     "RU": ("Russia", 643),
 }
 

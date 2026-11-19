@@ -404,3 +404,10 @@ table.xc a { color: var(--ink-2); }
   .summary-table { font-size: 14px; }
   .summary-table th, .summary-table td { padding: 6px 5px; }
 }
+
+@media (max-width: 520px) {
+  #summary { overflow-x: auto; }
+  .summary-table { font-size: 13.5px; }
+  .summary-table th, .summary-table td { padding: 6px 4px; }
+  .summary-table td { white-space: normal; }
+}

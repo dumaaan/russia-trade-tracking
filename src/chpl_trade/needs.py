@@ -10,7 +10,7 @@ from . import comtrade, config
 from .fetch import query_codes
 
 # Reporters (UN M49)
-KG, KZ, AM, UZ, GE, AZ, MN = 417, 398, 51, 860, 268, 31, 496
+KG, KZ, UZ, GE, AZ, MN = 417, 398, 860, 268, 31, 496
 CN = 156
 RU = config.RUSSIA_M49
 
@@ -34,14 +34,14 @@ def declare_all():
     comtrade.need("A", "X", [KZ, KG], [RU], years, codes)
     comtrade.need("A", "M", [KZ, KG], config.EU27_M49.values(), years, codes)
     # Listed goods as a share of all trade: the same codes plus the total of all goods.
-    comtrade.need("A", "X", [KG, AM, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
+    comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
     # China as a supplier: China's exports of the listed goods (and all goods) to the route countries
     # and to Russia, as China reports them.
-    comtrade.need("A", "X", [CN], [KG, AM, UZ, KZ, RU], years, codes + ["TOTAL"])
+    comtrade.need("A", "X", [CN], [KG, UZ, KZ, RU], years, codes + ["TOTAL"])
     # The April 2026 ban: monthly exports to Russia.
     t = date.today()
     ms = months("2024-01", f"{t.year}-{t.month:02d}")
-    comtrade.need("M", "X", [KG, AM, UZ, KZ], [RU], ms, codes)
+    comtrade.need("M", "X", [KG, UZ, KZ], [RU], ms, codes)
     # The ban: each route country's monthly imports from China, as the country reports them
     # (China's own monthly data in Comtrade ends in December 2024).
-    comtrade.need("M", "M", [KG, AM, UZ, KZ], [CN], ms, codes)
+    comtrade.need("M", "M", [KG, UZ, KZ], [CN], ms, codes)

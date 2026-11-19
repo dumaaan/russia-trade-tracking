@@ -1,13 +1,9 @@
 {
   "destinations": {
     "KG": "Kyrgyzstan",
-    "AM": "Armenia",
     "UZ": "Uzbekistan",
     "KZ": "Kazakhstan",
     "RU": "Russia"
   },
-  "missing": [
-    "cn|AM|2023",
-    "cn|AM|2024"
-  ]
+  "missing": []
 }

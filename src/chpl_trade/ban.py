@@ -34,11 +34,11 @@ START = "2024-01"
 BEFORE = ("2025-04", "2026-03")  # 12 months before the ban
 # Countries where EU sellers could move the banned goods (Comext partner codes).
 NEIGHBOURS = {
-    "KZ": "Kazakhstan", "UZ": "Uzbekistan", "AM": "Armenia", "TJ": "Tajikistan",
+    "KZ": "Kazakhstan", "UZ": "Uzbekistan", "TJ": "Tajikistan",
     "GE": "Georgia", "AZ": "Azerbaijan", "TR": "Türkiye", "AE": "United Arab Emirates",
 }
 # Second-leg reporters (Comtrade M49 codes).
-LEG2 = {"KG": 417, "AM": 51, "UZ": 860, "KZ": 398}
+LEG2 = {"KG": 417, "UZ": 860, "KZ": 398}
 
 RAW = config.RAW / "monthly"
 

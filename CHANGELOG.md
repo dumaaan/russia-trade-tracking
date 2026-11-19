@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.6.0 — 2026-11-19
+
+### Changed after a content review
+- **Peak, then the latest year:** the hero, comparison and mirror headlines and the key-numbers
+  table now show the war-time peak next to 2025. Before, they compared only 2025 with the pre-war
+  level, which hid that both routes peaked in 2022–23 and then fell, and that the mirror gap closed by 2025.
+- **Armenia removed:** the site covers Kazakhstan, Kyrgyzstan and Uzbekistan only.
+- **Ban chapter:** a new line gives Kyrgyzstan minus Kazakhstan (no ban) for each leg, against the
+  same months of 2025.
+- **Not added:** events of December 2023 (US secondary sanctions, EU "no Russia" clause). Monthly
+  data for 2022–23 show that the fall started in mid-2023, so the charts would suggest a cause
+  that the data do not show.
+
 ## 1.5.0 — 2026-11-19
 
 ### Changed after a fourth design review (Tufte principles)
