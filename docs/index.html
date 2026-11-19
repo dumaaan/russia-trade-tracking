@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=0.6">
+  <link rel="stylesheet" href="style.css?v=0.7">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -104,23 +104,17 @@
 
   <section class="chapter chapter-wide wrap" id="ban" aria-labelledby="ban-h">
     <div class="ch-text">
-      <h2 id="ban-h">Did the April 2026 ban work?</h2>
-      <p class="finding" id="ban-sub"></p>
-      <p class="aside">
-        On 23 April 2026 the EU used its anti-circumvention tool for the first time: it banned exports to
-        Kyrgyzstan of machining centres (8457.10) and data transmission equipment (8517.62). Each column is
-        one month. The dark line over each window is its monthly average: April 2025 to March 2026 before
-        the ban, May 2026 onwards after it. April 2026 is left out. Each chart has its own scale.
+      <h2 id="ban-h">The April 2026 EU ban on Kyrgyzstan</h2>
+      <p class="finding">
+        On 23 April 2026 the EU banned exports to Kyrgyzstan of machining centres (8457.10) and data
+        transmission equipment (8517.62). Monthly values. The lines are the averages of April 2025 to
+        March 2026 and of May 2026 onwards.
       </p>
+      <div class="seg" role="radiogroup" aria-label="Goods" id="ban-goods"></div>
     </div>
     <div class="ch-figure">
-      <div class="grid3 ban" id="ban-grid"></div>
-      <p class="aside">
-        Read with care: five months of EU data and four of Kyrgyz data, both provisional. Code 8517.62 also
-        covers ordinary routers and switches. A rise in Kyrgyzstan's exports to Russia after the ban means
-        that the goods came from somewhere else, for example from China or from stock.
-      </p>
-      <details class="table-view"><summary>Show the numbers, with all eight neighbours</summary><div id="ban-table"></div></details>
+      <div class="ban-rows" id="ban-grid"></div>
+      <details class="table-view"><summary>Show the numbers</summary><div id="ban-table"></div></details>
     </div>
   </section>
 
@@ -166,34 +160,6 @@
     </div>
   </section>
 
-  <section class="chapter wrap" aria-labelledby="data-h">
-    <div class="ch-text">
-      <h2 id="data-h">Data and method</h2>
-      <p class="finding" id="asof"></p>
-      <ul class="downloads">
-        <li><a href="data/trade_totals.csv" download>trade_totals.csv</a> <span>totals by flow, country and year, in USD and EUR</span></li>
-        <li><a href="data/trade_by_code.csv" download>trade_by_code.csv</a> <span>values by HS code and tier</span></li>
-        <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes, ratios and mirror gaps</span></li>
-        <li><a href="data/availability.csv" download>availability.csv</a> <span>which source has which year</span></li>
-        <li><a href="data/ban_monthly.csv" download>ban_monthly.csv</a> <span>monthly series for the April 2026 ban</span></li>
-        <li><a href="data/chpl_hs_codes.csv" download>chpl_hs_codes.csv</a> <span>the list of codes and tiers</span></li>
-      </ul>
-    </div>
-    <div class="ch-figure prose">
-      <h3>Method</h3>
-      <ul>
-        <li><strong>The list.</strong> The EU version of February 2024 of the Common High Priority List: 50 HS codes in four tiers. Earlier versions had 9 codes (May 2023) and 45 codes (September 2023), so totals from 2023 studies are not directly comparable.</li>
-        <li><strong>49 codes, not 50.</strong> Code 854149 is left out of the totals. Its 2017 code, 854140, also holds solar cells and LEDs, which would make 2019–2021 much too high.</li>
-        <li><strong>EU exports.</strong> Eurostat Comext, dataset DS-045409, EU-27, in EUR. USD values use the ECB annual average rate.</li>
-        <li><strong>Exports to Russia and imports from the EU.</strong> UN Comtrade, as reported by Kazakhstan and Kyrgyzstan. Russia stopped publishing product-level trade data after 2021.</li>
-        <li><strong>HS editions.</strong> 2019–2021 data uses HS 2017. Codes 880730 and 852589 use their 2017 codes, 880330 and 852580, in those years.</li>
-        <li><strong>Baseline.</strong> The 2019–2021 average, because one year can be unusual and small values make a one-year base unstable. 2021 alone is the second option.</li>
-        <li><strong>Missing data.</strong> A year that the source does not report is missing, not zero.</li>
-        <li><strong>Limits.</strong> Exports to Russia are probably under-reported, because trade inside the Eurasian Economic Union has no customs declarations. An HS code is wider than the sanctioned goods. Two rising lines can show re-export, but they do not prove it.</li>
-      </ul>
-      <details class="table-view"><summary>Show which source has which year</summary><div id="avail-table"></div></details>
-    </div>
-  </section>
 </main>
 
 <footer class="foot wrap">
@@ -202,7 +168,7 @@
 </footer>
 
 <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
-<script src="data.js?v=0.6"></script>
-<script src="app.js?v=0.6"></script>
+<script src="data.js?v=0.7"></script>
+<script src="app.js?v=0.7"></script>
 </body>
 </html>

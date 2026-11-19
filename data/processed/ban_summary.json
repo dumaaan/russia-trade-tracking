@@ -288,6 +288,30 @@
       "change_pct": 13.926948366317582,
       "change_vs_year_ago_pct": 4.455387642071584
     },
+    "ru|AM|851762": {
+      "before_avg": 3822.8091666666664,
+      "after_avg": 64555.18,
+      "year_ago_avg": 2896.5425000000005,
+      "after_months": 4,
+      "change_pct": 1588.6843466551977,
+      "change_vs_year_ago_pct": 2128.697835436559
+    },
+    "ru|AM|banned": {
+      "before_avg": 3822.8091666666664,
+      "after_avg": 64555.18,
+      "year_ago_avg": 2896.5425000000005,
+      "after_months": 4,
+      "change_pct": 1588.6843466551977,
+      "change_vs_year_ago_pct": 2128.697835436559
+    },
+    "ru|AM|other": {
+      "before_avg": 261976.4083333333,
+      "after_avg": 89686.77,
+      "year_ago_avg": 279045.5375,
+      "after_months": 4,
+      "change_pct": -65.76532575181943,
+      "change_vs_year_ago_pct": -67.85945018024164
+    },
     "ru|KG|845710": {
       "before_avg": 15235.916666666666,
       "after_avg": 0.0,
@@ -352,6 +376,38 @@
       "change_pct": -12.13223857137301,
       "change_vs_year_ago_pct": -15.902947104899345
     },
+    "ru|UZ|845710": {
+      "before_avg": 103841.16666666667,
+      "after_avg": 0.0,
+      "year_ago_avg": 0.0,
+      "after_months": 3,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": null
+    },
+    "ru|UZ|851762": {
+      "before_avg": 2553.75,
+      "after_avg": 0.0,
+      "year_ago_avg": 10215.0,
+      "after_months": 3,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": -100.0
+    },
+    "ru|UZ|banned": {
+      "before_avg": 106394.91666666667,
+      "after_avg": 0.0,
+      "year_ago_avg": 10215.0,
+      "after_months": 3,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": -100.0
+    },
+    "ru|UZ|other": {
+      "before_avg": 27255.083333333332,
+      "after_avg": 2940.0,
+      "year_ago_avg": 54713.0,
+      "after_months": 3,
+      "change_pct": -89.213021424138,
+      "change_vs_year_ago_pct": -94.62650558368212
+    },
     "relative_to_control_pct": -87.13829796994251
   },
   "ban_date": "2026-04-23",
@@ -368,6 +424,8 @@
   "comext_last_month": "2026-09",
   "comtrade_last_month": {
     "KG": "2026-08",
+    "AM": "2026-08",
+    "UZ": "2026-07",
     "KZ": "2026-08"
   },
   "neighbours": {
@@ -380,7 +438,25 @@
     "TR": "T\u00fcrkiye",
     "AE": "United Arab Emirates"
   },
+  "rows": [
+    "KG",
+    "AM",
+    "UZ",
+    "KZ"
+  ],
+  "names": {
+    "KG": "Kyrgyzstan",
+    "KZ": "Kazakhstan",
+    "UZ": "Uzbekistan",
+    "AM": "Armenia",
+    "TJ": "Tajikistan",
+    "GE": "Georgia",
+    "AZ": "Azerbaijan",
+    "TR": "T\u00fcrkiye",
+    "AE": "United Arab Emirates"
+  },
   "unreported": [
+    "AM 2026-06",
     "KZ 2024-03",
     "KZ 2024-04",
     "KZ 2024-05",

@@ -30,7 +30,7 @@
   const state = {
     basket: "all", currency: "USD", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru", goodsYear: 2023,
-    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan",
+    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned",
   };
 
   // ---------- data ----------
@@ -587,35 +587,38 @@
       : "Not enough data for this country.";
   }
 
-  // ---------- the April 2026 ban: monthly columns ----------
-  // One panel per series, each on its own scale (said in the caption), with the ban month marked
-  // and short lines for the average before and after the ban.
-  const fmtShort = (v) => (v >= 1e6 ? `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M` : v >= 1e3 ? `${Math.round(v / 1e3)}k` : `${Math.round(v)}`);
+  // ---------- the April 2026 ban: one row per country, leg 1 and leg 2 on one money scale ----------
   const monthName = (mm) => new Date(mm + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+  // Money with one unit for the whole axis: $0, $2M, $4M (or $0, $250k, $500k).
+  const moneyFmt = (top) => {
+    if (top >= 1e6) { const d = top / 1e6 < 3 ? 1 : 0; return (v) => (v === 0 ? "$0" : `$${(v / 1e6).toFixed(d)}M`); }
+    if (top >= 1e3) return (v) => (v === 0 ? "$0" : `$${Math.round(v / 1e3)}k`);
+    return (v) => `$${Math.round(v)}`;
+  };
+  const moneyShort = (v) => (v == null ? "no data" : moneyFmt(v)(v));
 
   function monthChart(container, opts) {
     const W = container.clientWidth, H = container.clientHeight;
     if (W < 120 || H < 80) return;
     const ms = opts.months, vals = opts.values;
-    const m = { top: 18, right: 8, bottom: 24, left: 44 };
+    const m = { top: 18, right: 8, bottom: 24, left: 50 };
     const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
-    const maxV = Math.max(...vals.filter((v) => v != null), opts.before || 0, opts.after || 0, 1e-9);
-    const ticks = niceTicks(maxV, 3);
+    const ticks = niceTicks(Math.max(opts.max, 1), 3);
     const top = ticks[ticks.length - 1];
+    const tf = moneyFmt(top);
     const y = (v) => m.top + ih - (v / top) * ih;
-    const bw = iw / ms.length;
+    const bw = iw / Math.max(ms.length, 1);
     const x = (i) => m.left + i * bw;
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria });
     for (const t of ticks) {
       el("line", { x1: m.left, x2: W - m.right, y1: y(t), y2: y(t), stroke: css("--grid"), "stroke-width": 1 }, svg);
       const lab = el("text", { x: m.left - 6, y: y(t) + 4, "text-anchor": "end" }, svg);
-      lab.textContent = t === top ? `$${fmtShort(t)}` : fmtShort(t);
+      lab.textContent = tf(t);
     }
     const col = css(opts.color);
     ms.forEach((mm, i) => {
       const v = vals[i];
       if (v == null) {
-        // not reported: a short tick on the baseline, never a zero-height column
         el("line", { x1: x(i) + 2, x2: x(i) + bw - 2, y1: m.top + ih + 3, y2: m.top + ih + 3, stroke: css("--text-muted"), "stroke-width": 1, "stroke-dasharray": "1 2" }, svg);
         return;
       }
@@ -624,14 +627,11 @@
         x: x(i) + 1, y: y(v), width: Math.max(bw - 2, 1), height: Math.max(m.top + ih - y(v), 0),
         fill: col, "fill-opacity": win ? 0.9 : 0.3,
       }, svg);
-      r.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, monthName(mm), [{ color: col, value: `$${fmtShort(v)}`, label: opts.label }]));
+      r.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, monthName(mm), [{ color: col, value: moneyShort(v), label: opts.label }]));
       r.addEventListener("pointerleave", hideTip);
     });
     ms.forEach((mm, i) => {
-      if (mm.endsWith("-01")) {
-        const t = el("text", { x: x(i), y: H - 6 }, svg);
-        t.textContent = mm.slice(0, 4);
-      }
+      if (mm.endsWith("-01")) { const t = el("text", { x: x(i), y: H - 6 }, svg); t.textContent = mm.slice(0, 4); }
     });
     const bi = ms.indexOf(D.ban.transition);
     if (bi >= 0) {
@@ -646,60 +646,58 @@
       el("line", { x1: x(i0), x2: x(i1) + bw, y1: y(v), y2: y(v), stroke: css("--text-primary"), "stroke-width": 1.5 }, svg);
     };
     avgLine(D.ban.before[0], D.ban.before[1], opts.before);
-    avgLine("2026-05", ms[ms.length - 1], opts.after);
+    if (ms.length && ms[ms.length - 1] >= "2026-05") avgLine("2026-05", ms[ms.length - 1], opts.after);
     container.replaceChildren(svg);
   }
 
   function banStudy() {
-    const B = D.ban;
-    const S = B.summary.series;
-    const get = (flow, country, group) => {
+    const B = D.ban, S = B.summary.series;
+    const group = state.banGoods;
+    const get = (flow, country) => {
       const rows = B.monthly.filter((r) => r[0] === flow && r[1] === country && r[2] === group);
       return { months: rows.map((r) => r[3]), values: rows.map((r) => r[4]), s: S[`${flow}|${country}|${group}`] };
     };
-    const others = Object.keys(B.summary.neighbours).filter((c) => c !== "KZ");
-    const sumOf = (flow, list, group) => {
-      const parts = list.map((c) => get(flow, c, group)).filter((p) => p.months.length);
-      const ms = parts[0].months;
-      const values = ms.map((_, i) => parts.reduce((t, p) => t + (p.values[i] || 0), 0));
-      const add = (k) => parts.reduce((t, p) => t + ((p.s && p.s[k]) || 0), 0);
-      return { months: ms, values, s: { before_avg: add("before_avg"), after_avg: add("after_avg"), year_ago_avg: add("year_ago_avg") } };
+    const ch = (s) => (s && s.before_avg && s.after_avg != null ? 100 * (s.after_avg / s.before_avg - 1) : null);
+    const pct = (v) => (v == null ? null : `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v)).toLocaleString("en-US")}%`);
+    const capOf = (d) => {
+      if (!d.months.length) return "no data";
+      const c = pct(ch(d.s));
+      return c ? `${c} after the ban` : "no data after the ban";
     };
-    const panels = [
-      { t: "EU exports to Kyrgyzstan", sub: "the two banned codes", d: get("eu", "KG", "banned"), color: "--flow-eu" },
-      { t: "EU exports to Kyrgyzstan", sub: "the other 47 codes (control)", d: get("eu", "KG", "other"), color: "--flow-eu" },
-      { t: "EU exports to Kazakhstan", sub: "the two banned codes", d: get("eu", "KZ", "banned"), color: "--flow-eu" },
-      { t: "EU exports to Armenia", sub: "the two banned codes", d: get("eu", "AM", "banned"), color: "--flow-eu" },
-      { t: "Kyrgyzstan's exports to Russia", sub: "the two banned codes", d: get("ru", "KG", "banned"), color: "--flow-ru" },
-      { t: "Kazakhstan's exports to Russia", sub: "the two banned codes", d: get("ru", "KZ", "banned"), color: "--flow-ru", note: "Kazakhstan did not report March to December 2024 (dotted)." },
-    ];
-    const ch = (s) => (s && s.before_avg ? 100 * (s.after_avg / s.before_avg - 1) : null);
-    const pct = (v) => (v == null ? "—" : `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}%`);
+    const countries = B.summary.rows;
+    const name = (c) => B.summary.names[c];
     const grid = document.getElementById("ban-grid");
-    grid.replaceChildren(...panels.map((p) => h("figure", {}, [
-      h("figcaption", {}, [p.t, h("span", { text: `${p.sub}; ${pct(ch(p.d.s))} after the ban` })]),
-      h("div", { class: "chart sm" }),
-      p.note ? h("p", { class: "panel-note", text: p.note }) : null,
+    const rows = countries.map((c) => {
+      const eu = get("eu", c), ru = get("ru", c);
+      const all = [...eu.values, ...ru.values, eu.s && eu.s.before_avg, eu.s && eu.s.after_avg, ru.s && ru.s.before_avg, ru.s && ru.s.after_avg].filter((v) => v != null);
+      return { c, eu, ru, max: all.length ? Math.max(...all) : 1 };
+    });
+    grid.replaceChildren(...rows.map((r) => h("div", { class: "ban-row" }, [
+      h("h3", { text: name(r.c) }),
+      h("div", { class: "ban-pair" }, [
+        h("figure", {}, [h("figcaption", {}, [`From the EU`, h("span", { text: capOf(r.eu) })]), h("div", { class: "chart sm" })]),
+        h("figure", {}, [h("figcaption", {}, [`To Russia`, h("span", { text: capOf(r.ru) })]), h("div", { class: "chart sm" })]),
+      ]),
     ])));
-    panels.forEach((p, i) => monthChart(grid.children[i].querySelector(".chart"), {
-      months: p.d.months, values: p.d.values, before: p.d.s && p.d.s.before_avg, after: p.d.s && p.d.s.after_avg,
-      color: p.color, label: `${p.t}, ${p.sub}`, aria: `${p.t}, ${p.sub}, monthly values in USD`,
-    }));
+    rows.forEach((r, i) => {
+      const charts = grid.children[i].querySelectorAll(".chart");
+      monthChart(charts[0], { months: r.eu.months, values: r.eu.values, before: r.eu.s && r.eu.s.before_avg, after: r.eu.s && r.eu.s.after_avg,
+        max: r.max, color: "--flow-eu", label: `EU exports to ${name(r.c)}`, aria: `EU exports to ${name(r.c)}, monthly, USD` });
+      monthChart(charts[1], { months: r.ru.months, values: r.ru.values, before: r.ru.s && r.ru.s.before_avg, after: r.ru.s && r.ru.s.after_avg,
+        max: r.max, color: "--flow-ru", label: `${name(r.c)}'s exports to Russia`, aria: `${name(r.c)}'s exports to Russia, monthly, USD` });
+    });
 
-    const cells = (s) => [s ? `$${fmtShort(s.before_avg)}` : "—", s ? `$${fmtShort(s.after_avg)}` : "—", pct(ch(s)),
-      s && s.year_ago_avg ? pct(100 * (s.after_avg / s.year_ago_avg - 1)) : "—"];
-    const rows = panels.map((p) => [`${p.t}, ${p.sub}`, ...cells(p.d.s)]);
-    for (const c of Object.keys(B.summary.neighbours)) {
-      rows.push([`EU exports to ${B.summary.neighbours[c]}, the two banned codes`, ...cells(get("eu", c, "banned").s)]);
+    const cells = (s) => [s && s.before_avg != null ? moneyShort(s.before_avg) : "no data", s && s.after_avg != null ? moneyShort(s.after_avg) : "no data",
+      pct(ch(s)) || "—", s && s.year_ago_avg && s.after_avg != null ? pct(100 * (s.after_avg / s.year_ago_avg - 1)) : "—"];
+    const trows = [];
+    for (const c of countries) {
+      trows.push([`EU to ${name(c)}`, ...cells(S[`eu|${c}|${group}`])]);
+      trows.push([`${name(c)} to Russia`, ...cells(S[`ru|${c}|${group}`])]);
     }
-    table(document.getElementById("ban-table"), ["Series", "Before, a month", "After, a month", "Change", "Against the same months of 2025"], rows);
-
-    const tr = S["eu|KG|banned"], co = S["eu|KG|other"], kg2 = S["ru|KG|banned"];
-    const lastEU = monthName(B.summary.comext_last_month), lastRU = monthName(B.summary.comtrade_last_month.KG);
-    document.getElementById("ban-sub").textContent =
-      `After the ban, EU exports of the two codes to Kyrgyzstan changed ${pct(ch(tr))} (from $${fmtShort(tr.before_avg)} to $${fmtShort(tr.after_avg)} a month). ` +
-      `The other codes changed ${pct(ch(co))}. Kyrgyzstan's exports of the same two codes to Russia changed ${pct(ch(kg2))}. ` +
-      `EU data to ${lastEU}, Kyrgyz data to ${lastRU}.`;
+    for (const c of Object.keys(B.summary.neighbours).filter((c) => !countries.includes(c))) {
+      trows.push([`EU to ${B.summary.neighbours[c]}`, ...cells(S[`eu|${c}|${group}`])]);
+    }
+    table(document.getElementById("ban-table"), ["Flow", "Before, a month", "After, a month", "Change", "Against the same months of 2025"], trows);
   }
 
   // ---------- section 3 ----------
@@ -787,26 +785,6 @@
     );
   }
 
-  // ---------- data availability ----------
-  function availability() {
-    const s = D.sources;
-    const kz = s.comtrade.Kazakhstan, kg = s.comtrade.Kyrgyzstan;
-    const lastRel = (o) => { const y = Object.keys(o.released).filter((k) => o.released[k]).sort().pop(); return y ? `${y} data released ${o.released[y]}` : "no data"; };
-    document.getElementById("asof").textContent =
-      `Data as of: Comext updated ${s.comext.Kazakhstan.updated}. Comtrade: Kazakhstan ${lastRel(kz)}, Kyrgyzstan ${lastRel(kg)}. Downloaded ${s.comext.Kazakhstan.downloaded}. CHPL version: ${D.chplVersion}.`;
-    const head = ["Source", ...YEARS.map(String)];
-    const rows = [];
-    for (const f of ["eu", "ru", "mi"]) {
-      for (const c of D.countries) {
-        rows.push([`${f === "eu" ? "Comext" : "Comtrade"}: ${FLOW[f].label(c)}`, ...YEARS.map((y) => {
-          const a = avail[`${f}|${c}|${y}`];
-          return a && a.available ? `${a.hs.replace("HS ", "HS").replace("CN ", "CN")} · ${a.codes} traded` : "no data";
-        })]);
-      }
-    }
-    table(document.getElementById("avail-table"), head, rows);
-  }
-
   // ---------- wire up ----------
   const basketSel = document.getElementById("f-basket");
   basketSel.replaceChildren(
@@ -822,6 +800,7 @@
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
+  if (D.ban) seg(document.getElementById("ban-goods"), [{ value: "banned", label: "The two banned codes" }, { value: "other", label: "The other 47 codes" }], () => state.banGoods, (v) => { state.banGoods = v; banStudy(); });
   seg(document.getElementById("tiers-country"), countryOpts, () => state.tiersCountry, (v) => { state.tiersCountry = v; tiers(); });
   seg(document.getElementById("goods-country"), countryOpts, () => state.goodsCountry, (v) => { state.goodsCountry = v; goods(); });
   seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
@@ -838,7 +817,7 @@
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
     if (D.ban) banStudy();
   }
-  function renderAll() { renderFiltered(); crossChecks(); availability(); }
+  function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
   window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); }, 120); });

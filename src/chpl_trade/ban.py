@@ -40,7 +40,7 @@ NEIGHBOURS = {
     "GE": "Georgia", "AZ": "Azerbaijan", "TR": "Türkiye", "AE": "United Arab Emirates",
 }
 # Second-leg reporters (Comtrade M49 codes).
-LEG2 = {"KG": 417, "KZ": 398}
+LEG2 = {"KG": 417, "AM": 51, "UZ": 860, "KZ": 398}
 
 RAW = config.RAW / "monthly"
 
@@ -112,6 +112,18 @@ def fetch_comtrade_monthly(iso2, month, refresh=False):
     return out
 
 
+def fetch_comtrade_release_monthly(iso2, month, refresh=False):
+    """Did the reporter release this month? An empty result means: not released."""
+    out = RAW / f"comtrade_{iso2}_release_{month}.json"
+    if out.exists() and not refresh:
+        return out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    body = _get(COMTRADE_DA_M_URL, {"reporterCode": LEG2[iso2], "period": month.replace("-", "")}).json()
+    out.write_text(json.dumps(_stamp(body)))
+    time.sleep(1)
+    return out
+
+
 def fetch_fx_monthly(refresh=False):
     out = RAW / "ecb_usd_per_eur_monthly.csv"
     if out.exists() and not refresh:
@@ -137,6 +149,7 @@ def fetch_all(refresh=False):
         print(f"Comtrade monthly: {iso2} -> RU, {START} to {latest[iso2]}")
         for m in months(START, latest[iso2]):
             fetch_comtrade_monthly(iso2, m, refresh)
+            fetch_comtrade_release_monthly(iso2, m, refresh)
     (RAW / "comtrade_latest.json").write_text(json.dumps(latest))
 
 
@@ -178,8 +191,9 @@ def build():
     for iso2 in LEG2:
         for m in months(START, latest[iso2]):
             data = json.loads((RAW / f"comtrade_{iso2}_to_RU_{m}.json").read_text())["data"]
-            if not data:
-                unreported.append((iso2, m))
+            released = json.loads((RAW / f"comtrade_{iso2}_release_{m}.json").read_text()).get("data")
+            if not released:
+                unreported.append((iso2, m))  # not released: missing; released with no rows: zero trade
             for r in data:
                 if (r["motCode"], r["customsCode"], r["partner2Code"]) != (0, "C00", 0):
                     continue
@@ -216,6 +230,8 @@ def build():
         "ban_date": BAN_DATE, "banned": BANNED, "before": list(BEFORE), "transition": BAN_MONTH,
         "comext_updated": comext_updated, "comext_last_month": comext_last, "comtrade_last_month": latest,
         "neighbours": NEIGHBOURS,
+        "rows": list(LEG2),
+        "names": {"KG": "Kyrgyzstan", **NEIGHBOURS},
         "unreported": [f"{i} {m}" for i, m in unreported],
     })
     (config.PROCESSED / "ban_summary.json").write_text(json.dumps(summary, indent=2) + "\n")

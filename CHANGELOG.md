@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.7.0 — 2026-11-19
+
+### Changed
+- Ban chapter: a switch for the two banned codes or the other 47 codes, and one row for each of
+  four countries (Kyrgyzstan, Armenia, Uzbekistan, Kazakhstan) with EU exports to the country and
+  the country's exports to Russia side by side. Both charts in a row share one money scale; every
+  tick shows its unit.
+- Added Armenia's and Uzbekistan's monthly exports to Russia (Comtrade).
+- A month counts as missing only when the reporter has not released it (Comtrade release list).
+  A released month with no rows is zero trade.
+- Removed the guiding questions and comment paragraphs from the ban chapter.
+- Removed the "Data and method" section from the site.
+
 ## 0.6.0 — 2026-11-19
 
 ### Added: test of the April 2026 ban
