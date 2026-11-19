@@ -471,7 +471,7 @@
       h("b", { text: g(kg, "ru") }), ". Band widths are to scale. The two legs are measured separately: the second leg also carries goods from China and other suppliers, so it is not only EU goods passing through.",
     );
   }
-  // ---------- hero: flow map (EU and China, directly and through four countries, into Russia) ----------
+  // ---------- hero: flow map (EU and China through four countries into Russia) ----------
   const PLACES = {
     EU: { ll: [10.4, 50.9], name: "EU-27" }, CN: { ll: [103.0, 35.0], name: "China" }, RU: { ll: [37.6, 55.75], name: "Russia" },
     KZ: { ll: [71.4, 51.1], name: "Kazakhstan" }, KG: { ll: [74.6, 42.9], name: "Kyrgyzstan" },
@@ -496,7 +496,6 @@
   }
   function mapBands(i) {
     const b = [];
-    b.push({ kind: "eu", from: "EU", to: "RU", direct: true }, { kind: "cn", from: "CN", to: "RU", direct: true });
     for (const h of HUBS) b.push({ kind: "eu", from: "EU", to: h }, { kind: "cn", from: "CN", to: h });
     for (const h of HUBS) b.push({ kind: "ru", from: h, to: "RU" });
     for (const x of b) x.v = mapValue(x.kind, x.from, x.to, i);
@@ -542,8 +541,7 @@
       const cx = mx - (dy / len) * bend * len, cy = my + (dx / len) * bend * len;
       return { d: `M${x1},${y1}Q${cx},${cy} ${x2},${y2}`, at: (t) => [(1 - t) ** 2 * x1 + 2 * (1 - t) * t * cx + t * t * x2, (1 - t) ** 2 * y1 + 2 * (1 - t) * t * cy + t * t * y2] };
     };
-    // China's direct band bows north (through Siberia), so it does not cover the four countries.
-    const bendOf = (x) => (x.direct ? (x.kind === "cn" ? 0.28 : -0.06) : x.kind === "ru" ? 0.12 : x.kind === "eu" ? -0.1 : 0.1);
+    const bendOf = (x) => (x.kind === "ru" ? 0.12 : x.kind === "eu" ? -0.1 : 0.1);
     const bands = mapBands(yi);
     const gB = el("g", {}, svg), gL = el("g", {}, svg), gV = el("g", {}, svg);
     const labels = [];
@@ -553,10 +551,10 @@
       const wv = x.v == null ? 0 : x.v * k;
       const p = el("path", {
         d: c.d, fill: "none", stroke: x.v == null ? css("--text-muted") : color[x.kind],
-        "stroke-width": x.v == null ? 1 : Math.max(wv, 0.5), "stroke-opacity": x.direct ? 0.55 : 0.85,
+        "stroke-width": x.v == null ? 1 : Math.max(wv, 0.5), "stroke-opacity": 0.85,
         "stroke-dasharray": x.v == null ? "3 3" : null, "stroke-linecap": "butt", class: "flow", tabindex: 0,
       }, gB);
-      const what = x.kind === "ru" ? `${PLACES[x.from].name} to Russia` : `${PLACES[x.from].name} to ${PLACES[x.to].name}${x.direct ? ", directly" : ""}`;
+      const what = x.kind === "ru" ? `${PLACES[x.from].name} to Russia` : `${PLACES[x.from].name} to ${PLACES[x.to].name}`;
       const tipAt = (cx, cy) => showTip(cx, cy, String(state.routeYear), [{ color: color[x.kind], value: x.v == null ? "no data" : fmtMoney(x.v), label: what }]);
       p.addEventListener("pointermove", (e) => tipAt(e.clientX, e.clientY));
       p.addEventListener("pointerleave", hideTip);
@@ -564,7 +562,7 @@
       p.addEventListener("blur", hideTip);
       p.setAttribute("aria-label", `${what}, ${state.routeYear}: ${x.v == null ? "no data" : fmtMoney(x.v)}`);
       labels.push({ v: x.v == null ? -1 : x.v, c, text: x.v == null ? "no data" : fmtMoney(x.v),
-        ts: x.direct ? [0.5, 0.35, 0.65] : x.kind === "ru" ? [0.45, 0.3, 0.6] : [0.62, 0.78, 0.45] });
+        ts: x.kind === "ru" ? [0.45, 0.3, 0.6] : [0.62, 0.78, 0.45] });
     }
     // places
     const placed = [];
@@ -599,12 +597,10 @@
     const i = YEARS.indexOf(state.routeYear), yr = state.routeYear;
     const sum = (kind) => HUBS.reduce((t, hh) => { const v = mapValue(kind, kind === "ru" ? hh : kind.toUpperCase(), hh, i); return v == null ? t : t + v; }, 0);
     const eu = sum("eu"), cn = sum("cn"), ru = HUBS.reduce((t, hh) => { const v = mapValue("ru", hh, "RU", i); return v == null ? t : t + v; }, 0);
-    const deu = mapValue("eu", "EU", "RU", i), dcn = mapValue("cn", "CN", "RU", i);
     const cap = document.getElementById("route-caption");
     cap.replaceChildren(
       `${yr}: to the four countries, the EU sent `, h("b", { text: fmtMoney(eu) }), ` and China `, h("b", { text: fmtMoney(cn) }),
-      `; the four countries sent `, h("b", { text: fmtMoney(ru) }), ` of the same goods to Russia. Directly to Russia: China `,
-      h("b", { text: fmtMoney(dcn) }), `, the EU `, h("b", { text: fmtMoney(deu) }), `. Band widths are to scale, the same for every year.`,
+      `; the four countries sent `, h("b", { text: fmtMoney(ru) }), ` of the same goods to Russia. Band widths are to scale, the same for every year.`,
     );
   }
 
@@ -621,17 +617,6 @@
     const pre = (vals) => baseOf(vals, "avg");
     const chg = (a, b) => (a == null || !b ? "—" : b / a >= 2 ? fmtX(b / a) : `${b >= a ? "+" : "−"}${Math.abs(Math.round(100 * (b / a - 1)))}%`);
     const rows = [];
-    if (D.suppliers) {
-      const sup = (code, dest) => YEARS.map((y) => {
-        if (D.suppliers.meta.missing.includes(`${code}|${dest}|${y}`)) return null;
-        let t = 0;
-        for (const r of D.suppliers.rows) if (r[0] === code && r[1] === dest && r[2] === y && !D.excluded.includes(r[3]) && r[4] != null) t += r[4];
-        return t;
-      });
-      const eu = sup("eu", "RU"), cn = sup("cn", "RU");
-      rows.push(["China to Russia, directly", pre(cn), cn[ly]]);
-      rows.push(["EU to Russia, directly", pre(eu), eu[ly]]);
-    }
     const [kz, kg] = D.countries;
     for (const c of [kz, kg]) { const v = series("ru", c, "all", true); rows.push([`${c} to Russia`, pre(v), v[ly]]); }
 
@@ -882,15 +867,14 @@
       for (const r of SP.rows) if (r[0] === sup && r[1] === dest && basket.has(r[3]) && r[4] != null) sum[r[2]] += r[4];
       return YEARS.map((y) => (missing.has(`${sup}|${dest}|${y}`) ? null : conv(sum[y], y)));
     };
-    const dests = Object.keys(meta.destinations);
+    const dests = Object.keys(meta.destinations).filter((d) => d !== "RU"); // the detour only
     const rows = dests.map((d) => ({ d, name: meta.destinations[d], eu: ser("eu", d), cn: ser("cn", d) }));
     const ly = YEARS.length - 1, yr = YEARS[ly];
 
     // Heading and finding, from the data (they follow the filters).
-    const route = rows.filter((r) => r.d !== "RU");
+    const route = rows;
     const both = route.filter((r) => r.eu[ly] != null && r.cn[ly] != null);
     const sumEU = both.reduce((t, r) => t + r.eu[ly], 0), sumCN = both.reduce((t, r) => t + r.cn[ly], 0);
-    const ru = rows.find((r) => r.d === "RU");
     const ratio = sumEU ? sumCN / sumEU : null;
     document.getElementById("sup-h").textContent = ratio == null ? "The EU and China as suppliers"
       : ratio >= 1 ? "China, not the EU, supplies most of these goods" : "The EU supplies more of these goods than China";
@@ -898,12 +882,11 @@
     document.getElementById("sup-sub").textContent =
       `In ${yr}, China shipped ${fmtMoney(sumCN)} of these goods to ${both.map((r) => r.name).join(", ").replace(/, ([^,]*)$/, " and $1")}` +
       (ratio ? `, ${ratio >= 1 ? `${fmtX(ratio).replace("×", "")} times as much as the EU (${fmtMoney(sumEU)})` : `against ${fmtMoney(sumEU)} from the EU`}. ` : ". ") +
-      (more.length ? `${more.join(" and ")} ${more.length > 1 ? "are the exceptions" : "is the exception"}: there the EU ships more. ` : "") +
-      (ru && ru.eu[ly] != null && ru.cn[ly] != null ? `Directly to Russia, China shipped ${fmtMoney(ru.cn[ly])}; the EU ${fmtMoney(ru.eu[ly])}, down from ${fmtMoney(ru.eu[0])} in ${YEARS[0]}.` : "");
+      (more.length ? `${more.join(" and ")} ${more.length > 1 ? "are the exceptions" : "is the exception"}: there the EU ships more.` : "");
 
     const grid = document.getElementById("sup-grid");
     grid.replaceChildren(...rows.map((r) => h("div", { class: "sup-row" }, [
-      h("div", { class: "ctl-name", text: r.d === "RU" ? "Russia, directly" : r.name }),
+      h("div", { class: "ctl-name", text: r.name }),
       h("div", { class: "chart sm" }),
     ])));
     rows.forEach((r, i) => lineChart(grid.children[i].querySelector(".chart"), {

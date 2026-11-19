@@ -2,6 +2,13 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.2.0 — 2026-11-19
+
+### Changed: the detour only
+- Removed direct EU-to-Russia and China-to-Russia flows from the hero map, the key-numbers table
+  and the supplier chapter. The site now covers only goods that go through Kazakhstan,
+  Kyrgyzstan, Uzbekistan and Armenia.
+
 ## 1.1.0 — 2026-11-19
 
 ### Changed after a design review (Tufte principles)
