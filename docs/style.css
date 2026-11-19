@@ -92,10 +92,10 @@ h1 {
 .route-diagram .val { font-stretch: 75%; font-weight: 650; font-size: 14px; fill: var(--ink); }
 .route-diagram .val-sub { font-stretch: 75%; font-size: 12.5px; fill: var(--ink-3); }
 .route-diagram .val-in.on1 { fill: #fff; }
-.route-diagram .val-in.on2 { fill: #16202E; }
-.route-diagram .val.val-in { font-size: 17px; font-weight: 700; }
+.route-diagram .val-in.on2 { fill: #fff; }
+.route-diagram .val.val-in { font-size: 19px; font-weight: 750; }
 .route-diagram .val-sub.val-in.on1 { fill: rgba(255, 255, 255, .88); }
-.route-diagram .val-sub.val-in.on2 { fill: rgba(22, 32, 46, .82); }
+.route-diagram .val-sub.val-in.on2 { fill: rgba(255, 255, 255, .9); }
 .route-diagram .band { cursor: default; }
 .route-diagram .band:hover, .route-diagram .band:focus-visible { fill-opacity: 1; outline: none; }
 .route-diagram .band { transition: d .45s cubic-bezier(.3,.7,.2,1); }
@@ -195,6 +195,9 @@ h3 { margin: 0 0 6px; font-stretch: 125%; font-weight: 700; font-size: 17px; }
 .legend i.dash { height: 0; border-top: 1.5px dashed var(--ink-3); background: none; }
 .legend i.dash::after { display: none; }
 .chart .evn { font-size: 11px; font-weight: 700; fill: var(--ink-2); }
+.chart .ev-lbl { font-size: 11.5px; fill: var(--ink-2); }
+.chart .gap-note { font-size: 11.5px; font-style: italic; fill: var(--ink-3); }
+.chart .pt-lbl { font-size: 12.5px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
 
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 10px; }
 .grid3.tiers { row-gap: 36px; }
@@ -288,9 +291,17 @@ table.xc a { color: var(--ink-2); }
 .tooltip { max-width: 340px; }
 .tooltip .n { margin-top: 6px; font-size: 12.5px; line-height: 1.4; opacity: .85; }
 .tooltip .n + .n { margin-top: 2px; font-size: 11.5px; opacity: .65; }
-.summary { list-style: none; margin: 22px 0 0; padding: 0 0 4px 16px; border-left: 3px solid var(--ink);
-  display: grid; gap: 6px; font-size: 16px; line-height: 1.45; max-width: 72ch; margin-bottom: 28px; }
-.summary b { font-weight: 700; }
+.summary { margin: 22px 0 28px; max-width: 760px; }
+.summary-table { min-width: 0; width: 100%; font-stretch: 100%; font-size: 15px; }
+.summary-table caption { caption-side: top; text-align: left; font-size: 13.5px; color: var(--ink-3); padding-bottom: 6px; }
+.summary-table th, .summary-table td { padding: 6px 10px; }
+.summary-table td { white-space: nowrap; }
+.summary-table thead th { white-space: normal; }
+.summary-table thead th { font-size: 13px; }
+.summary-table tbody th { text-align: left; font-weight: 600; white-space: normal; }
+.summary-table td { text-align: right; font-stretch: 87.5%; font-weight: 600; }
+.summary-table .gap-row th { font-weight: 500; color: var(--ink-2); }
+.summary-table tr:first-child th, .summary-table tr:first-child td { border-top: 2px solid var(--ink); }
 
 /* ---------- smaller screens ---------- */
 @media (max-width: 960px) {
@@ -324,4 +335,52 @@ table.xc a { color: var(--ink-2); }
   table.xc td { display: grid; grid-template-columns: 84px 1fr; gap: 8px; padding: 2px 0; border: 0; white-space: normal !important; }
   table.xc td::before { content: attr(data-label); color: var(--ink-3); font-size: 12.5px; font-weight: 600; }
   table.xc td:first-child { font-weight: 650; }
+}
+
+/* ---------- supertables ---------- */
+.supertable { min-width: 640px; width: 100%; font-stretch: 100%; font-size: 14px; border-collapse: collapse; }
+.supertable th, .supertable td { padding: 5px 8px; border-bottom: 1px solid var(--grid-c); white-space: nowrap; }
+.supertable thead th { font-size: 12.5px; color: var(--ink-3); font-weight: 600; text-align: right; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
+.supertable thead th:first-child, .supertable tbody th { text-align: left; }
+.supertable td { text-align: right; font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
+.supertable tbody th { font-weight: 500; white-space: normal; }
+.supertable tr.group th { padding-top: 16px; border-bottom: 1px solid var(--ink); font-weight: 700; font-size: 14.5px; font-stretch: 112%; }
+.supertable tr.group .use { font-weight: 400; font-stretch: 100%; color: var(--ink-2); font-size: 13px; margin-left: 10px; }
+.supertable .use { display: block; font-size: 12.5px; color: var(--ink-3); }
+.supertable .chg { font-weight: 700; }
+.supertable .code { font-stretch: 75%; color: var(--ink-2); text-align: left; }
+.supertable .spark-cell { text-align: center; padding-top: 2px; padding-bottom: 2px; }
+.supertable .spark { display: block; margin: 0 auto; }
+.supertable tr.total td, .supertable tr.total th { border-top: 2px solid var(--ink); font-weight: 700; }
+.supertable tbody tr:not(.group):hover { background: var(--inset); }
+.supertable .ban-key { margin-left: 8px; }
+.ban-table .spark-cell { width: 180px; }
+.goods-table { min-width: 860px; }
+.src-note { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.src-note a { color: var(--ink-2); }
+.ctl-head { display: grid; grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); gap: 28px; font-weight: 650; font-size: 15px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); margin-top: 8px; }
+.mobile-only { display: none; }
+#ctl-compare { min-width: 520px; max-width: 760px; }
+#ctl-compare thead th[colspan] { text-align: center; color: var(--ink-2); }
+@media (max-width: 960px) {
+  .ctl-head { display: none; }
+  .mobile-only { display: block; }
+}
+
+/* ---------- hero flow map ---------- */
+.flow-map { display: block; width: 100%; height: 100%; }
+.route-diagram .flow-map { overflow: hidden; }
+.flow-map .land { fill: var(--inset); stroke: var(--paper); stroke-width: 0.6; }
+.flow-map .land.hub { fill: var(--rule); }
+.flow-map .land.big { fill: color-mix(in srgb, var(--inset) 70%, var(--rule)); }
+.flow-map .flow:hover, .flow-map .flow:focus-visible { stroke-opacity: 1; outline: none; }
+.flow-map .flow-lbl { font-stretch: 75%; font-size: 12.5px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.flow-map .flow-lbl.thin { font-size: 11px; font-weight: 600; fill: var(--ink-2); }
+.flow-map .node { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+.flow-map .node-lbl { font-stretch: 112%; font-size: 13px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; pointer-events: none; }
+.flow-map .node-lbl.big { font-size: 15px; font-weight: 800; }
+.goods-table thead th:nth-child(2) { text-align: left; }
+@media (max-width: 560px) {
+  .summary-table { font-size: 14px; }
+  .summary-table th, .summary-table td { padding: 6px 5px; }
 }

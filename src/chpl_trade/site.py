@@ -19,17 +19,17 @@ FLOWS = {"EU-27 exports to country": "eu", "Country exports to Russia": "ru", "C
 
 # Dated events for the chart notes. Keep each one short and give a source.
 EVENTS = [
-    {"date": "2022-02-24", "label": "Russia invades Ukraine; EU export bans widen",
+    {"date": "2022-02-24", "short": "Invasion", "label": "Russia invades Ukraine; EU export bans widen",
      "url": "https://finance.ec.europa.eu/eu-and-world/sanctions-restrictive-measures/sanctions-adopted-following-russias-military-aggression-against-ukraine_en"},
-    {"date": "2023-05-19", "label": "FinCEN–BIS alert: first 9 high-priority HS codes",
+    {"date": "2023-05-19", "short": "9 codes listed", "label": "FinCEN–BIS alert: first 9 high-priority HS codes",
      "url": "https://www.fincen.gov/news/news-releases/supplemental-alert-fincen-and-us-department-commerces-bureau-industry-and"},
-    {"date": "2023-09-19", "label": "Common list grows to 45 HS codes in 4 tiers",
+    {"date": "2023-09-19", "short": "45 codes", "label": "Common list grows to 45 HS codes in 4 tiers",
      "url": "https://www.thompsonhinesmartrade.com/2023/09/u-s-uk-and-eu-announce-updated-list-of-controlled-high-priority-items-restricted-for-export-to-russia/"},
-    {"date": "2024-02-23", "label": "List grows to 50 codes (CNC tools, Tier 4.B)",
+    {"date": "2024-02-23", "short": "50 codes", "label": "List grows to 50 codes (CNC tools, Tier 4.B)",
      "url": "https://www.bis.gov/licensing/country-guidance/common-high-priority-items-list-chpl"},
-    {"date": "2025-01-15", "label": "US sanctions Keremet Bank (Kyrgyzstan)", "country": "Kyrgyzstan",
+    {"date": "2025-01-15", "short": "Keremet Bank", "label": "US sanctions Keremet Bank (Kyrgyzstan)", "country": "Kyrgyzstan",
      "url": "https://www.akchabar.kg/en/article/banki-qfocdypwkrljimms/posledstviya-sankczij-keremet-bank-poteryal-svyshe-40-klientskikh-sredstv"},
-    {"date": "2026-04-23", "label": "EU bans exports of 8457.10 and 8517.62 to Kyrgyzstan (first use of Art. 12f)", "country": "Kyrgyzstan",
+    {"date": "2026-04-23", "short": "EU ban", "label": "EU bans exports of 8457.10 and 8517.62 to Kyrgyzstan (first use of Art. 12f)", "country": "Kyrgyzstan",
      "url": "https://www.nortonrosefulbright.com/en/knowledge/publications/ac68233a/beyond-the-no-russia-clause-kyrgyzstan-becomes-the-first-test"},
 ]
 

@@ -2,6 +2,27 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.1.0 — 2026-11-19
+
+### Changed after a design review (Tufte principles)
+- **Hero:** a flow map replaces the two-leg diagram. Bands from the EU and from China to
+  Kazakhstan, Kyrgyzstan, Uzbekistan and Armenia, from those four countries to Russia, and the
+  direct flows to Russia, on one width scale for all years, with values on the bands.
+  Base map: world-atlas 110m (Natural Earth), drawn with D3 and TopoJSON from cdnjs.
+- **Key numbers:** an aligned table (2019–21 average, latest year, change) instead of sentences.
+- **Ban chapter:** a supertable instead of 12 charts: for each country and flow, a monthly
+  sparkline on its own scale, the averages before and after the ban in dollars, the change, and
+  the change against the same months of 2025.
+- **Share chapter:** column headers once; the comparison countries as a small table.
+- **Which goods:** a supertable for one country and flow, all years, grouped by tier, with short
+  plain names, each tier's use and the use of the two banned codes, with sources.
+- **Words on the charts:** low points labelled on the mirror chart, notes in data gaps (Kazakhstan
+  2020–2022, China to Armenia 2023–2024), short event labels at the top of event lines.
+- **Labels:** the comparison charts are labelled at the line ends (no legend); end labels stay
+  above the year axis.
+- **Credibility:** the EU's +800% / +1,200% Kyrgyz figures now cite their original source,
+  Regulation (EU) 2026/506, recital 34. The tier heading gives size and growth together.
+
 ## 1.0.0 — 2026-11-19
 
 ### Changed: headings state the finding
