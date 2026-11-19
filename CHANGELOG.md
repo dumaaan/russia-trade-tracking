@@ -2,6 +2,16 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.5.0 — 2026-11-19
+
+### Changed after a fourth design review (Tufte principles)
+- **Share chapter:** all eight panels share one scale. Before, the EU column ran to 10% and the
+  Russia column to 5%, so Kazakhstan's 2.3% to Russia looked higher than its 3.3% from the EU.
+- **EU and China panels:** tick labels only at 10, 100 and $1bn.
+- **Cross-checks:** whole percents; "Match" only within 2 points of the published figure,
+  otherwise "Close (n points lower/higher)".
+- **Mirror chart:** the pre-war lines are drawn in the leg colour, so they do not look like grid.
+
 ## 1.4.0 — 2026-11-19
 
 ### Changed after a third design review (Tufte principles)

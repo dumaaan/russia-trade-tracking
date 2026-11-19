@@ -226,6 +226,8 @@
       const lo = opts.domain ? opts.domain[0] : Math.min(...all, opts.baseline || Infinity) * 0.8;
       const hi = opts.domain ? opts.domain[1] : Math.max(...all, opts.baseline || 0) * 1.15;
       ticks = logTicks(lo, hi);
+      // fewer ticks when asked, but never fewer than two (a scale needs two marks)
+      if (opts.tickFilter && ticks.filter(opts.tickFilter).length >= 2) ticks = ticks.filter(opts.tickFilter);
       const l0 = Math.log10(lo), l1 = Math.log10(hi);
       y = (v) => m.top + ih - ((Math.log10(Math.max(v, lo)) - l0) / (l1 - l0)) * ih;
     } else {
@@ -246,7 +248,7 @@
     // Reference lines (e.g. a pre-war level), thin and dashed, labelled at the right.
     for (const r of opts.refs || []) {
       if (r.value == null) continue;
-      el("line", { x1: m.left, x2: W - m.right + 8, y1: y(r.value), y2: y(r.value), stroke: css(r.color), "stroke-width": 1, "stroke-dasharray": "1 3", "stroke-opacity": 0.9 }, svg);
+      el("line", { x1: m.left, x2: W - m.right + 8, y1: y(r.value), y2: y(r.value), stroke: css(r.color), "stroke-width": 1.25, "stroke-dasharray": "1 3", "stroke-opacity": r.opacity || 0.9 }, svg);
       if (r.label) { const t = el("text", { x: m.left + 4, y: y(r.value) + (r.below ? 13 : -5), class: "ref-lbl" }, svg); t.textContent = r.label; }
     }
     if (opts.baseline) {
@@ -877,7 +879,7 @@
     lineChart(document.getElementById("mirror-chart"), {
       series: s, fmt: fmtPct, tickFmt: (t) => t + "%", baseline: 100, endNames: true,
       refs: D.countries.map((c, k) => ({
-        value: data[c].pre, color: "--axis", label: data[c].pre == null ? "" : `${c} pre-war, ${fmtPct(data[c].pre)}`,
+        value: data[c].pre, color: FLOW.eu.color, opacity: 0.6, label: data[c].pre == null ? "" : `${c} pre-war, ${fmtPct(data[c].pre)}`,
         below: pres[1 - k] != null && data[c].pre < pres[1 - k],
       })),
       aria: "Mirror ratio: imports from EU-27 as recorded by the country, divided by EU-27 exports, percent",
@@ -1025,7 +1027,9 @@
         { label: `EU exports to ${r.name}`, endName: "from the EU", color: "--flow-eu", values: r.eu },
         { label: `China's exports to ${r.name}`, endName: "from China", color: "--text-primary", values: r.cn, marker: "square", gapNote: "no Chinese data" },
       ],
-      fmt: fmtMoney, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf, topTickFmt: (t) => `${cur()}${t >= 1000 ? `${t / 1000}bn` : `${t}M`}`,
+      fmt: fmtMoney, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf,
+      tickFilter: (t) => /^(0\.0*)?10*$/.test(String(t)), // powers of ten only (10, 100, $1bn): fewer labels than data points
+      topTickFmt: (t) => `${cur()}${t >= 1000 ? `${t / 1000}bn` : `${t}M`}`,
       aria: `${r.name}: exports of the listed goods from the EU and from China, ${state.currency} million`,
     }));
 
@@ -1105,8 +1109,10 @@
             ? `These goods became a bigger part of EU trade with ${list(ue)}`
             : "These goods kept pace with overall trade";
     }
-    const top = (key) => Math.max(...rows.flatMap((r) => (r[key] ? r[key].share : [])).filter((v) => v != null), 0.1);
-    const max = { eu: top("eu"), ru: top("ru") };
+    // One scale for all eight panels: the panels sit side by side, so the same height must be the same share.
+    const shared = Math.max(...rows.filter((r) => r.info.group === "route")
+      .flatMap((r) => [...(r.eu ? r.eu.share : []), ...(r.ru ? r.ru.share : [])]).filter((v) => v != null), 0.1);
+    const max = { eu: shared, ru: shared };
     const pf = (v) => (v == null ? "—" : `${v < 10 ? v.toFixed(1) : Math.round(v)}%`);
 
     const grid = document.getElementById("ctl-grid");
@@ -1320,7 +1326,14 @@
     const kzru = series("ru", "Kazakhstan", "all", true);
     const kgru = series("ru", "Kyrgyzstan", "all", true);
     const kgeu = series("eu", "Kyrgyzstan", "all", true);
-    const pct = (a, b) => (a == null || !b ? "—" : `${a >= b ? "+" : "−"}${Math.abs(100 * (a / b - 1)).toFixed(1)}%`);
+    const pctV = (a, b) => (a == null || !b ? null : Math.round(100 * (a / b - 1)));
+    const pct = (a, b) => { const v = pctV(a, b); return v == null ? "—" : `${v >= 0 ? "+" : "−"}${Math.abs(v).toLocaleString("en-US")}%`; };
+    // "Match" only within 2 points of the published figure; otherwise say how far off we are.
+    const verdict = (ours, published) => {
+      if (ours == null) return "—";
+      const d = ours - published;
+      return Math.abs(d) <= 2 ? "Match" : `Close (${Math.abs(d)} points ${d < 0 ? "lower" : "higher"})`;
+    };
     const x = (a, b) => (a == null || !b ? "—" : `×${(a / b).toFixed(1)}`);
     const avg = (v) => baseOf(v, "avg"), y21 = (v) => baseOf(v, "2021");
     // The rest of the page uses 2025 prices; give that value too, so one flow does not show two unexplained multiples.
@@ -1334,9 +1347,9 @@
         kgRatio(2022) == null || kgPre == null ? "—" : `${String(Math.round(kgRatio(2022) - kgPre)).replace("-", "−")} points (${Math.round(kgPre)}% → ${Math.round(kgRatio(2022))}%)`,
         "Same direction. EBRD uses a wider list of sanctioned goods and Mar–Dec only."],
       ["Kazakhstan → Russia, 2022 vs 2021", "+401%", "The Moscow Times, from Comtrade", "https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf",
-        pct(at(kzru, 2022), at(kzru, 2021)), "Match"],
+        pct(at(kzru, 2022), at(kzru, 2021)), verdict(pctV(at(kzru, 2022), at(kzru, 2021)), 401)],
       ["Kazakhstan → Russia, 2023 vs 2022", "−5%", "The Moscow Times, from Comtrade", "https://www.themoscowtimes.com/2024/09/16/should-the-west-sanction-russias-neighbors-in-central-asia-a86310/pdf",
-        pct(at(kzru, 2023), at(kzru, 2022)), "Match"],
+        pct(at(kzru, 2023), at(kzru, 2022)), verdict(pctV(at(kzru, 2023), at(kzru, 2022)), -5)],
       ["EU → Kyrgyzstan, Jan–Oct 2025 vs pre-war", "almost +800% (×9)", "Regulation (EU) 2026/506, recital 34", "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506",
         `2025: ${x(at(kgeu, 2025), avg(kgeu))} vs 2019–21 (${x(at(kgeuR, 2025), avg(kgeuR))} in 2025 prices), ${x(at(kgeu, 2025), y21(kgeu))} vs 2021`, "Ours lower. The regulation does not give its baseline or its exact list of codes."],
       ["Kyrgyzstan → Russia, Jan–Oct 2025 vs pre-war", "+1,200% (×13)", "Regulation (EU) 2026/506, recital 34", "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506",
