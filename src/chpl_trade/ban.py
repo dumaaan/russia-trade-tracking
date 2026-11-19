@@ -16,16 +16,14 @@ import argparse
 import csv
 import io
 import json
-import time
 from datetime import date, datetime, timezone
 
 import pandas as pd
 
 from . import config
-from .fetch import COMEXT_URL, COMTRADE_PREVIEW_CAP, _get, query_codes
+from . import comtrade as ct
+from .fetch import COMEXT_URL, _get, query_codes
 
-COMTRADE_M_URL = "https://comtradeapi.un.org/public/v1/preview/C/M/HS"
-COMTRADE_DA_M_URL = "https://comtradeapi.un.org/public/v1/getDA/C/M/HS"
 ECB_M_URL = "https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A"
 
 BAN_DATE = "2026-04-23"
@@ -83,47 +81,6 @@ def fetch_comext_monthly(partner, refresh=False):
     return out
 
 
-def latest_comtrade_month(m49):
-    """The last month the reporter has released in Comtrade (checked backwards from now)."""
-    for m in reversed(months(START, this_month())):
-        d = _get(COMTRADE_DA_M_URL, {"reporterCode": m49, "period": m.replace("-", "")}).json().get("data")
-        time.sleep(1)
-        if d:
-            return m
-    return None
-
-
-def fetch_comtrade_monthly(iso2, month, refresh=False):
-    """One reporter's exports to Russia (USD) in one month, all CHPL codes."""
-    out = RAW / f"comtrade_{iso2}_to_RU_{month}.json"
-    if out.exists() and not refresh:
-        return out
-    out.parent.mkdir(parents=True, exist_ok=True)
-    body = _get(COMTRADE_M_URL, {
-        "reporterCode": LEG2[iso2], "partnerCode": config.RUSSIA_M49, "period": month.replace("-", ""),
-        "flowCode": "X", "cmdCode": ",".join(query_codes()),
-    }).json()
-    if "data" not in body:
-        raise RuntimeError(f"Comtrade error for {iso2} {month}: {body}")
-    if len(body["data"]) >= COMTRADE_PREVIEW_CAP:
-        raise RuntimeError(f"Comtrade preview cap reached for {iso2} {month}")
-    out.write_text(json.dumps(_stamp(body)))
-    time.sleep(2)
-    return out
-
-
-def fetch_comtrade_release_monthly(iso2, month, refresh=False):
-    """Did the reporter release this month? An empty result means: not released."""
-    out = RAW / f"comtrade_{iso2}_release_{month}.json"
-    if out.exists() and not refresh:
-        return out
-    out.parent.mkdir(parents=True, exist_ok=True)
-    body = _get(COMTRADE_DA_M_URL, {"reporterCode": LEG2[iso2], "period": month.replace("-", "")}).json()
-    out.write_text(json.dumps(_stamp(body)))
-    time.sleep(1)
-    return out
-
-
 def fetch_fx_monthly(refresh=False):
     out = RAW / "ecb_usd_per_eur_monthly.csv"
     if out.exists() and not refresh:
@@ -143,14 +100,6 @@ def fetch_all(refresh=False):
     for p in [TARGET, *NEIGHBOURS]:
         print(f"Comext monthly: EU-27 -> {p}")
         fetch_comext_monthly(p, refresh)
-    latest = {}
-    for iso2, m49 in LEG2.items():
-        latest[iso2] = latest_comtrade_month(m49)
-        print(f"Comtrade monthly: {iso2} -> RU, {START} to {latest[iso2]}")
-        for m in months(START, latest[iso2]):
-            fetch_comtrade_monthly(iso2, m, refresh)
-            fetch_comtrade_release_monthly(iso2, m, refresh)
-    (RAW / "comtrade_latest.json").write_text(json.dumps(latest))
 
 
 # ---------------------------------------------------------------- build
@@ -185,13 +134,17 @@ def build():
     eu = pd.concat(frames)
     comext_last = eu["month"].max()
 
-    latest = json.loads((RAW / "comtrade_latest.json").read_text())
+    # last month each reporter has released (Comtrade release list in the shared store)
+    latest = {}
+    for iso2, m49 in LEG2.items():
+        p = ct.latest_period("M", m49)
+        latest[iso2] = f"{p[:4]}-{p[4:6]}"
     rows = []
     unreported = []  # (reporter, month) with no rows at all: the month is missing, not zero
     for iso2 in LEG2:
         for m in months(START, latest[iso2]):
-            data = json.loads((RAW / f"comtrade_{iso2}_to_RU_{m}.json").read_text())["data"]
-            released = json.loads((RAW / f"comtrade_{iso2}_release_{m}.json").read_text()).get("data")
+            data = ct.records("M", "X", LEG2[iso2], config.RUSSIA_M49, m.replace("-", ""))
+            released = ct.released("M", LEG2[iso2], m.replace("-", ""))
             if not released:
                 unreported.append((iso2, m))  # not released: missing; released with no rows: zero trade
             for r in data:

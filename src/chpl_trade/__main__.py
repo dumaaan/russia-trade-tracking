@@ -6,7 +6,8 @@
 
 import argparse
 
-from . import ban, control
+from . import ban, comtrade, control
+from .needs import declare_all
 from .build import build
 from .fetch import fetch_all
 from .plot import plot_all
@@ -17,6 +18,8 @@ if __name__ == "__main__":
     p.add_argument("--refresh", action="store_true", help="download all raw files again")
     args = p.parse_args()
     fetch_all(args.refresh)
+    declare_all()
+    comtrade.sync()
     build()
     ban.fetch_all(args.refresh)
     ban.build()

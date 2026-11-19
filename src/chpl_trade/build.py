@@ -10,9 +10,11 @@ import json
 import pandas as pd
 
 from . import config
+from . import comtrade as ct
 from .fetch import chpl_codes
 
 OLD_TO_NEW = {old: new for new, old in config.HS2017_EQUIVALENT.items()}
+QUERY = set(chpl_codes()) | set(config.HS2017_EQUIVALENT.values())
 
 
 def _to_chpl(code):
@@ -68,8 +70,7 @@ def build_imports_from_eu():
     rows = []
     for iso2, info in config.COUNTRIES.items():
         for year in config.YEARS:
-            path = config.RAW / "comtrade" / f"{iso2}_imports_from_EU27_{year}.json"
-            for r in _total_rows(json.loads(path.read_text())["data"]):
+            for r in ct.records("A", "M", info["m49"], config.EU27_M49.values(), year):
                 rows.append({"hs6": r["cmdCode"], "year": int(r["refYear"]),
                              "usd": float(r["primaryValue"]), "country": info["name"]})
     df = pd.DataFrame(rows, columns=["hs6", "year", "usd", "country"])
@@ -98,8 +99,7 @@ def build_exports_to_russia():
     rows = []
     for iso2, info in config.COUNTRIES.items():
         for year in config.YEARS:
-            path = config.RAW / "comtrade" / f"{iso2}_exports_to_RU_{year}.json"
-            for r in _total_rows(json.loads(path.read_text())["data"]):
+            for r in ct.records("A", "X", info["m49"], config.RUSSIA_M49, year):
                 rows.append(
                     {
                         "hs6": r["cmdCode"],
@@ -130,9 +130,9 @@ def availability():
                 "released": d.get("updated", "")[:10],
             })
         for year in config.YEARS:
-            rel = json.loads((config.RAW / "comtrade" / f"{iso2}_release_{year}.json").read_text())
-            rel = rel.get("data") or []
-            data = json.loads((config.RAW / "comtrade" / f"{iso2}_exports_to_RU_{year}.json").read_text())["data"]
+            r0 = ct.released("A", info["m49"], year)
+            rel = [{"lastReleased": r0[0], "classificationCode": r0[1]}] if r0 else []
+            data = [r for r in ct.records("A", "X", info["m49"], config.RUSSIA_M49, year) if r["cmdCode"] in QUERY]
             rows.append({
                 "flow": RU_FLOW, "country": info["name"], "year": year,
                 "source": "UN Comtrade",
@@ -144,7 +144,7 @@ def availability():
             # Imports from the EU: the reporter can report a year but give no
             # product detail by partner (Kazakhstan 2020-2022). Then the year
             # is missing for this flow.
-            imp = _total_rows(json.loads((config.RAW / "comtrade" / f"{iso2}_imports_from_EU27_{year}.json").read_text())["data"])
+            imp = ct.records("A", "M", info["m49"], config.EU27_M49.values(), year)
             rows.append({
                 "flow": MI_FLOW, "country": info["name"], "year": year,
                 "source": "UN Comtrade",
@@ -165,10 +165,9 @@ def source_dates():
         rel = {}
         downloaded = ""
         for year in config.YEARS:
-            r = json.loads((config.RAW / "comtrade" / f"{iso2}_release_{year}.json").read_text()).get("data") or []
-            rel[str(year)] = r[0]["lastReleased"][:10] if r else None
-            body = json.loads((config.RAW / "comtrade" / f"{iso2}_exports_to_RU_{year}.json").read_text())
-            downloaded = max(downloaded, body.get("_downloaded", "")[:10])
+            r = ct.released("A", info["m49"], year)
+            rel[str(year)] = r[0][:10] if r else None
+        downloaded = (ct.fetched_at("A", info["m49"]) or "")[:10]
         out["comtrade"][info["name"]] = {"released": rel, "downloaded": downloaded}
     return out
 

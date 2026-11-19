@@ -645,8 +645,6 @@
       if (r.ru) draw(charts[1], r.ru, "ru", `${r.info.name}'s exports to Russia`);
     });
 
-    document.getElementById("ctl-sub").textContent =
-      "The value of the listed goods as a percent of the value of all goods in the same flow. Each column has one scale.";
 
     const ly = YEARS.length - 1;
     const trows = [];

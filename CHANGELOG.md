@@ -2,6 +2,22 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.9.0 — 2026-11-19
+
+### Changed: one shared UN Comtrade client
+- New `src/chpl_trade/comtrade.py`. Modules no longer call Comtrade; they declare their needs
+  (`needs.py`), and one `sync()` downloads only what is missing or newly revised, then every
+  module reads from one local store (`data/raw/comtrade.sqlite`).
+- Releases: one call per frequency for all reporters, at most once a day.
+- Batching with an API key (read from `COMTRADE_KEY` or `.env`, which git ignores): many
+  reporters, partners and codes and up to 12 periods per call, total rows only. Without a key the
+  free preview API is used.
+- Quota guard: a daily call counter stops before the limit; data already received is kept.
+- `make plan` shows the calls a run would make; `make status` shows what is stored.
+- The old download files were imported into the store (`legacy.py`), so nothing was downloaded
+  again. A full run now needs 2 calls when nothing is new (before: about 500).
+- Outputs are unchanged.
+
 ## 0.8.0 — 2026-11-19
 
 ### Added: listed goods as a share of all trade

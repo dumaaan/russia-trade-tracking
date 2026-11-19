@@ -12,14 +12,14 @@ Output: data/processed/control.csv (listed codes by HS6, and the total of all go
 
 import argparse
 import json
-import time
 from datetime import datetime, timezone
 
 import pandas as pd
 
 from . import config
 from .build import load_fx
-from .fetch import COMEXT_URL, COMTRADE_PREVIEW_CAP, COMTRADE_URL, _get, chpl_codes, query_codes
+from . import comtrade as ct
+from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
 
 RAW = config.RAW / "control"
 
@@ -69,25 +69,6 @@ def fetch_comext(partner, refresh=False):
     return out
 
 
-def fetch_comtrade(iso2, year, refresh=False):
-    m49 = DESTINATIONS[iso2][1]
-    out = RAW / f"comtrade_{iso2}_to_RU_{year}.json"
-    if out.exists() and not refresh:
-        return out
-    out.parent.mkdir(parents=True, exist_ok=True)
-    body = _get(COMTRADE_URL, {
-        "reporterCode": m49, "partnerCode": config.RUSSIA_M49, "period": year, "flowCode": "X",
-        "cmdCode": ",".join(headings() + hs6_codes()),
-    }).json()
-    if "data" not in body:
-        raise RuntimeError(f"Comtrade error for {iso2} {year}: {body}")
-    if len(body["data"]) >= COMTRADE_PREVIEW_CAP:
-        raise RuntimeError(f"Comtrade preview cap reached for {iso2} {year}")
-    out.write_text(json.dumps(_stamp(body)))
-    time.sleep(2)
-    return out
-
-
 def fetch_comext_total(partner, refresh=False):
     out = RAW / f"comext_eu27_to_{partner}_TOTAL.json"
     if out.exists() and not refresh:
@@ -100,32 +81,11 @@ def fetch_comext_total(partner, refresh=False):
     return out
 
 
-def fetch_comtrade_total(iso2, year, refresh=False):
-    out = RAW / f"comtrade_{iso2}_to_RU_{year}_TOTAL.json"
-    if out.exists() and not refresh:
-        return out
-    out.parent.mkdir(parents=True, exist_ok=True)
-    body = _get(COMTRADE_URL, {
-        "reporterCode": DESTINATIONS[iso2][1], "partnerCode": config.RUSSIA_M49, "period": year,
-        "flowCode": "X", "cmdCode": "TOTAL",
-    }).json()
-    if "data" not in body:
-        raise RuntimeError(f"Comtrade error for {iso2} {year} total: {body}")
-    out.write_text(json.dumps(_stamp(body)))
-    time.sleep(2)
-    return out
-
-
 def fetch_all(refresh=False):
     for p, (name, m49, _) in DESTINATIONS.items():
         print(f"Comext: EU-27 -> {name}")
         fetch_comext(p, refresh)
         fetch_comext_total(p, refresh)
-        if m49:
-            for y in config.YEARS:
-                print(f"Comtrade: {name} -> Russia {y}")
-                fetch_comtrade(p, y, refresh)
-                fetch_comtrade_total(p, y, refresh)
 
 
 def _comext_frame(partner, suffix=""):
@@ -156,13 +116,7 @@ def build():
             frames.append(df[["flow", "dest", "year", "code", "usd"]])
         if m49:
             for y in config.YEARS:
-                rows = []
-                for suffix in ("", "_TOTAL"):
-                    path = RAW / f"comtrade_{p}_to_RU_{y}{suffix}.json"
-                    if not path.exists():
-                        continue  # not downloaded yet (for example, the daily Comtrade limit): missing
-                    body = json.loads(path.read_text())
-                    rows += [r for r in body["data"] if (r["motCode"], r["customsCode"], r["partner2Code"]) == (0, "C00", 0)]
+                rows = ct.records("A", "X", m49, config.RUSSIA_M49, y)
                 if not any(r["cmdCode"] == "TOTAL" for r in rows):
                     missing.append(("ru", p, y))  # no total reported for that year
                 for r in rows:
