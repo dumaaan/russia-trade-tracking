@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=0.91">
+  <link rel="stylesheet" href="style.css?v=1.01">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -31,6 +31,7 @@
       <figcaption id="route-caption"></figcaption>
     </div>
   </figure>
+  <div class="wrap"><ul class="summary" id="summary" aria-label="Key numbers"></ul></div>
 </header>
 
 <div class="filterbar" role="group" aria-label="Filters for every chart on the page">
@@ -59,10 +60,21 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" id="suppliers" aria-labelledby="sup-h">
+    <div class="ch-text">
+      <h2 id="sup-h"></h2>
+      <p class="finding" id="sup-sub"></p>
+    </div>
+    <div class="ch-figure">
+      <div class="ctl-rows" id="sup-grid"></div>
+      <details class="table-view"><summary>Show the numbers</summary><div id="sup-table"></div></details>
+    </div>
+  </section>
+
   <section class="chapter chapter-wide wrap" aria-labelledby="cmp-h">
     <div class="ch-text">
-      <h2 id="cmp-h">Kazakhstan and Kyrgyzstan compared</h2>
-      <p class="finding">Kazakhstan's flows are six to ten times larger. Kyrgyzstan's grew much faster, from a very small base.</p>
+      <h2 id="cmp-h">Kazakhstan's flows are larger; Kyrgyzstan's grew faster</h2>
+      <p class="finding" id="cmp-sub"></p>
     </div>
     <div class="ch-figure">
       <div class="legend" id="cmp-legend"></div>
@@ -82,7 +94,7 @@
 
   <section class="chapter wrap" aria-labelledby="mirror-h">
     <div class="ch-text">
-      <h2 id="mirror-h">Does the EU shipment arrive?</h2>
+      <h2 id="mirror-h">Part of the EU's shipments never appear in the importers' records</h2>
       <p class="finding">
         Each line divides what the country records as imports from the EU by what the EU records as
         exports to it. Below 100%, part of the shipments is missing from the country's records.
@@ -146,7 +158,7 @@
   <section class="chapter wrap" aria-labelledby="goods-h">
     <div class="ch-text">
       <h2 id="goods-h">Which goods</h2>
-      <p class="finding">The ten largest codes for one country, flow and year. Point at a bar for its share.</p>
+      <p class="finding">The ten largest codes for one country, flow and year. Point at a bar for what the goods are and what they are used for.</p>
       <p class="aside"><span class="ban-key">EU ban</span> marks the two codes in the first EU anti-circumvention export ban on Kyrgyzstan, April 2026.</p>
       <div class="controls">
         <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
@@ -164,7 +176,7 @@
 
   <section class="chapter chapter-wide wrap" aria-labelledby="xc-h">
     <div class="ch-text">
-      <h2 id="xc-h">How our numbers compare</h2>
+      <h2 id="xc-h">Our numbers match published trade data, and Kyrgyz reports undercount</h2>
       <p class="finding">Our figures next to published ones. Ours always use all 49 codes in USD, whatever the filters say.</p>
     </div>
     <div class="ch-figure">
@@ -180,7 +192,7 @@
 </footer>
 
 <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
-<script src="data.js?v=0.91"></script>
-<script src="app.js?v=0.91"></script>
+<script src="data.js?v=1.01"></script>
+<script src="app.js?v=1.01"></script>
 </body>
 </html>

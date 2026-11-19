@@ -24,6 +24,27 @@
     "4B": "Tier 4.B: CNC machine tools",
   };
   const chplByCode = Object.fromEntries(D.chpl.map((r) => [r.hs6, r]));
+  // What the goods are and what they are used for. Sources: the EU's List of Common High Priority
+  // Items (version of February 2024) for the tiers; Regulation (EU) 2026/506, recital 34, for the two
+  // codes in the first anti-circumvention ban.
+  const SRC_CHPL = "Source: EU List of Common High Priority Items, Feb 2024";
+  const SRC_BAN = "Source: Regulation (EU) 2026/506, recital 34";
+  const TIER_NOTE = {
+    "1": "Integrated circuits (microelectronics). The list's items were found in Russian weapons used in Ukraine, such as the Kalibr and Kh-101 cruise missiles, the Orlan-10 drone and the Ka-52 helicopter.",
+    "2": "Electronics for wireless communication, satellite-based radio navigation, and passive components.",
+    "3A": "Discrete electronic components, electrical plugs and connectors, navigation equipment and digital cameras.",
+    "3B": "Mechanical and non-electronic components, such as bearings and optical components.",
+    "4A": "Manufacturing equipment for producing and quality-testing electronic components and circuits.",
+    "4B": "CNC machine tools for working metal, and their parts.",
+  };
+  const CODE_NOTE = {
+    "845710": "Machining centres produce the high-precision metal components essential for military production.",
+    "851762": "Used, among other things, for field communication networks and drone telemetry.",
+  };
+  const noteFor = (code) => {
+    const info = chplByCode[code] || {};
+    return CODE_NOTE[code] ? [CODE_NOTE[code], SRC_BAN] : TIER_NOTE[info.tier] ? [TIER_NOTE[info.tier], SRC_CHPL] : null;
+  };
   const fmtCode = (c) => c.replace(/^(\d{4})(\d{2})$/, "$1.$2");
 
   // ---------- state (filters at the top apply to every chart) ----------
@@ -87,7 +108,7 @@
     return n;
   };
   const fmtM = (v) => (v == null ? "no data" : v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2));
-  const fmtMoney = (v) => (v == null ? "no data" : `${cur()}${fmtM(v)}M`);
+  const fmtMoney = (v) => (v == null ? "no data" : v >= 1000 ? `${cur()}${(v / 1000).toFixed(v >= 10000 ? 1 : 2)}bn` : `${cur()}${fmtM(v)}M`);
   const fmtIdx = (v) => (v == null ? "—" : Math.round(v).toLocaleString("en-US"));
   const fmtPct = (v) => (v == null ? "—" : `${Math.round(v)}%`);
   const fmtX = (v) => (v == null ? "—" : `×${v >= 10 ? v.toFixed(0) : v.toFixed(1)}`);
@@ -113,7 +134,7 @@
     return out.length > 8 ? out.filter((v) => /^1/.test(String(v))) : out;
   }
 
-  function showTip(x, y, title, rows) {
+  function showTip(x, y, title, rows, note) {
     tip.replaceChildren(h("div", { class: "t", text: title }));
     for (const r of rows) {
       tip.appendChild(h("div", { class: "r" }, [
@@ -122,6 +143,7 @@
         h("span", { text: r.label }),
       ]));
     }
+    if (note) for (const line of [].concat(note)) tip.appendChild(h("div", { class: "n", text: line }));
     tip.hidden = false;
     const w = tip.offsetWidth, ht = tip.offsetHeight;
     let left = x + 14, top = y - ht - 10;
@@ -420,6 +442,42 @@
   }
   function routeAll() { routeCaption(); routeDiagram(); }
 
+  function summaryBox() {
+    const el = document.getElementById("summary");
+    if (!el) return;
+    const ly = YEARS.length - 1, yr = YEARS[ly];
+    const items = [];
+    const usd = (v) => (v == null ? "no data" : v >= 1000 ? `$${(v / 1000).toFixed(2)}bn` : `$${fmtM(v)}M`);
+    if (D.suppliers) {
+      const sum = (sup, dest, i) => {
+        if (D.suppliers.meta.missing.includes(`${sup}|${dest}|${YEARS[i]}`)) return null;
+        let t = 0;
+        for (const r of D.suppliers.rows) if (r[0] === sup && r[1] === dest && r[2] === YEARS[i] && !D.excluded.includes(r[3]) && r[4] != null) t += r[4];
+        return t;
+      };
+      const e0 = sum("eu", "RU", 0), e1 = sum("eu", "RU", ly), c0 = sum("cn", "RU", 0), c1 = sum("cn", "RU", ly);
+      items.push([`EU exports of these goods directly to Russia fell from `, usd(e0), ` in ${YEARS[0]} to `, usd(e1), ` in ${yr}.`]);
+      items.push([`China's rose from `, usd(c0), ` to `, usd(c1), `.`]);
+    }
+    const [kz, kg] = D.countries;
+    const mult = (c) => { const v = series("ru", c, "all", true), b = baseOf(v, "avg"); return b && v[ly] != null ? v[ly] / b : null; };
+    items.push([`Kyrgyzstan's exports of these goods to Russia are `, fmtX(mult(kg)), ` their 2019–21 level; Kazakhstan's `, fmtX(mult(kz)), `.`]);
+    // Mirror gap above the pre-war ratio, all codes, 2022 onwards, both countries.
+    let excess = 0;
+    for (const c of D.countries) {
+      const eu = series("eu", c, "all", true), mi = series("mi", c, "all", true);
+      let se = 0, sm = 0;
+      for (const y of D.baselineYears) { const i = YEARS.indexOf(y); if (eu[i] && mi[i] != null) { se += eu[i]; sm += mi[i]; } }
+      if (!se) continue;
+      const pre = sm / se;
+      YEARS.forEach((y, i) => { if (y >= 2022 && eu[i] && mi[i] != null) excess += Math.max(0, eu[i] * pre - mi[i]); });
+    }
+    if (excess > 0) {
+      items.push([`Since 2022, at least `, usd(excess), ` of EU shipments to the two countries is missing from their import records, above the pre-war gap.`]);
+    }
+    el.replaceChildren(...items.map((parts) => h("li", {}, parts.map((x, i) => (i % 2 ? h("b", { text: x }) : x)))));
+  }
+
   // ---------- section 1 ----------
   function flows() {
     const c = state.flowsCountry;
@@ -431,6 +489,12 @@
       if (b == null || l == null) return `${what}: not enough data for this selection.`;
       return `${what} went from ${fmtMoney(b)} a year (${baseLabel()}) to ${fmtMoney(l)} in ${ly}, ${fmtX(l / b)}.`;
     };
+    {
+      const ru = s[1].values, b = baseOf(ru), l = ru[last];
+      document.getElementById("flows-h").textContent = b && l != null
+        ? `${c}'s exports of these goods to Russia are ${fmtX(l / b)} their pre-war level`
+        : "Both legs, year by year";
+    }
     document.getElementById("flows-sub").textContent =
       `${say(s[0].values, `EU exports to ${c}`)} ${say(s[1].values, `${c}'s exports to Russia`)}`;
     document.getElementById("flows-legend").replaceChildren();
@@ -463,6 +527,16 @@
         eu: indexOf(eu).map((v) => (v == null ? null : v / 100)), ru: indexOf(ru).map((v) => (v == null ? null : v / 100)),
         ratio: YEARS.map((_, i) => (eu[i] && ru[i] != null ? (100 * ru[i]) / eu[i] : null)),
       };
+    }
+    {
+      const [kz, kg] = D.countries, ly = YEARS.length - 1;
+      const rz = series("ru", kz), rg = series("ru", kg);
+      const size = rz[ly] && rg[ly] ? rz[ly] / rg[ly] : null;
+      const gz = data[kz].ru[ly], gg = data[kg].ru[ly];
+      document.getElementById("cmp-sub").textContent =
+        `In ${YEARS[ly]}, ${kz} exported ${fmtMoney(rz[ly])} of these goods to Russia` +
+        (size ? `, ${fmtX(size).replace("×", "")} times ${kg}'s ${fmtMoney(rg[ly])}. ` : ". ") +
+        (gz != null && gg != null ? `Against the ${baseLabel()}, ${kg}'s exports grew ${fmtX(gg)}, ${kz}'s ${fmtX(gz)}.` : "");
     }
     const mk = (key) => D.countries.map((c) => ({ label: c, color: COUNTRY[c].color, marker: COUNTRY[c].marker, values: data[c][key] }));
     const cap = `times the ${baseLabel()}, log scale`;
@@ -514,6 +588,18 @@
       aria: "Mirror ratio: imports from EU-27 as recorded by the country, divided by EU-27 exports, percent",
     });
 
+    {
+      let best = null;
+      for (const c of D.countries) {
+        const d = data[c];
+        d.ratio.forEach((v, i) => {
+          if (v != null && d.pre != null && YEARS[i] >= 2022 && (!best || d.pre - v > best.drop)) best = { c, i, v, drop: d.pre - v };
+        });
+      }
+      document.getElementById("mirror-h").textContent = best && best.drop > 5
+        ? `In ${YEARS[best.i]}, ${best.c}'s import records showed only ${Math.round(best.v)}% of what the EU shipped`
+        : "The importers' records match the EU's shipments";
+    }
     // Summary: the year with the largest excess gap for each country.
     const parts = D.countries.map((c) => {
       const d = data[c];
@@ -582,9 +668,59 @@
     ]);
     // Finding: which tier grew most on the Russia leg.
     const ranked = panels.filter((p) => p.xru[last] != null).sort((a, b) => b.xru[last] - a.xru[last]);
+    document.getElementById("tiers-h").textContent = ranked.length
+      ? `${TIER_NAMES[ranked[0].t].split(": ")[1].replace(/^./, (x) => x.toUpperCase())} grew fastest on the way to Russia`
+      : "Tier by tier";
     document.getElementById("tiers-sub").textContent = ranked.length
       ? `In ${ly}, ${c}'s exports to Russia grew most in ${TIER_NAMES[ranked[0].t].split(": ")[0].replace("Tier", "tier")} (${TIER_NAMES[ranked[0].t].split(": ")[1]}), ${fmtX(ranked[0].xru[last])} the ${baseLabel()}, and least in ${TIER_NAMES[ranked[ranked.length - 1].t].split(": ")[0].replace("Tier", "tier")}, ${fmtX(ranked[ranked.length - 1].xru[last])}.`
       : "Not enough data for this country.";
+  }
+
+  // ---------- suppliers: the EU and China ----------
+  function supplierStudy() {
+    const SP = D.suppliers, meta = SP.meta;
+    const missing = new Set(meta.missing);
+    const basket = new Set(D.chpl.map((r) => r.hs6).filter((c) => inBasket(c, state.basket)));
+    const ser = (sup, dest) => {
+      const sum = Object.fromEntries(YEARS.map((y) => [y, 0]));
+      for (const r of SP.rows) if (r[0] === sup && r[1] === dest && basket.has(r[3]) && r[4] != null) sum[r[2]] += r[4];
+      return YEARS.map((y) => (missing.has(`${sup}|${dest}|${y}`) ? null : conv(sum[y], y)));
+    };
+    const dests = Object.keys(meta.destinations);
+    const rows = dests.map((d) => ({ d, name: meta.destinations[d], eu: ser("eu", d), cn: ser("cn", d) }));
+    const ly = YEARS.length - 1, yr = YEARS[ly];
+
+    // Heading and finding, from the data (they follow the filters).
+    const route = rows.filter((r) => r.d !== "RU");
+    const both = route.filter((r) => r.eu[ly] != null && r.cn[ly] != null);
+    const sumEU = both.reduce((t, r) => t + r.eu[ly], 0), sumCN = both.reduce((t, r) => t + r.cn[ly], 0);
+    const ru = rows.find((r) => r.d === "RU");
+    const ratio = sumEU ? sumCN / sumEU : null;
+    document.getElementById("sup-h").textContent = ratio == null ? "The EU and China as suppliers"
+      : ratio >= 1 ? "China, not the EU, supplies most of these goods" : "The EU supplies more of these goods than China";
+    const more = route.filter((r) => r.eu[ly] != null && r.cn[ly] != null && r.eu[ly] > r.cn[ly]).map((r) => r.name);
+    document.getElementById("sup-sub").textContent =
+      `In ${yr}, China shipped ${fmtMoney(sumCN)} of these goods to ${both.map((r) => r.name).join(", ").replace(/, ([^,]*)$/, " and $1")}` +
+      (ratio ? `, ${ratio >= 1 ? `${fmtX(ratio).replace("×", "")} times as much as the EU (${fmtMoney(sumEU)})` : `against ${fmtMoney(sumEU)} from the EU`}. ` : ". ") +
+      (more.length ? `${more.join(" and ")} ${more.length > 1 ? "are the exceptions" : "is the exception"}: there the EU ships more. ` : "") +
+      (ru && ru.eu[ly] != null && ru.cn[ly] != null ? `Directly to Russia, China shipped ${fmtMoney(ru.cn[ly])}; the EU ${fmtMoney(ru.eu[ly])}, down from ${fmtMoney(ru.eu[0])} in ${YEARS[0]}.` : "");
+
+    const grid = document.getElementById("sup-grid");
+    grid.replaceChildren(...rows.map((r) => h("div", { class: "sup-row" }, [
+      h("div", { class: "ctl-name", text: r.d === "RU" ? "Russia, directly" : r.name }),
+      h("div", { class: "chart sm" }),
+    ])));
+    rows.forEach((r, i) => lineChart(grid.children[i].querySelector(".chart"), {
+      series: [
+        { label: `EU exports to ${r.name}`, endName: "from the EU", color: "--flow-eu", values: r.eu },
+        { label: `China's exports to ${r.name}`, endName: "from China", color: "--text-primary", values: r.cn, marker: "square" },
+      ],
+      fmt: fmtMoney, endNames: true, topTickFmt: (t) => `${cur()}${t.toLocaleString("en-US")}M`,
+      aria: `${r.name}: exports of the listed goods from the EU and from China, ${state.currency} million`,
+    }));
+
+    table(document.getElementById("sup-table"), ["Destination", "Supplier", ...YEARS.map(String)],
+      rows.flatMap((r) => [[r.name, "EU", ...r.eu.map(fmtM)], [r.name, "China", ...r.cn.map(fmtM)]]));
   }
 
   // ---------- listed goods as a share of all trade ----------
@@ -616,6 +752,19 @@
       };
       return { d, info, eu: leg("eu"), ru: leg("ru") };
     });
+    {
+      const routeRows = rows.filter((r) => r.info.group === "route");
+      const ly = YEARS.length - 1;
+      const up = (key) => routeRows.filter((r) => r[key] && r[key].pre != null && r[key].share[ly] != null && r[key].share[ly] > r[key].pre * 1.1).map((r) => r.info.name);
+      const ue = up("eu"), ur = up("ru");
+      const list = (a) => a.join(", ").replace(/, ([^,]*)$/, " and $1");
+      document.getElementById("ctl-h").textContent =
+        ur.length > ue.length
+          ? `These goods became a bigger part of trade with Russia${ur.length ? ` for ${list(ur)}` : ""}, not of trade with the EU`
+          : ue.length
+            ? `These goods became a bigger part of EU trade with ${list(ue)}`
+            : "These goods kept pace with overall trade";
+    }
     const top = (key) => Math.max(...rows.flatMap((r) => (r[key] ? r[key].share : [])).filter((v) => v != null), 0.1);
     const max = { eu: top("eu"), ru: top("ru") };
     const pf = (v) => (v == null ? "—" : `${v < 10 ? v.toFixed(1) : Math.round(v)}%`);
@@ -715,6 +864,8 @@
     const avgLine = (a, b, v) => {
       const i0 = ms.indexOf(a), i1 = ms.indexOf(b);
       if (i0 < 0 || i1 < 0 || v == null) return;
+      // a halo in the page colour keeps the line visible on dark bars
+      el("line", { x1: x(i0), x2: x(i1) + bw, y1: y(v), y2: y(v), stroke: css("--surface-1"), "stroke-width": 4.5 }, svg);
       el("line", { x1: x(i0), x2: x(i1) + bw, y1: y(v), y2: y(v), stroke: css("--text-primary"), "stroke-width": 1.5 }, svg);
     };
     avgLine(D.ban.before[0], D.ban.before[1], opts.before);
@@ -736,18 +887,29 @@
       const c = pct(ch(d.s));
       return c ? `${c} after the ban` : "no data after the ban";
     };
+    {
+      const t = S["eu|KG|banned"], cn = S["cn|KG|banned"], ru = S["ru|KG|banned"];
+      const p = (x) => (x && x.before_avg && x.after_avg != null ? 100 * (x.after_avg / x.before_avg - 1) : null);
+      const word = (v, up, down) => (v >= 0 ? `${up} ${Math.round(v)}%` : `${down} ${Math.abs(Math.round(v))}%`);
+      const a = p(t), b = p(cn), c = p(ru);
+      document.getElementById("ban-h").textContent = a == null ? "The April 2026 EU ban on Kyrgyzstan"
+        : `The ban ${a < 0 ? `cut EU shipments to Kyrgyzstan by ${Math.abs(Math.round(a))}%` : `did not cut EU shipments to Kyrgyzstan (${word(a, "+", "−")})`}` +
+          (b != null ? `; Kyrgyz imports from China ${word(b, "rose", "fell")}` : "") +
+          (c != null ? `, exports to Russia ${word(c, "rose", "fell")}` : "");
+    }
     const countries = B.summary.rows;
     const name = (c) => B.summary.names[c];
     const grid = document.getElementById("ban-grid");
     const rows = countries.map((c) => {
-      const eu = get("eu", c), ru = get("ru", c);
-      const all = [...eu.values, ...ru.values, eu.s && eu.s.before_avg, eu.s && eu.s.after_avg, ru.s && ru.s.before_avg, ru.s && ru.s.after_avg].filter((v) => v != null);
-      return { c, eu, ru, max: all.length ? Math.max(...all) : 1 };
+      const eu = get("eu", c), cn = get("cn", c), ru = get("ru", c);
+      const all = [eu, cn, ru].flatMap((d) => [...d.values, d.s && d.s.before_avg, d.s && d.s.after_avg]).filter((v) => v != null);
+      return { c, eu, cn, ru, max: all.length ? Math.max(...all) : 1 };
     });
     grid.replaceChildren(...rows.map((r) => h("div", { class: "ban-row" }, [
       h("h3", { text: name(r.c) }),
       h("div", { class: "ban-pair" }, [
         h("figure", {}, [h("figcaption", {}, [`From the EU`, h("span", { text: capOf(r.eu) })]), h("div", { class: "chart sm" })]),
+        h("figure", {}, [h("figcaption", {}, [`From China`, h("span", { text: capOf(r.cn) })]), h("div", { class: "chart sm" })]),
         h("figure", {}, [h("figcaption", {}, [`To Russia`, h("span", { text: capOf(r.ru) })]), h("div", { class: "chart sm" })]),
       ]),
     ])));
@@ -755,7 +917,9 @@
       const charts = grid.children[i].querySelectorAll(".chart");
       monthChart(charts[0], { months: r.eu.months, values: r.eu.values, before: r.eu.s && r.eu.s.before_avg, after: r.eu.s && r.eu.s.after_avg,
         max: r.max, color: "--flow-eu", label: `EU exports to ${name(r.c)}`, aria: `EU exports to ${name(r.c)}, monthly, USD` });
-      monthChart(charts[1], { months: r.ru.months, values: r.ru.values, before: r.ru.s && r.ru.s.before_avg, after: r.ru.s && r.ru.s.after_avg,
+      monthChart(charts[1], { months: r.cn.months, values: r.cn.values, before: r.cn.s && r.cn.s.before_avg, after: r.cn.s && r.cn.s.after_avg,
+        max: r.max, color: "--text-primary", label: `${name(r.c)}'s imports from China`, aria: `${name(r.c)}'s imports from China, monthly, USD` });
+      monthChart(charts[2], { months: r.ru.months, values: r.ru.values, before: r.ru.s && r.ru.s.before_avg, after: r.ru.s && r.ru.s.after_avg,
         max: r.max, color: "--flow-ru", label: `${name(r.c)}'s exports to Russia`, aria: `${name(r.c)}'s exports to Russia, monthly, USD` });
     });
 
@@ -764,6 +928,7 @@
     const trows = [];
     for (const c of countries) {
       trows.push([`EU to ${name(c)}`, ...cells(S[`eu|${c}|${group}`])]);
+      trows.push([`China to ${name(c)} (as ${name(c)} reports)`, ...cells(S[`cn|${c}|${group}`])]);
       trows.push([`${name(c)} to Russia`, ...cells(S[`ru|${c}|${group}`])]);
     }
     for (const c of Object.keys(B.summary.neighbours).filter((c) => !countries.includes(c))) {
@@ -790,6 +955,9 @@
     const max = top.length ? top[0].v : 1;
     const color = css(FLOW[f].color);
     const share = total ? top.reduce((s, r) => s + r.v, 0) / total : 0;
+    document.getElementById("goods-h").textContent = top.length
+      ? `Largest item in ${yr}: ${(chplByCode[top[0].code] || {}).description || top[0].code}`
+      : "Which goods";
     totalEl.textContent = `${FLOW[f].label(c)}, ${yr}, ${basketLabel()}: ${fmtMoney(total)} in total.` +
       (rows.length > 10 ? ` The top 10 codes are ${Math.round(share * 100)}% of it.` : "");
     if (!top.length) { box.replaceChildren(h("div", { class: "empty", text: "No trade reported for these codes." })); return; }
@@ -807,9 +975,9 @@
         h("div", { class: "bar-track" }, h("div", { class: "bar-fill", style: { width: `${(100 * r.v) / max}%`, background: color } })),
         h("div", { class: "bar-val", text: fmtMoney(r.v) }),
       ]);
-      const show = (cx, cy) => showTip(cx, cy, `${fmtCode(r.code)} · Tier ${info.tier}`, [
+      const show = (cx, cy) => showTip(cx, cy, `${fmtCode(r.code)}, tier ${info.tier}: ${info.description}`, [
         { color, value: fmtMoney(r.v), label: `${(sh * 100).toFixed(1)}% of total` },
-      ]);
+      ], noteFor(r.code));
       row.addEventListener("pointermove", (e) => show(e.clientX, e.clientY));
       row.addEventListener("pointerleave", hideTip);
       row.addEventListener("focus", () => { const b = row.getBoundingClientRect(); show(b.left + b.width * 0.6, b.top); });
@@ -889,11 +1057,13 @@
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
+    if (D.suppliers) supplierStudy();
+    summaryBox();
   }
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); if (D.control) controlStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

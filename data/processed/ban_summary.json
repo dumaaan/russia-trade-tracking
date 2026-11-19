@@ -1,5 +1,133 @@
 {
   "series": {
+    "cn|AM|845710": {
+      "before_avg": 20060.399166666666,
+      "after_avg": 97197.41666666667,
+      "year_ago_avg": 18645.0825,
+      "after_months": 4,
+      "change_pct": 384.52384152043504,
+      "change_vs_year_ago_pct": 421.30322655674314
+    },
+    "cn|AM|851762": {
+      "before_avg": 2223088.4441666664,
+      "after_avg": 1731496.4299999997,
+      "year_ago_avg": 2058497.3275000001,
+      "after_months": 4,
+      "change_pct": -22.113020984684294,
+      "change_vs_year_ago_pct": -15.885417636035303
+    },
+    "cn|AM|banned": {
+      "before_avg": 2243148.8433333333,
+      "after_avg": 1828693.8466666667,
+      "year_ago_avg": 2077142.4100000001,
+      "after_months": 4,
+      "change_pct": -18.476482195928824,
+      "change_vs_year_ago_pct": -11.961075087448314
+    },
+    "cn|AM|other": {
+      "before_avg": 4630908.288333333,
+      "after_avg": 5083533.010000001,
+      "year_ago_avg": 5162066.1425,
+      "after_months": 4,
+      "change_pct": 9.773994505720761,
+      "change_vs_year_ago_pct": -1.5213507601815723
+    },
+    "cn|KG|845710": {
+      "before_avg": 2551.8333333333335,
+      "after_avg": 4322.5,
+      "year_ago_avg": 7586.25,
+      "after_months": 4,
+      "change_pct": 69.38802168375678,
+      "change_vs_year_ago_pct": -43.021914648212224
+    },
+    "cn|KG|851762": {
+      "before_avg": 2417324.9166666665,
+      "after_avg": 3526943.0,
+      "year_ago_avg": 2055664.75,
+      "after_months": 4,
+      "change_pct": 45.902728081065106,
+      "change_vs_year_ago_pct": 71.57189663343695
+    },
+    "cn|KG|banned": {
+      "before_avg": 2419876.75,
+      "after_avg": 3531265.5,
+      "year_ago_avg": 2063251.0,
+      "after_months": 4,
+      "change_pct": 45.92749403456189,
+      "change_vs_year_ago_pct": 71.15055318039347
+    },
+    "cn|KG|other": {
+      "before_avg": 4909668.666666667,
+      "after_avg": 6556913.25,
+      "year_ago_avg": 5172034.5,
+      "after_months": 4,
+      "change_pct": 33.5510335863805,
+      "change_vs_year_ago_pct": 26.776286005052754
+    },
+    "cn|KZ|845710": {
+      "before_avg": 122470.61750000001,
+      "after_avg": 302968.1125,
+      "year_ago_avg": 137495.27000000002,
+      "after_months": 4,
+      "change_pct": 147.38024408181002,
+      "change_vs_year_ago_pct": 120.34802542662008
+    },
+    "cn|KZ|851762": {
+      "before_avg": 24767449.245833334,
+      "after_avg": 17423744.3,
+      "year_ago_avg": 19954551.165,
+      "after_months": 4,
+      "change_pct": -29.650630845922798,
+      "change_vs_year_ago_pct": -12.682855375063495
+    },
+    "cn|KZ|banned": {
+      "before_avg": 24889919.863333333,
+      "after_avg": 17726712.4125,
+      "year_ago_avg": 20092046.435,
+      "after_months": 4,
+      "change_pct": -28.779552084399572,
+      "change_vs_year_ago_pct": -11.772489328810366
+    },
+    "cn|KZ|other": {
+      "before_avg": 46644761.595,
+      "after_avg": 30705020.9625,
+      "year_ago_avg": 57528120.900000006,
+      "after_months": 4,
+      "change_pct": -34.17262750938496,
+      "change_vs_year_ago_pct": -46.62606655295777
+    },
+    "cn|UZ|845710": {
+      "before_avg": 242713.41666666666,
+      "after_avg": 78613.66666666667,
+      "year_ago_avg": 207735.0,
+      "after_months": 3,
+      "change_pct": -67.61049811488927,
+      "change_vs_year_ago_pct": -62.15675419805682
+    },
+    "cn|UZ|851762": {
+      "before_avg": 10766696.0,
+      "after_avg": 17537146.0,
+      "year_ago_avg": 11311339.666666666,
+      "after_months": 3,
+      "change_pct": 62.88326520967993,
+      "change_vs_year_ago_pct": 55.04039766111997
+    },
+    "cn|UZ|banned": {
+      "before_avg": 11009409.416666666,
+      "after_avg": 17615759.666666668,
+      "year_ago_avg": 11519074.666666666,
+      "after_months": 3,
+      "change_pct": 60.006399979992885,
+      "change_vs_year_ago_pct": 52.92686414857861
+    },
+    "cn|UZ|other": {
+      "before_avg": 32160647.166666668,
+      "after_avg": 31458970.333333332,
+      "year_ago_avg": 24588330.666666668,
+      "after_months": 3,
+      "change_pct": -2.1817870445735243,
+      "change_vs_year_ago_pct": 27.942684518965287
+    },
     "eu|AE|845710": {
       "before_avg": 251547.80735098434,
       "after_avg": 202269.66131196046,

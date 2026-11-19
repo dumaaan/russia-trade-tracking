@@ -151,6 +151,13 @@ def build():
                 if (r["motCode"], r["customsCode"], r["partner2Code"]) != (0, "C00", 0):
                     continue
                 rows.append({"hs6": r["cmdCode"], "month": m, "usd": float(r["primaryValue"]), "flow": "ru", "country": iso2})
+    # Imports from China, as each route country reports them.
+    for iso2 in LEG2:
+        for m in months(START, latest[iso2]):
+            if not ct.released("M", LEG2[iso2], m.replace("-", "")):
+                continue
+            for r in ct.records("M", "M", LEG2[iso2], 156, m.replace("-", "")):
+                rows.append({"hs6": r["cmdCode"], "month": m, "usd": float(r["primaryValue"]), "flow": "cn", "country": iso2})
     ru = pd.DataFrame(rows)
     df = pd.concat([eu, ru], ignore_index=True)
     df["hs6"] = df["hs6"].map(lambda c: old_to_new.get(c, c))
@@ -164,16 +171,16 @@ def build():
     out = pd.concat([tot, per], ignore_index=True)
 
     # Fill the month grid: within the data range, a missing row is zero trade.
-    last = {"eu": comext_last, **{f"ru-{k}": v for k, v in latest.items()}}
+    last = {"eu": comext_last, **{f"ru-{k}": v for k, v in latest.items()}, **{f"cn-{k}": v for k, v in latest.items()}}
     grid = []
     for (flow, country, group), _ in out.groupby(["flow", "country", "group"]):
-        end = last["eu"] if flow == "eu" else last[f"ru-{country}"]
+        end = last["eu"] if flow == "eu" else last[f"{flow}-{country}"]
         for m in months(START, end):
             grid.append((flow, country, group, m))
     g = pd.DataFrame(grid, columns=["flow", "country", "group", "month"])
     out = g.merge(out, how="left").fillna({"usd": 0.0})
     for iso2, m in unreported:
-        out.loc[(out["flow"] == "ru") & (out["country"] == iso2) & (out["month"] == m), "usd"] = float("nan")
+        out.loc[out["flow"].isin(["ru", "cn"]) & (out["country"] == iso2) & (out["month"] == m), "usd"] = float("nan")
     out = out.sort_values(["flow", "country", "group", "month"])
     config.PROCESSED.mkdir(parents=True, exist_ok=True)
     out.to_csv(config.PROCESSED / "ban_monthly.csv", index=False)
@@ -196,7 +203,7 @@ def summarise(df, last):
     res = {}
     for (flow, country, group), g in df.groupby(["flow", "country", "group"]):
         s = g.set_index("month")["usd"]
-        end = last["eu"] if flow == "eu" else last[f"ru-{country}"]
+        end = last["eu"] if flow == "eu" else last[f"{flow}-{country}"]
         after = months("2026-05", end)
         before = months(*BEFORE)
         year_ago = [f"{int(m[:4]) - 1}-{m[5:]}" for m in after]

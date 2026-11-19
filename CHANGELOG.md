@@ -2,6 +2,31 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.0.0 — 2026-11-19
+
+### Changed: headings state the finding
+- Every chapter heading now states its finding. Headings with numbers are built from the data,
+  so they stay true when the filters or the data change.
+- New summary under the route diagram: EU and China direct exports to Russia, Kyrgyzstan's and
+  Kazakhstan's exports to Russia against 2019–21, and the mirror gap above the pre-war level
+  since 2022 (all 49 codes, USD).
+- "Which goods" tooltips: what the goods are and what they are used for, with the source
+  (EU List of Common High Priority Items, Feb 2024; Regulation (EU) 2026/506, recital 34).
+
+## 0.10.0 — 2026-11-19
+
+### Added: China as a supplier
+- New module `src/chpl_trade/china.py` and chapter "China, not the EU, supplies most of these
+  goods": EU-27 exports (Comext) and China's exports (Comtrade, as China reports) of the listed
+  codes to Kyrgyzstan, Armenia, Uzbekistan, Kazakhstan and Russia, 2019–2025. Heading and finding
+  are computed from the data and follow the filters.
+- China's Comtrade data for Armenia in 2023–2024 is a reporting gap (a total of all goods near
+  zero or absent): these years are missing.
+- Ban chapter: a third column, each route country's monthly imports from China (as the country
+  reports them; China's own monthly data in Comtrade ends in December 2024).
+- Money above $1,000M is shown in billions.
+- New Comtrade needs cost 8 calls with the shared client.
+
 ## 0.9.0 — 2026-11-19
 
 ### Changed: one shared UN Comtrade client

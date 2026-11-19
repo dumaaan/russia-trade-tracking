@@ -6,7 +6,7 @@
 
 import argparse
 
-from . import ban, comtrade, control
+from . import ban, china, comtrade, control
 from .needs import declare_all
 from .build import build
 from .fetch import fetch_all
@@ -25,6 +25,8 @@ if __name__ == "__main__":
     ban.build()
     control.fetch_all(args.refresh)
     control.build()
+    china.fetch_all(args.refresh)
+    china.build()
     outs, comp = plot_all()
     outs.append(export())
     print(comp.to_string(index=False))
