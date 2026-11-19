@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.6">
+  <link rel="stylesheet" href="style.css?v=1.7">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -19,9 +19,10 @@
   <div class="wrap">
     <h1>The Central Asian detour</h1>
     <p class="dek">
-      Battlefield goods are the 50 types of electronics, bearings and machine tools that Western
-      governments found in Russian weapons in Ukraine. The map follows them from the EU and from China
-      through Kazakhstan, Kyrgyzstan, Uzbekistan and Armenia into Russia.
+      Battlefield goods are the 50 types (customs codes) of electronics, bearings and machine tools that
+      Western governments found in Russian weapons in Ukraine. The map follows them from the EU and from
+      China through Kazakhstan, Kyrgyzstan, Uzbekistan and Armenia into Russia. The site uses 49 of the
+      50 codes: the code for light sensors has no comparable data before 2022.
     </p>
   </div>
   <figure class="route wrap" aria-labelledby="route-caption">
@@ -40,6 +41,7 @@
       <select id="f-basket"></select>
     </label>
     <div class="seg" role="radiogroup" aria-label="Currency" id="f-currency"></div>
+    <div class="seg" role="radiogroup" aria-label="Prices" id="f-prices"></div>
     <div class="seg" role="radiogroup" aria-label="Baseline" id="f-baseline"></div>
     <p class="filter-note" id="f-note"></p>
   </div>
@@ -53,9 +55,10 @@
       <div class="seg" role="radiogroup" aria-label="Country" id="flows-country"></div>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-legs"></p>
       <div class="legend" id="flows-legend"></div>
       <div class="chart" id="flows-chart"></div>
-      <ol class="events" id="flows-events" aria-label="Events marked on the chart"></ol>
+      <ol class="events" id="flows-events" aria-label="Sources for the dates marked on the chart"></ol>
       <details class="table-view"><summary>Show the numbers</summary><div id="flows-table"></div></details>
     </div>
   </section>
@@ -66,7 +69,8 @@
       <p class="finding" id="sup-sub"></p>
     </div>
     <div class="ch-figure">
-      <div class="ctl-rows" id="sup-grid"></div>
+      <p class="scope" id="scope-sup"></p>
+      <div class="grid4" id="sup-grid"></div>
       <details class="table-view"><summary>Show the numbers</summary><div id="sup-table"></div></details>
     </div>
   </section>
@@ -77,16 +81,17 @@
       <p class="finding" id="cmp-sub"></p>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-cmp"></p>
       <div class="legend" id="cmp-legend"></div>
-      <div class="grid3">
+      <div class="grid2">
         <figure><figcaption>EU exports to the country<span id="cmp-eu-cap"></span></figcaption><div class="chart sm" id="cmp-eu"></div></figure>
         <figure><figcaption>The country's exports to Russia<span id="cmp-ru-cap"></span></figcaption><div class="chart sm" id="cmp-ru"></div></figure>
-        <figure><figcaption>Exports to Russia as a share of EU exports<span>percent, a scale ratio</span></figcaption><div class="chart sm" id="cmp-ratio"></div></figure>
       </div>
+      <figure class="scatter-fig"><figcaption>Both legs, one point a year<span>exports to Russia against EU exports, log scales</span></figcaption><div class="chart" id="cmp-ratio"></div></figure>
       <p class="aside">
-        The ratio is not a re-export share. The EU is not the only supplier: China and other countries
-        also sell these goods to Kazakhstan and Kyrgyzstan. Kazakhstan's Tier 3.B exports to Russia
-        (bearings, optics) are larger than the EU's Tier 3.B exports to Kazakhstan in every year.
+        A point on the dotted line means the country sold Russia as much as it bought from
+        the EU. China and other countries also supply these goods, so the distance from the line is not a
+        re-export share.
       </p>
       <details class="table-view"><summary>Show the numbers</summary><div id="cmp-table"></div></details>
     </div>
@@ -107,6 +112,7 @@
       </p>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-mirror"></p>
       <div class="legend" id="mirror-legend"></div>
       <div class="chart" id="mirror-chart"></div>
       <p class="readout" id="mirror-summary"></p>
@@ -121,6 +127,7 @@
       <p class="finding">A flat line means these goods are keeping pace with overall trade. A rising line means they are outpacing it. Each column uses its own scale.</p>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-ctl"></p>
       <div class="ctl-head" aria-hidden="true"><span></span><span>From the EU</span><span>To Russia</span></div>
       <div class="ctl-rows" id="ctl-grid"></div>
       <h3 class="ctl-group">Comparison countries</h3>
@@ -134,8 +141,10 @@
       <p class="finding">
         On 23 April 2026 the EU banned exports to Kyrgyzstan of machining centres (8457.10) and data
         transmission equipment (8517.62). Averages a month: April 2025 to March 2026 before the ban,
-        May 2026 onwards after it. Each small chart is one row's months, on its own scale.
+        May 2026 onwards after it. Each small chart is one row's months, on its own scale. Values in
+        current US dollars; the filters at the top do not change this table.
       </p>
+      <p class="aside" id="ban-months"></p>
       <div class="seg" role="radiogroup" aria-label="Goods" id="ban-goods"></div>
     </div>
     <div class="ch-figure">
@@ -150,9 +159,10 @@
       <div class="seg" role="radiogroup" aria-label="Country" id="tiers-country"></div>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-tiers"></p>
       <div class="legend" id="tiers-legend"></div>
       <div class="grid3 tiers" id="tiers-grid"></div>
-      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart. The goods filter does not apply here.</p>
+      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart.</p>
     </div>
   </section>
 
@@ -166,6 +176,7 @@
       </div>
     </div>
     <div class="ch-figure">
+      <p class="scope" id="scope-goods"></p>
       <div class="table-wrap"><table class="supertable goods-table" id="goods-super"></table></div>
       <p class="src-note">Uses: <a href="https://finance.ec.europa.eu/document/download/5a2494db-d874-4e2b-bf2a-ec5a191d2dc0_en">EU List of Common High Priority Items, February 2024</a>; for 8457.10 and 8517.62, <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506">Regulation (EU) 2026/506, recital 34</a>.</p>
     </div>
@@ -174,7 +185,7 @@
   <section class="chapter chapter-wide wrap" aria-labelledby="xc-h">
     <div class="ch-text">
       <h2 id="xc-h">Our numbers match published trade data, and Kyrgyz reports undercount</h2>
-      <p class="finding">Our figures next to published ones. Ours always use all 49 codes in USD, whatever the filters say.</p>
+      <p class="finding">Our figures next to published ones. Ours always use all 49 codes in current US dollars; the filters at the top do not change this table.</p>
     </div>
     <div class="ch-figure">
       <div class="table-wrap"><table class="xc" id="xc-table"></table></div>
@@ -193,6 +204,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.6"></script>
-<script src="app.js?v=1.6"></script>
+<script src="app.js?v=1.7"></script>
 </body>
 </html>

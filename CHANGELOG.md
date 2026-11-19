@@ -2,6 +2,35 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.3.0 — 2026-11-19
+
+### Changed after a second design review (Tufte principles)
+- **Prices:** money now shows in 2025 prices by default. US dollars are deflated with the US
+  CPI-U (BLS CUUR0000SA0, annual average; 2025 has 11 months, because BLS published no October
+  2025 figure), euros with the euro-area HICP (Eurostat prc_hicp_aind). A new filter switches
+  back to current prices. The key-numbers table is always in 2025 US dollars. The ban table and
+  the cross-checks stay in current US dollars. Multiples fall: Kazakhstan to Russia is ×2.1, not
+  ×2.6; Kyrgyzstan to Russia is ×8.8, not ×11.
+- **Small bases:** a pre-war value under $0.5M a year (under $50k a month in the ban table) gets
+  no multiple or percent. Charts leave out such index lines and say why; the goods table shows a
+  dash; the ban table shows the change in dollars. Headlines rank only tiers with a usable base.
+- **Ban headline:** compares the months after the ban with the same months of 2025, not with the
+  12 months before, so the season does not count as an effect. The table shows how many months
+  of data exist after the ban, and the seasonal comparison comes first.
+- **EU and China chapter:** the four countries share one scale, two panels a row.
+- **Comparison chapter:** a connected scatterplot (EU exports against exports to Russia, one point
+  a year, log scales, equal-value line) replaces the "share of EU exports" ratio chart.
+- **Colour:** blue is always the EU leg, orange the Russia leg; countries differ by marker, dash
+  and name, not by colour (comparison and mirror charts).
+- **Filters:** a line above each chart says which goods, prices and base it shows. On phones the
+  filter bar no longer sticks to the top.
+- **Labels:** tier charts are labelled at the line ends (no legend); the mirror chart labels each
+  pre-war line; the event list drops its number badges; the intro explains 50 codes vs 49.
+- **Map:** EU bands bow south, away from the Russia legs; bands under 1% of the year's largest
+  band carry no number; value labels keep clear of the place dots.
+- **Goods table:** the trend lines in one tier share a scale.
+- **Type:** section headings use normal width and a lighter weight.
+
 ## 1.2.0 — 2026-11-19
 
 ### Changed: the detour only
