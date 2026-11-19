@@ -198,6 +198,10 @@ h3 { margin: 0 0 6px; font-stretch: 125%; font-weight: 700; font-size: 17px; }
 
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 10px; }
 .grid3.tiers { row-gap: 36px; }
+.grid3.ban { row-gap: 36px; }
+.grid3.ban .chart.sm { height: 190px; }
+.panel-note { margin: 4px 0 0; font-size: 13px; color: var(--ink-3); }
+.chart .ban-lbl { font-size: 12px; font-weight: 650; fill: var(--ink); }
 .grid3.tiers .chart.sm { height: 200px; }
 figure { margin: 0; min-width: 0; }
 figcaption { font-size: 15px; font-weight: 650; }
@@ -277,10 +281,10 @@ table.xc a { color: var(--ink-2); }
 @media (max-width: 960px) {
   .chapter { grid-template-columns: minmax(0, 1fr); }
   .grid3 { grid-template-columns: minmax(0, 1fr); }
-  .grid3.tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
+  .grid3.tiers, .grid3.ban { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
 }
 @media (max-width: 560px) {
-  .grid3.tiers { grid-template-columns: minmax(0, 1fr); }
+  .grid3.tiers, .grid3.ban { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .route-diagram { height: 270px; }

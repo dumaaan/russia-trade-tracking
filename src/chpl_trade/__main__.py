@@ -6,6 +6,7 @@
 
 import argparse
 
+from . import ban
 from .build import build
 from .fetch import fetch_all
 from .plot import plot_all
@@ -17,6 +18,8 @@ if __name__ == "__main__":
     args = p.parse_args()
     fetch_all(args.refresh)
     build()
+    ban.fetch_all(args.refresh)
+    ban.build()
     outs, comp = plot_all()
     outs.append(export())
     print(comp.to_string(index=False))

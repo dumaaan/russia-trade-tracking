@@ -1,0 +1,395 @@
+{
+  "series": {
+    "eu|AE|845710": {
+      "before_avg": 251547.80735098434,
+      "after_avg": 202269.66131196046,
+      "year_ago_avg": 376896.82504138537,
+      "after_months": 5,
+      "change_pct": -19.589972402449185,
+      "change_vs_year_ago_pct": -46.332882668950546
+    },
+    "eu|AE|851762": {
+      "before_avg": 50058292.922751375,
+      "after_avg": 50572136.69898759,
+      "year_ago_avg": 48723786.112432055,
+      "after_months": 5,
+      "change_pct": 1.0264908094831826,
+      "change_vs_year_ago_pct": 3.79352824160748
+    },
+    "eu|AE|banned": {
+      "before_avg": 50309840.73010236,
+      "after_avg": 50774406.36029955,
+      "year_ago_avg": 49100682.937473446,
+      "after_months": 5,
+      "change_pct": 0.9234090656129235,
+      "change_vs_year_ago_pct": 3.408757929003725
+    },
+    "eu|AE|other": {
+      "before_avg": 190886241.98775306,
+      "after_avg": 230134671.26921242,
+      "year_ago_avg": 191303657.16044575,
+      "after_months": 5,
+      "change_pct": 20.561161911279857,
+      "change_vs_year_ago_pct": 20.298103384505218
+    },
+    "eu|AM|845710": {
+      "before_avg": 25347.757246376812,
+      "after_avg": 176924.96075485714,
+      "year_ago_avg": 0.0,
+      "after_months": 5,
+      "change_pct": 597.9905915745135,
+      "change_vs_year_ago_pct": null
+    },
+    "eu|AM|851762": {
+      "before_avg": 2189245.682894545,
+      "after_avg": 4039277.144656725,
+      "year_ago_avg": 2152910.859087122,
+      "after_months": 5,
+      "change_pct": 84.50542925434172,
+      "change_vs_year_ago_pct": 87.61934000228233
+    },
+    "eu|AM|banned": {
+      "before_avg": 2214593.440140922,
+      "after_avg": 4216202.105411582,
+      "year_ago_avg": 2152910.859087122,
+      "after_months": 5,
+      "change_pct": 90.38266929677579,
+      "change_vs_year_ago_pct": 95.83728177205334
+    },
+    "eu|AM|other": {
+      "before_avg": 4704964.304871023,
+      "after_avg": 36392023.22760616,
+      "year_ago_avg": 2422064.628138946,
+      "after_months": 5,
+      "change_pct": 673.4813883695081,
+      "change_vs_year_ago_pct": 1402.520733956174
+    },
+    "eu|AZ|845710": {
+      "before_avg": 7531.496446590908,
+      "after_avg": 0.0,
+      "year_ago_avg": 0.0,
+      "after_months": 5,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": null
+    },
+    "eu|AZ|851762": {
+      "before_avg": 3343730.469489112,
+      "after_avg": 1985216.0260222026,
+      "year_ago_avg": 3282742.800239737,
+      "after_months": 5,
+      "change_pct": -40.62870664555916,
+      "change_vs_year_ago_pct": -39.525690959485985
+    },
+    "eu|AZ|banned": {
+      "before_avg": 3351261.965935703,
+      "after_avg": 1985216.0260222026,
+      "year_ago_avg": 3282742.800239737,
+      "after_months": 5,
+      "change_pct": -40.76213539254273,
+      "change_vs_year_ago_pct": -39.525690959485985
+    },
+    "eu|AZ|other": {
+      "before_avg": 4876156.893373714,
+      "after_avg": 6310958.221039369,
+      "year_ago_avg": 4637677.325028578,
+      "after_months": 5,
+      "change_pct": 29.424839254360926,
+      "change_vs_year_ago_pct": 36.080149150964914
+    },
+    "eu|GE|845710": {
+      "before_avg": 11996.683429166667,
+      "after_avg": 42100.51288873519,
+      "year_ago_avg": 0.0,
+      "after_months": 5,
+      "change_pct": 250.9345990274217,
+      "change_vs_year_ago_pct": null
+    },
+    "eu|GE|851762": {
+      "before_avg": 2095929.1629005512,
+      "after_avg": 1895950.0402981944,
+      "year_ago_avg": 1721944.1294415381,
+      "after_months": 5,
+      "change_pct": -9.541311135038843,
+      "change_vs_year_ago_pct": 10.10520073686072
+    },
+    "eu|GE|banned": {
+      "before_avg": 2107925.8463297174,
+      "after_avg": 1938050.5531869293,
+      "year_ago_avg": 1721944.1294415381,
+      "after_months": 5,
+      "change_pct": -8.058883733437394,
+      "change_vs_year_ago_pct": 12.5501414389954
+    },
+    "eu|GE|other": {
+      "before_avg": 3621083.1435552877,
+      "after_avg": 3724246.615490141,
+      "year_ago_avg": 3719268.8461164245,
+      "after_months": 5,
+      "change_pct": 2.848967224584742,
+      "change_vs_year_ago_pct": 0.13383730995715215
+    },
+    "eu|KG|845710": {
+      "before_avg": 16591.784420289856,
+      "after_avg": 0.0,
+      "year_ago_avg": 0.0,
+      "after_months": 5,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": null
+    },
+    "eu|KG|851762": {
+      "before_avg": 518326.06371002336,
+      "after_avg": 59029.555572031626,
+      "year_ago_avg": 777201.1132651817,
+      "after_months": 5,
+      "change_pct": -88.611501580778,
+      "change_vs_year_ago_pct": -92.4048544753061
+    },
+    "eu|KG|banned": {
+      "before_avg": 534917.8481303132,
+      "after_avg": 59029.555572031626,
+      "year_ago_avg": 777201.1132651817,
+      "after_months": 5,
+      "change_pct": -88.96474369319395,
+      "change_vs_year_ago_pct": -92.4048544753061
+    },
+    "eu|KG|other": {
+      "before_avg": 2068397.2643490639,
+      "after_avg": 1774671.3384469836,
+      "year_ago_avg": 2069771.9986910163,
+      "after_months": 5,
+      "change_pct": -14.200653373737538,
+      "change_vs_year_ago_pct": -14.25764095903621
+    },
+    "eu|KZ|845710": {
+      "before_avg": 1416825.446980004,
+      "after_avg": 229389.38395445127,
+      "year_ago_avg": 232804.42011428578,
+      "after_months": 5,
+      "change_pct": -83.80962281250665,
+      "change_vs_year_ago_pct": -1.4669120793144863
+    },
+    "eu|KZ|851762": {
+      "before_avg": 10101653.986252306,
+      "after_avg": 6724768.391679456,
+      "year_ago_avg": 9204469.214505369,
+      "after_months": 5,
+      "change_pct": -33.4290364644104,
+      "change_vs_year_ago_pct": -26.940182698619275
+    },
+    "eu|KZ|banned": {
+      "before_avg": 11518479.433232313,
+      "after_avg": 6954157.775633907,
+      "year_ago_avg": 9437273.634619655,
+      "after_months": 5,
+      "change_pct": -39.6260781126174,
+      "change_vs_year_ago_pct": -26.311792527416987
+    },
+    "eu|KZ|other": {
+      "before_avg": 22885775.055746824,
+      "after_avg": 13391463.819958195,
+      "year_ago_avg": 26191318.37437283,
+      "after_months": 5,
+      "change_pct": -41.48564430377254,
+      "change_vs_year_ago_pct": -48.870600446515844
+    },
+    "eu|TJ|845710": {
+      "before_avg": 12855.376562301586,
+      "after_avg": 0.0,
+      "year_ago_avg": 30852.903749523808,
+      "after_months": 5,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": -100.0
+    },
+    "eu|TJ|851762": {
+      "before_avg": 68370.82016040028,
+      "after_avg": 40890.490264837186,
+      "year_ago_avg": 43033.00495936759,
+      "after_months": 5,
+      "change_pct": -40.19306749735239,
+      "change_vs_year_ago_pct": -4.978770821497114
+    },
+    "eu|TJ|banned": {
+      "before_avg": 81226.19672270188,
+      "after_avg": 40890.490264837186,
+      "year_ago_avg": 73885.9087088914,
+      "after_months": 5,
+      "change_pct": -49.6584945317171,
+      "change_vs_year_ago_pct": -44.657254706110905
+    },
+    "eu|TJ|other": {
+      "before_avg": 259205.16747386847,
+      "after_avg": 218507.00956379488,
+      "year_ago_avg": 385912.9244328309,
+      "after_months": 5,
+      "change_pct": -15.701136789325975,
+      "change_vs_year_ago_pct": -43.37919366527291
+    },
+    "eu|TR|845710": {
+      "before_avg": 8809377.734760093,
+      "after_avg": 12195926.275665667,
+      "year_ago_avg": 8438817.62851565,
+      "after_months": 5,
+      "change_pct": 38.44253978964838,
+      "change_vs_year_ago_pct": 44.52174241157141
+    },
+    "eu|TR|851762": {
+      "before_avg": 67229390.8675636,
+      "after_avg": 59414982.04096578,
+      "year_ago_avg": 49370009.798339695,
+      "after_months": 5,
+      "change_pct": -11.62350086138899,
+      "change_vs_year_ago_pct": 20.34630392753922
+    },
+    "eu|TR|banned": {
+      "before_avg": 76038768.6023237,
+      "after_avg": 71610908.31663144,
+      "year_ago_avg": 57808827.42685535,
+      "after_months": 5,
+      "change_pct": -5.823161483386974,
+      "change_vs_year_ago_pct": 23.875386345173077
+    },
+    "eu|TR|other": {
+      "before_avg": 313484452.94839996,
+      "after_avg": 353352138.1593098,
+      "year_ago_avg": 293564405.8202507,
+      "after_months": 5,
+      "change_pct": 12.7175956689221,
+      "change_vs_year_ago_pct": 20.3661381126931
+    },
+    "eu|UZ|845710": {
+      "before_avg": 202649.03049599638,
+      "after_avg": 0.0,
+      "year_ago_avg": 0.0,
+      "after_months": 5,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": null
+    },
+    "eu|UZ|851762": {
+      "before_avg": 1399380.91797377,
+      "after_avg": 1992177.0931138888,
+      "year_ago_avg": 1266131.0095203277,
+      "after_months": 5,
+      "change_pct": 42.36131617390184,
+      "change_vs_year_ago_pct": 57.34367756055694
+    },
+    "eu|UZ|banned": {
+      "before_avg": 1602029.9484697664,
+      "after_avg": 1992177.0931138888,
+      "year_ago_avg": 1266131.0095203277,
+      "after_months": 5,
+      "change_pct": 24.35329907638648,
+      "change_vs_year_ago_pct": 57.34367756055694
+    },
+    "eu|UZ|other": {
+      "before_avg": 4191171.817640675,
+      "after_avg": 4774874.152627146,
+      "year_ago_avg": 4571209.068687583,
+      "after_months": 5,
+      "change_pct": 13.926948366317582,
+      "change_vs_year_ago_pct": 4.455387642071584
+    },
+    "ru|KG|845710": {
+      "before_avg": 15235.916666666666,
+      "after_avg": 0.0,
+      "year_ago_avg": 45707.75,
+      "after_months": 4,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": -100.0
+    },
+    "ru|KG|851762": {
+      "before_avg": 232771.66666666666,
+      "after_avg": 464621.75,
+      "year_ago_avg": 367045.75,
+      "after_months": 4,
+      "change_pct": 99.60408268474829,
+      "change_vs_year_ago_pct": 26.58415197560522
+    },
+    "ru|KG|banned": {
+      "before_avg": 248007.58333333334,
+      "after_avg": 464621.75,
+      "year_ago_avg": 412753.5,
+      "after_months": 4,
+      "change_pct": 87.3417513106958,
+      "change_vs_year_ago_pct": 12.566398588988337
+    },
+    "ru|KG|other": {
+      "before_avg": 670704.6666666666,
+      "after_avg": 658290.5,
+      "year_ago_avg": 525068.75,
+      "after_months": 4,
+      "change_pct": -1.8509140138182945,
+      "change_vs_year_ago_pct": 25.37224887217151
+    },
+    "ru|KZ|845710": {
+      "before_avg": 145780.58,
+      "after_avg": 0.0,
+      "year_ago_avg": 10852.5,
+      "after_months": 4,
+      "change_pct": -100.0,
+      "change_vs_year_ago_pct": -100.0
+    },
+    "ru|KZ|851762": {
+      "before_avg": 5971426.5075,
+      "after_avg": 6432419.69,
+      "year_ago_avg": 4477342.1875,
+      "after_months": 4,
+      "change_pct": 7.719984193408425,
+      "change_vs_year_ago_pct": 43.66602820660557
+    },
+    "ru|KZ|banned": {
+      "before_avg": 6117207.0874999985,
+      "after_avg": 6432419.69,
+      "year_ago_avg": 4488194.6875,
+      "after_months": 4,
+      "change_pct": 5.152884281850012,
+      "change_vs_year_ago_pct": 43.31864230210045
+    },
+    "ru|KZ|other": {
+      "before_avg": 8868111.584166666,
+      "after_avg": 7792211.13,
+      "year_ago_avg": 9265736.2675,
+      "after_months": 4,
+      "change_pct": -12.13223857137301,
+      "change_vs_year_ago_pct": -15.902947104899345
+    },
+    "relative_to_control_pct": -87.13829796994251
+  },
+  "ban_date": "2026-04-23",
+  "banned": [
+    "845710",
+    "851762"
+  ],
+  "before": [
+    "2025-04",
+    "2026-03"
+  ],
+  "transition": "2026-04",
+  "comext_updated": "2026-11-13",
+  "comext_last_month": "2026-09",
+  "comtrade_last_month": {
+    "KG": "2026-08",
+    "KZ": "2026-08"
+  },
+  "neighbours": {
+    "KZ": "Kazakhstan",
+    "UZ": "Uzbekistan",
+    "AM": "Armenia",
+    "TJ": "Tajikistan",
+    "GE": "Georgia",
+    "AZ": "Azerbaijan",
+    "TR": "T\u00fcrkiye",
+    "AE": "United Arab Emirates"
+  },
+  "unreported": [
+    "KZ 2024-03",
+    "KZ 2024-04",
+    "KZ 2024-05",
+    "KZ 2024-06",
+    "KZ 2024-07",
+    "KZ 2024-08",
+    "KZ 2024-09",
+    "KZ 2024-10",
+    "KZ 2024-11",
+    "KZ 2024-12"
+  ]
+}

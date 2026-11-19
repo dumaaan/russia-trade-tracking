@@ -41,6 +41,20 @@ def _num(v, nd=4):
     return None if v is None or (isinstance(v, float) and math.isnan(v)) else round(float(v), nd)
 
 
+def ban_data():
+    """Monthly series and summary for the April 2026 ban, if the ban module has run."""
+    mpath, spath = config.PROCESSED / "ban_monthly.csv", config.PROCESSED / "ban_summary.json"
+    if not (mpath.exists() and spath.exists()):
+        return None
+    m = pd.read_csv(mpath)
+    summary = json.loads(spath.read_text())
+    return {
+        "before": summary["before"], "transition": summary["transition"],
+        "monthly": [[r.flow, r.country, r.group, r.month, _num(r.usd, 0)] for r in m.itertuples()],
+        "summary": summary,
+    }
+
+
 def export():
     by_code = pd.read_csv(config.PROCESSED / "trade_by_code.csv", dtype={"hs6": str, "tier": str})
     avail = pd.read_csv(config.PROCESSED / "availability.csv")
@@ -73,6 +87,7 @@ def export():
         "events": EVENTS,
         "sources": sources,
         "built": date.today().isoformat(),
+        "ban": ban_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -81,8 +96,9 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv"]:
-        shutil.copy(config.PROCESSED / name, dl / name)
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv"]:
+        if (config.PROCESSED / name).exists():
+            shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")
     return out
 

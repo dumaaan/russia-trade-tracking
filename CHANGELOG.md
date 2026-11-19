@@ -2,6 +2,23 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 0.6.0 — 2026-11-19
+
+### Added: test of the April 2026 ban
+- New module `src/chpl_trade/ban.py` and site chapter "Did the April 2026 ban work?".
+  Monthly data: Comext (EU-27 exports, January 2024 to September 2026) and Comtrade
+  (Kyrgyzstan's and Kazakhstan's exports to Russia, January 2024 to August 2026).
+- Method: average monthly value in April 2025 to March 2026 (before) against May 2026 onwards
+  (after); April 2026, the month of the ban, is left out. Control goods: the other 47 codes to
+  Kyrgyzstan. Displacement: the two codes to eight neighbouring countries. Also compared with the
+  same months of 2025. New files `ban_monthly.csv` and `ban_summary.json`.
+- First result: EU exports of the two codes to Kyrgyzstan fell 89% (other codes −14%).
+  EU exports of the same codes to Armenia rose 90%. Kyrgyzstan's exports of the two codes to
+  Russia rose 87%.
+- Kazakhstan did not report monthly data to Comtrade for March to December 2024. These months
+  are missing, not zero.
+- The regulation text (Regulation (EU) 2026/506) adds no wind-down rule for the two codes.
+
 ## 0.5.0 — 2026-11-19
 
 ### Charts (review after Tufte, The Visual Display of Quantitative Information)

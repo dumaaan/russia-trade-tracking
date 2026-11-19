@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=0.5">
+  <link rel="stylesheet" href="style.css?v=0.6">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -102,6 +102,28 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" id="ban" aria-labelledby="ban-h">
+    <div class="ch-text">
+      <h2 id="ban-h">Did the April 2026 ban work?</h2>
+      <p class="finding" id="ban-sub"></p>
+      <p class="aside">
+        On 23 April 2026 the EU used its anti-circumvention tool for the first time: it banned exports to
+        Kyrgyzstan of machining centres (8457.10) and data transmission equipment (8517.62). Each column is
+        one month. The dark line over each window is its monthly average: April 2025 to March 2026 before
+        the ban, May 2026 onwards after it. April 2026 is left out. Each chart has its own scale.
+      </p>
+    </div>
+    <div class="ch-figure">
+      <div class="grid3 ban" id="ban-grid"></div>
+      <p class="aside">
+        Read with care: five months of EU data and four of Kyrgyz data, both provisional. Code 8517.62 also
+        covers ordinary routers and switches. A rise in Kyrgyzstan's exports to Russia after the ban means
+        that the goods came from somewhere else, for example from China or from stock.
+      </p>
+      <details class="table-view"><summary>Show the numbers, with all eight neighbours</summary><div id="ban-table"></div></details>
+    </div>
+  </section>
+
   <section class="chapter chapter-wide wrap" aria-labelledby="tiers-h">
     <div class="ch-text">
       <h2 id="tiers-h">Tier by tier</h2>
@@ -153,6 +175,7 @@
         <li><a href="data/trade_by_code.csv" download>trade_by_code.csv</a> <span>values by HS code and tier</span></li>
         <li><a href="data/comparison.csv" download>comparison.csv</a> <span>indexes, ratios and mirror gaps</span></li>
         <li><a href="data/availability.csv" download>availability.csv</a> <span>which source has which year</span></li>
+        <li><a href="data/ban_monthly.csv" download>ban_monthly.csv</a> <span>monthly series for the April 2026 ban</span></li>
         <li><a href="data/chpl_hs_codes.csv" download>chpl_hs_codes.csv</a> <span>the list of codes and tiers</span></li>
       </ul>
     </div>
@@ -179,7 +202,7 @@
 </footer>
 
 <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
-<script src="data.js?v=0.5"></script>
-<script src="app.js?v=0.5"></script>
+<script src="data.js?v=0.6"></script>
+<script src="app.js?v=0.6"></script>
 </body>
 </html>

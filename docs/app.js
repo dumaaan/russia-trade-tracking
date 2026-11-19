@@ -587,6 +587,121 @@
       : "Not enough data for this country.";
   }
 
+  // ---------- the April 2026 ban: monthly columns ----------
+  // One panel per series, each on its own scale (said in the caption), with the ban month marked
+  // and short lines for the average before and after the ban.
+  const fmtShort = (v) => (v >= 1e6 ? `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M` : v >= 1e3 ? `${Math.round(v / 1e3)}k` : `${Math.round(v)}`);
+  const monthName = (mm) => new Date(mm + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+
+  function monthChart(container, opts) {
+    const W = container.clientWidth, H = container.clientHeight;
+    if (W < 120 || H < 80) return;
+    const ms = opts.months, vals = opts.values;
+    const m = { top: 18, right: 8, bottom: 24, left: 44 };
+    const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
+    const maxV = Math.max(...vals.filter((v) => v != null), opts.before || 0, opts.after || 0, 1e-9);
+    const ticks = niceTicks(maxV, 3);
+    const top = ticks[ticks.length - 1];
+    const y = (v) => m.top + ih - (v / top) * ih;
+    const bw = iw / ms.length;
+    const x = (i) => m.left + i * bw;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria });
+    for (const t of ticks) {
+      el("line", { x1: m.left, x2: W - m.right, y1: y(t), y2: y(t), stroke: css("--grid"), "stroke-width": 1 }, svg);
+      const lab = el("text", { x: m.left - 6, y: y(t) + 4, "text-anchor": "end" }, svg);
+      lab.textContent = t === top ? `$${fmtShort(t)}` : fmtShort(t);
+    }
+    const col = css(opts.color);
+    ms.forEach((mm, i) => {
+      const v = vals[i];
+      if (v == null) {
+        // not reported: a short tick on the baseline, never a zero-height column
+        el("line", { x1: x(i) + 2, x2: x(i) + bw - 2, y1: m.top + ih + 3, y2: m.top + ih + 3, stroke: css("--text-muted"), "stroke-width": 1, "stroke-dasharray": "1 2" }, svg);
+        return;
+      }
+      const win = (mm >= D.ban.before[0] && mm <= D.ban.before[1]) || mm >= "2026-05";
+      const r = el("rect", {
+        x: x(i) + 1, y: y(v), width: Math.max(bw - 2, 1), height: Math.max(m.top + ih - y(v), 0),
+        fill: col, "fill-opacity": win ? 0.9 : 0.3,
+      }, svg);
+      r.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, monthName(mm), [{ color: col, value: `$${fmtShort(v)}`, label: opts.label }]));
+      r.addEventListener("pointerleave", hideTip);
+    });
+    ms.forEach((mm, i) => {
+      if (mm.endsWith("-01")) {
+        const t = el("text", { x: x(i), y: H - 6 }, svg);
+        t.textContent = mm.slice(0, 4);
+      }
+    });
+    const bi = ms.indexOf(D.ban.transition);
+    if (bi >= 0) {
+      const bx = x(bi) + bw * (22 / 30);
+      el("line", { x1: bx, x2: bx, y1: m.top - 6, y2: m.top + ih, stroke: css("--text-primary"), "stroke-width": 1.25 }, svg);
+      const t = el("text", { x: bx - 4, y: m.top + 2, "text-anchor": "end", class: "ban-lbl" }, svg);
+      t.textContent = "ban";
+    }
+    const avgLine = (a, b, v) => {
+      const i0 = ms.indexOf(a), i1 = ms.indexOf(b);
+      if (i0 < 0 || i1 < 0 || v == null) return;
+      el("line", { x1: x(i0), x2: x(i1) + bw, y1: y(v), y2: y(v), stroke: css("--text-primary"), "stroke-width": 1.5 }, svg);
+    };
+    avgLine(D.ban.before[0], D.ban.before[1], opts.before);
+    avgLine("2026-05", ms[ms.length - 1], opts.after);
+    container.replaceChildren(svg);
+  }
+
+  function banStudy() {
+    const B = D.ban;
+    const S = B.summary.series;
+    const get = (flow, country, group) => {
+      const rows = B.monthly.filter((r) => r[0] === flow && r[1] === country && r[2] === group);
+      return { months: rows.map((r) => r[3]), values: rows.map((r) => r[4]), s: S[`${flow}|${country}|${group}`] };
+    };
+    const others = Object.keys(B.summary.neighbours).filter((c) => c !== "KZ");
+    const sumOf = (flow, list, group) => {
+      const parts = list.map((c) => get(flow, c, group)).filter((p) => p.months.length);
+      const ms = parts[0].months;
+      const values = ms.map((_, i) => parts.reduce((t, p) => t + (p.values[i] || 0), 0));
+      const add = (k) => parts.reduce((t, p) => t + ((p.s && p.s[k]) || 0), 0);
+      return { months: ms, values, s: { before_avg: add("before_avg"), after_avg: add("after_avg"), year_ago_avg: add("year_ago_avg") } };
+    };
+    const panels = [
+      { t: "EU exports to Kyrgyzstan", sub: "the two banned codes", d: get("eu", "KG", "banned"), color: "--flow-eu" },
+      { t: "EU exports to Kyrgyzstan", sub: "the other 47 codes (control)", d: get("eu", "KG", "other"), color: "--flow-eu" },
+      { t: "EU exports to Kazakhstan", sub: "the two banned codes", d: get("eu", "KZ", "banned"), color: "--flow-eu" },
+      { t: "EU exports to Armenia", sub: "the two banned codes", d: get("eu", "AM", "banned"), color: "--flow-eu" },
+      { t: "Kyrgyzstan's exports to Russia", sub: "the two banned codes", d: get("ru", "KG", "banned"), color: "--flow-ru" },
+      { t: "Kazakhstan's exports to Russia", sub: "the two banned codes", d: get("ru", "KZ", "banned"), color: "--flow-ru", note: "Kazakhstan did not report March to December 2024 (dotted)." },
+    ];
+    const ch = (s) => (s && s.before_avg ? 100 * (s.after_avg / s.before_avg - 1) : null);
+    const pct = (v) => (v == null ? "—" : `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}%`);
+    const grid = document.getElementById("ban-grid");
+    grid.replaceChildren(...panels.map((p) => h("figure", {}, [
+      h("figcaption", {}, [p.t, h("span", { text: `${p.sub}; ${pct(ch(p.d.s))} after the ban` })]),
+      h("div", { class: "chart sm" }),
+      p.note ? h("p", { class: "panel-note", text: p.note }) : null,
+    ])));
+    panels.forEach((p, i) => monthChart(grid.children[i].querySelector(".chart"), {
+      months: p.d.months, values: p.d.values, before: p.d.s && p.d.s.before_avg, after: p.d.s && p.d.s.after_avg,
+      color: p.color, label: `${p.t}, ${p.sub}`, aria: `${p.t}, ${p.sub}, monthly values in USD`,
+    }));
+
+    const cells = (s) => [s ? `$${fmtShort(s.before_avg)}` : "—", s ? `$${fmtShort(s.after_avg)}` : "—", pct(ch(s)),
+      s && s.year_ago_avg ? pct(100 * (s.after_avg / s.year_ago_avg - 1)) : "—"];
+    const rows = panels.map((p) => [`${p.t}, ${p.sub}`, ...cells(p.d.s)]);
+    for (const c of Object.keys(B.summary.neighbours)) {
+      rows.push([`EU exports to ${B.summary.neighbours[c]}, the two banned codes`, ...cells(get("eu", c, "banned").s)]);
+    }
+    table(document.getElementById("ban-table"), ["Series", "Before, a month", "After, a month", "Change", "Against the same months of 2025"], rows);
+
+    const tr = S["eu|KG|banned"], co = S["eu|KG|other"], kg2 = S["ru|KG|banned"];
+    const lastEU = monthName(B.summary.comext_last_month), lastRU = monthName(B.summary.comtrade_last_month.KG);
+    document.getElementById("ban-sub").textContent =
+      `After the ban, EU exports of the two codes to Kyrgyzstan changed ${pct(ch(tr))} (from $${fmtShort(tr.before_avg)} to $${fmtShort(tr.after_avg)} a month). ` +
+      `The other codes changed ${pct(ch(co))}. Kyrgyzstan's exports of the same two codes to Russia changed ${pct(ch(kg2))}. ` +
+      `EU data to ${lastEU}, Kyrgyz data to ${lastRU}.`;
+  }
+
   // ---------- section 3 ----------
   function goods() {
     const { goodsCountry: c, goodsFlow: f, goodsYear: yr } = state;
@@ -721,11 +836,12 @@
   function renderFiltered() {
     document.getElementById("f-note").textContent = `Every chart shows ${basketPhrase()} in ${state.currency}, against the ${baseLabel()}.`;
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
+    if (D.ban) banStudy();
   }
   function renderAll() { renderFiltered(); crossChecks(); availability(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeDiagram(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();
