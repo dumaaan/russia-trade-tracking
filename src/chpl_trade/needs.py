@@ -12,6 +12,7 @@ from .fetch import query_codes
 # Reporters (UN M49)
 KG, KZ, UZ, GE, AZ, MN = 417, 398, 860, 268, 31, 496
 CN = 156
+HK = 344
 RU = config.RUSSIA_M49
 
 
@@ -28,6 +29,7 @@ def months(start, end):
 
 
 def declare_all():
+    t = date.today()
     years = [str(y) for y in config.YEARS]
     codes = query_codes()
     # Main module: Kazakhstan and Kyrgyzstan, exports to Russia and imports from the 27 EU states.
@@ -39,6 +41,16 @@ def declare_all():
     # Both are flow X, so the planner joins them into one request. The EU leg is from Comext.
     comtrade.need_weight("A", "X", [KG, UZ, KZ], [RU], years, codes)
     comtrade.need_weight("A", "X", [CN], [KG, UZ, KZ], years, codes)
+    # Price per kg around the April 2026 ban: monthly weights from April 2025 (the ban chapter's first
+    # month). All listed codes cost no more calls than the two banned codes: a call is limited by
+    # 12 months, not by codes.
+    bms = months("2025-04", f"{t.year}-{t.month:02d}")
+    comtrade.need_weight("M", "X", [KG, UZ, KZ], [RU], bms, codes)
+    comtrade.need_weight("M", "M", [KG, UZ, KZ], [CN], bms, codes)
+    # Hong Kong as a supplier: its exports to the route countries (with weight, at no extra cost),
+    # and the route countries' imports from Hong Kong, for the mirror check.
+    comtrade.need_weight("A", "X", [HK], [KG, UZ, KZ], years, codes + ["TOTAL"])
+    comtrade.need("A", "M", [KG, UZ, KZ], [HK], years, codes + ["TOTAL"])
     # China leg of the mirror check: the route countries' imports from China, as they report them
     # (China's side is the "China as a supplier" need below).
     comtrade.need("A", "M", [KG, UZ, KZ], [CN], years, codes + ["TOTAL"])

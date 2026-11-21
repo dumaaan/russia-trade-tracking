@@ -437,3 +437,15 @@ table.xc a { color: var(--ink-2); }
 .uv-svg .uv-span { stroke: var(--ink-3); stroke-width: 1; stroke-opacity: 0.6; }
 .uv-svg .uv-dot:focus-visible { outline: none; stroke-width: 3; }
 #uv-table td.lbl { text-align: left; white-space: normal; font-stretch: 100%; font-weight: 500; }
+
+/* ---------- designations ---------- */
+.des-key .k-us::before, .des-key .k-uk::before, .des-key .k-eu::before { border-top: 0; width: 9px; height: 9px; border-radius: 50%; }
+.des-key .k-us::before { background: var(--c-kg); }
+.des-key .k-uk::before { background: var(--c-kz); }
+.des-key .k-eu::before { background: var(--flow-eu); }
+.des-block { margin-bottom: 8px; }
+.des-svg { display: block; overflow: visible; }
+.des-svg .des-lbl { font-size: 11.5px; fill: var(--ink-3); }
+.des-svg .des-tick { font-size: 11px; fill: var(--ink-3); }
+.des-svg .des-year { stroke: var(--rule); stroke-width: 0.75; }
+.des-svg .des-dot:focus-visible { outline: none; stroke-width: 3; }

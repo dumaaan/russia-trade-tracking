@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.13">
+  <link rel="stylesheet" href="style.css?v=1.14">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -121,7 +121,9 @@
       <details class="table-view"><summary>Show the numbers</summary><div id="mirror-table"></div></details>
       <h3 class="ctl-group" id="mcn-h">The same check for China</h3>
       <p class="aside">Imports from China as each country records them, divided by China's exports to it as China
-        records them. Kazakhstan gives no product detail for imports from China for 2020–2022.</p>
+        records them. Kazakhstan gives no product detail for imports from China for 2020–2022. Importers record the
+        country of origin, so Chinese goods re-exported by Hong Kong count as imports from China: this can put a ratio
+        above 100%.</p>
       <div class="legend" id="mcn-legend"></div>
       <div class="chart" id="mcn-chart"></div>
       <p class="readout" id="mcn-summary"></p>
@@ -190,6 +192,26 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" id="designations" aria-labelledby="des-h">
+    <div class="ch-text">
+      <h2 id="des-h">Sanctions designations next to the flows</h2>
+      <p class="finding" id="des-sub"></p>
+      <p class="finding">Bars: each country's listed exports to Russia, a month, on the row's own scale. Dots: one
+        organisation in the country, designated in that month, coloured by the list that designated it.</p>
+      <p class="aside">Source: OpenSanctions (CC BY-NC 4.0): US Treasury (OFAC), US trade list with the BIS Entity
+        List, EU financial sanctions, UK sanctions list. Organisations only. The OFAC file has no designation date;
+        there the date is the day OpenSanctions first saw the entry (hollow dots), within a few days of known
+        designations. The EU list of companies under export controls (Annex IV) is not in the EU file, so EU
+        listings are fewer than in fact.</p>
+    </div>
+    <div class="ch-figure">
+      <p class="scope">Organisations in Kazakhstan, Kyrgyzstan and Uzbekistan · from 24 February 2022 · the filters at the top do not change this</p>
+      <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span></p>
+      <div id="des-plot"></div>
+      <details class="table-view"><summary>Show the list</summary><div id="des-table"></div></details>
+    </div>
+  </section>
+
   <section class="chapter chapter-wide wrap" id="events" aria-labelledby="ev-h">
     <div class="ch-text">
       <h2 id="ev-h">Sanctions events, 2023–2025</h2>
@@ -219,6 +241,7 @@
       </p>
       <p class="finding" id="ban-did"></p>
       <p class="finding" id="ban-nb"></p>
+      <p class="finding" id="ban-uv"></p>
       <p class="aside" id="ban-months"></p>
       <div class="seg" role="radiogroup" aria-label="Goods" id="ban-goods"></div>
     </div>
@@ -278,7 +301,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.12"></script>
-<script src="app.js?v=1.25"></script>
+<script src="data.js?v=1.15"></script>
+<script src="app.js?v=1.29"></script>
 </body>
 </html>

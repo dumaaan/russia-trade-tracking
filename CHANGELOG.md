@@ -2,6 +2,23 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.10.0 — 2026-11-21
+
+### Added
+- **Designations:** organisations in Kazakhstan, Kyrgyzstan and Uzbekistan on the US OFAC, US
+  trade (with BIS), EU financial and UK sanctions lists since 24 February 2022 (95), from
+  OpenSanctions (CC BY-NC 4.0), next to each country's monthly listed exports to Russia.
+  Organisations only. OFAC gives no dates: there the date is when OpenSanctions first saw the
+  entry. The EU export-control list (Annex IV) is not in the EU file.
+- **Hong Kong as a supplier:** its exports of the listed goods to the three countries. In 2023 it
+  shipped more to Uzbekistan than China did, mostly chips.
+- **Ban chapter:** price per kg of 8517.62 before and after the ban, on each leg.
+- **Comtrade:** monthly weights from April 2025, and Hong Kong's trade (7 calls).
+
+### Changed
+- The supplier gap rule uses the median of the other years, not the mean, so one large year does
+  not make normal years look like gaps.
+
 ## 1.9.0 — 2026-11-21
 
 ### Added

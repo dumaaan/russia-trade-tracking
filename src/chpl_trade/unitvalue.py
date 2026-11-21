@@ -45,10 +45,93 @@ def fetch_comext(partner, refresh=False):
     return out
 
 
+BAN = ["845710", "851762"]
+BAN_START, BEFORE_END, AFTER_START = "2025-04", "2026-03", "2026-05"  # the ban chapter's windows
+
+
+def _months(start, end):
+    y, m = map(int, start.split("-"))
+    ey, em = map(int, end.split("-"))
+    out = []
+    while (y, m) <= (ey, em):
+        out.append(f"{y:04d}-{m:02d}")
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
+def fetch_comext_monthly(partner, refresh=False):
+    """EU-27 monthly exports of the two banned codes: value and net weight."""
+    from datetime import date
+    out = RAW / f"comext_eu27_to_{partner}_ban_qty_M.json"
+    if out.exists() and not refresh:
+        return out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    t = date.today()
+    params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"), ("freq", "M"),
+              ("indicators", "VALUE_IN_EUROS"), ("indicators", "QUANTITY_IN_100KG")]
+    params += [("product", c) for c in BAN]
+    params += [("time", m) for m in _months(BAN_START, f"{t.year}-{t.month:02d}")]
+    out.write_text(json.dumps(_stamp(_get(COMEXT_URL, params).json())))
+    return out
+
+
 def fetch_all(refresh=False):
     for p, (name, _) in COUNTRIES.items():
         print(f"Comext weights: EU-27 -> {name}")
         fetch_comext(p, refresh)
+    for p in ("KG", "KZ"):
+        fetch_comext_monthly(p, refresh)
+
+
+def build_ban():
+    """Price per kg of the two banned codes before and after the ban, on each leg, KG and KZ."""
+    from datetime import date
+    fx = pd.read_csv(config.RAW / "events" / "ecb_usd_per_eur_monthly.csv")
+    fx = dict(zip(fx["month"], fx["usd_per_eur"]))
+    t = date.today()
+    months = _months(BAN_START, f"{t.year}-{t.month:02d}")
+    cells = {}
+    for p in ("KG", "KZ"):
+        d = json.loads((RAW / f"comext_eu27_to_{p}_ban_qty_M.json").read_text())
+        dims, sizes = d["id"], d["size"]
+        index = {k: {v: c for c, v in d["dimension"][k]["category"]["index"].items()} for k in dims}
+        tmp = {}
+        for flat, value in d["value"].items():
+            flat = int(flat)
+            pos = {}
+            for dim, size in reversed(list(zip(dims, sizes))):
+                pos[dim] = flat % size
+                flat //= size
+            k = (index["product"][pos["product"]], index["time"][pos["time"]])
+            tmp.setdefault(k, {})[index["indicators"][pos["indicators"]]] = float(value)
+        for (c, m), v in tmp.items():
+            if v.get("VALUE_IN_EUROS") and v.get("QUANTITY_IN_100KG") and m in fx:
+                cells[("eu", p, c, m)] = (v["VALUE_IN_EUROS"] * fx[m], v["QUANTITY_IN_100KG"] * 100)
+        m49 = COUNTRIES[p][1]
+        for leg, flow, rep, par in (("cn", "M", m49, CN), ("ru", "X", m49, config.RUSSIA_M49)):
+            for m in months:
+                per = m.replace("-", "")
+                vals = {r["cmdCode"]: r["primaryValue"] for r in ct.records("M", flow, rep, par, per)}
+                for c, (kg, *_) in ct.weights("M", flow, rep, par, per).items():
+                    if c in BAN and vals.get(c) and kg:
+                        cells[(leg, p, c, m)] = (vals[c], kg)
+    before = _months(BAN_START, BEFORE_END)
+    after = [m for m in months if m >= AFTER_START]
+    out = {}
+    for leg in ("eu", "cn", "ru"):
+        for p in ("KG", "KZ"):
+            for c in BAN:
+                res = {}
+                for name, ms in (("before", before), ("after", after)):
+                    v = sum(cells[(leg, p, c, m)][0] for m in ms if (leg, p, c, m) in cells)
+                    kg = sum(cells[(leg, p, c, m)][1] for m in ms if (leg, p, c, m) in cells)
+                    res[name] = {"usd": v, "kg": kg, "usd_per_kg": v / kg if kg else None,
+                                 "months": sum(1 for m in ms if (leg, p, c, m) in cells)}
+                out[f"{leg}|{p}|{c}"] = res
+    meta = {"before": [before[0], before[-1]], "after": [after[0], after[-1]] if after else None, "prices": out,
+            "note": "China leg: the importing country's records of imports from China."}
+    (config.PROCESSED / "ban_unit_values.json").write_text(json.dumps(meta, indent=1) + "\n")
+    return meta
 
 
 def _comext(partner):

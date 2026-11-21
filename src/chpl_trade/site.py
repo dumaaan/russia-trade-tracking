@@ -97,7 +97,25 @@ def unit_value_data():
     if not path.exists():
         return None
     d = pd.read_csv(path, dtype={"hs6": str})
-    return {"rows": [[r.leg, r.country, int(r.year), r.hs6, _num(r.usd), _num(r.kg), bool(r.estimated)] for r in d.itertuples()]}
+    bpath = config.PROCESSED / "ban_unit_values.json"
+    return {"rows": [[r.leg, r.country, int(r.year), r.hs6, _num(r.usd), _num(r.kg), bool(r.estimated)] for r in d.itertuples()],
+            "ban": json.loads(bpath.read_text()) if bpath.exists() else None}
+
+
+def designations_data():
+    """Designated organisations (KZ, KG, UZ) and monthly listed exports to Russia, if built."""
+    path, mpath = config.PROCESSED / "designations.csv", config.PROCESSED / "designations_meta.json"
+    fpath = config.PROCESSED / "events_monthly.csv"
+    if not (path.exists() and mpath.exists() and fpath.exists()):
+        return None
+    d = pd.read_csv(path)
+    f = pd.read_csv(fpath)
+    f = f[(f["leg"] == "ru") & (f["group"] == "listed") & (f["month"] >= "2022-01")]
+    return {
+        "rows": [[r.list, r.country, r.date, r.name, r.date_source != "list"] for r in d.itertuples()],
+        "flows": {c: [[m, _num(v)] for m, v in zip(g["month"], g["usd"])] for c, g in f.groupby("country")},
+        "meta": json.loads(mpath.read_text()),
+    }
 
 
 def events_data():
@@ -157,6 +175,7 @@ def export():
         "eventStudy": events_data(),
         "mirrorCn": mirror_cn_data(),
         "unitValues": unit_value_data(),
+        "designations": designations_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -165,7 +184,7 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")

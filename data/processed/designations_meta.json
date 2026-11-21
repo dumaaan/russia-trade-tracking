@@ -1,0 +1,12 @@
+{
+  "source": "OpenSanctions, CC BY-NC 4.0",
+  "lists": {
+    "us_ofac_sdn": "US OFAC",
+    "us_trade_csl": "US trade list (incl. BIS)",
+    "eu_fsf": "EU",
+    "gb_fcdo_sanctions": "UK"
+  },
+  "built": "2026-11-21",
+  "start": "2022-02-24",
+  "first_seen_dates": 51
+}

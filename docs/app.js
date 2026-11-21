@@ -1015,7 +1015,7 @@
       return YEARS.map((y) => (missing.has(`${sup}|${dest}|${y}`) ? null : conv(sum[y], y)));
     };
     const dests = Object.keys(meta.destinations).filter((d) => d !== "RU"); // the detour only
-    const rows = dests.map((d) => ({ d, name: meta.destinations[d], eu: ser("eu", d), cn: ser("cn", d) }));
+    const rows = dests.map((d) => ({ d, name: meta.destinations[d], eu: ser("eu", d), cn: ser("cn", d), hk: ser("hk", d) }));
     const ly = YEARS.length - 1, yr = YEARS[ly];
 
     // Heading and finding, from the data (they follow the filters).
@@ -1029,12 +1029,18 @@
     document.getElementById("sup-sub").textContent =
       `In ${yr}, China shipped ${fmtMoney(sumCN)} of these goods to ${both.map((r) => r.name).join(", ").replace(/, ([^,]*)$/, " and $1")}` +
       (ratio ? `, ${ratio >= 1 ? `${fmtX(ratio).replace("×", "")} times as much as the EU (${fmtMoney(sumEU)})` : `against ${fmtMoney(sumEU)} from the EU`}. ` : ". ") +
-      (more.length ? `${more.join(" and ")} ${more.length > 1 ? "are the exceptions" : "is the exception"}: there the EU ships more.` : "");
+      (more.length ? `${more.join(" and ")} ${more.length > 1 ? "are the exceptions" : "is the exception"}: there the EU ships more. ` : "") +
+      (() => {
+        // Hong Kong: its largest year to one country, if it shipped more than China that year.
+        let best = null;
+        for (const r of route) r.hk.forEach((v, i) => { if (v != null && r.cn[i] != null && v > r.cn[i] && (!best || v > best.v)) best = { r, i, v }; });
+        return best ? `Hong Kong, which re-exports mostly Chinese goods, shipped ${fmtMoney(best.v)} to ${best.r.name} in ${YEARS[best.i]}, more than China (${fmtMoney(best.r.cn[best.i])}); in ${yr}, ${fmtMoney(best.r.hk[ly])}.` : "";
+      })();
 
     const grid = document.getElementById("sup-grid");
     // Small multiples on one shared log scale: the same height is the same money in every panel, and the
     // gap between the two lines is the China/EU ratio, readable for small and large countries alike.
-    const pos = rows.flatMap((r) => [...r.eu, ...r.cn]).filter((v) => v != null && v > 0);
+    const pos = rows.flatMap((r) => [...r.eu, ...r.cn, ...r.hk]).filter((v) => v != null && v > 0);
     const dom = [Math.min(...pos) * 0.8, Math.max(...pos) * 1.25];
     const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : String(t));
     grid.replaceChildren(...rows.map((r) => h("figure", { class: "sup-cell" }, [
@@ -1045,15 +1051,16 @@
       series: [
         { label: `EU exports to ${r.name}`, endName: "from the EU", color: "--flow-eu", values: r.eu },
         { label: `China's exports to ${r.name}`, endName: "from China", color: "--text-primary", values: r.cn, marker: "square", gapNote: "no Chinese data" },
+        { label: `Hong Kong's exports to ${r.name}`, endName: "from Hong Kong", color: "--text-primary", values: r.hk, dash: "4 3", tint: 0.55 },
       ],
       fmt: fmtMoney, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf,
       tickFilter: (t) => /^(0\.0*)?10*$/.test(String(t)), // powers of ten only (10, 100, $1bn): fewer labels than data points
       topTickFmt: (t) => `${cur()}${t >= 1000 ? `${t / 1000}bn` : `${t}M`}`,
-      aria: `${r.name}: exports of the listed goods from the EU and from China, ${state.currency} million`,
+      aria: `${r.name}: exports of the listed goods from the EU, from China and from Hong Kong, ${state.currency} million`,
     }));
 
     table(document.getElementById("sup-table"), ["Destination", "Supplier", ...YEARS.map(String)],
-      rows.flatMap((r) => [[r.name, "EU", ...r.eu.map(fmtM)], [r.name, "China", ...r.cn.map(fmtM)]]));
+      rows.flatMap((r) => [[r.name, "EU", ...r.eu.map(fmtM)], [r.name, "China", ...r.cn.map(fmtM)], [r.name, "Hong Kong", ...r.hk.map(fmtM)]]));
   }
 
   // ---------- sparkline: one row's values on its own scale ----------
@@ -1454,6 +1461,86 @@
       "Only codes with a weight on both legs count. A few codes with small values can move Kyrgyzstan's and Uzbekistan's index a lot.";
   }
 
+
+  // ---------- sanctions designations next to the flows ----------
+  function designationStudy() {
+    const S = D.designations;
+    const NAMES = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const group = (l) => (l.startsWith("US") ? "US" : l);
+    const COL = { US: "--c-kg", UK: "--c-kz", EU: "--flow-eu" };
+    const order = ["KZ", "KG", "UZ"];
+    const flows = S.flows;
+    const months = [...new Set(order.flatMap((c) => (flows[c] || []).map((x) => x[0])))].sort();
+    const last = months[months.length - 1];
+    const dmonths = [...new Set(S.rows.map((r) => r[2].slice(0, 7)))].filter((m) => m > last);
+    const all = [...months, ...dmonths].sort();
+    const fmtD = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    // Headline and summary from the data.
+    {
+      const count = Object.fromEntries(order.map((c) => [c, S.rows.filter((r) => r[1] === c).length]));
+      const total = S.rows.length;
+      const top = [...order].sort((a, b) => count[b] - count[a])[0];
+      const avg = (c, from, to) => { const v = (flows[c] || []).filter((x) => x[0] >= from && x[0] <= to && x[1] != null).map((x) => x[1]); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+      const lastM = (c) => { const f = (flows[c] || []).filter((x) => x[1] != null); return f.length ? f[f.length - 1][0] : null; };
+      const back12 = (m) => { const [y, mo] = m.split("-").map(Number); const t = y * 12 + mo - 1 - 11; return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, "0")}`; };
+      document.getElementById("des-h").textContent = `${count[top]} of ${total} designated organisations are in ${NAMES[top]}`;
+      document.getElementById("des-sub").textContent = order.map((c) => {
+        const lm = lastM(c), a = avg(c, "2023-01", "2023-12"), b = lm ? avg(c, back12(lm), lm) : null;
+        return `${NAMES[c]}: ${count[c]} organisations; listed exports to Russia ${moneyK(a)} a month in 2023, ${moneyK(b)} in the last 12 months of data`;
+      }).join(". ") + ".";
+    }
+    const box = document.getElementById("des-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 0 : 92, R = 6, barH = 46, gap = 3;
+    const x0 = (i) => L + (i / all.length) * (W - L - R), bw = (W - L - R) / all.length;
+    const dotR = Math.max(1.8, Math.min(4, bw / 2 - 0.4)); // dots of neighbouring months must not touch
+    const kids = [];
+    for (const c of order) {
+      const f = Object.fromEntries((flows[c] || []).map((x) => [x[0], x[1]]));
+      const rows = S.rows.filter((r) => r[1] === c);
+      const byM = {};
+      for (const r of rows) (byM[r[2].slice(0, 7)] = byM[r[2].slice(0, 7)] || []).push(r);
+      const stack = Math.max(1, ...Object.values(byM).map((v) => v.length));
+      const H = 16 + barH + 8 + stack * (dotR * 2 + gap) + 18;
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "des-svg", role: "img",
+        "aria-label": `${NAMES[c]}: monthly listed exports to Russia and ${rows.length} designated organisations` });
+      const vals = all.map((m) => f[m]).filter((v) => v != null);
+      const max = Math.max(...vals, 1);
+      const yb = 16 + barH;
+      if (!small) { const t = el("text", { x: 0, y: 16 + barH / 2, class: "des-lbl" }, svg); t.textContent = "to Russia"; const t2 = el("text", { x: 0, y: yb + 8 + dotR + 4, class: "des-lbl" }, svg); t2.textContent = "designated"; }
+      const mt = el("text", { x: L, y: 11, class: "des-tick" }, svg); mt.textContent = `max ${moneyK(max)} a month`;
+      all.forEach((m, i) => {
+        const v = f[m];
+        if (v == null) {
+          if (m <= last) el("line", { x1: x0(i) + 1, x2: x0(i) + bw - 1, y1: yb - 0.5, y2: yb - 0.5, stroke: css("--text-muted"), "stroke-dasharray": "1 1.5" }, svg);
+        } else {
+          const hh = (v / max) * barH;
+          const b = el("rect", { x: x0(i) + 0.5, y: yb - hh, width: Math.max(bw - 1, 0.8), height: hh, fill: css("--flow-ru"), "fill-opacity": 0.85 }, svg);
+          b.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, monthName(m), [{ color: css("--flow-ru"), value: moneyK(v), label: `${NAMES[c]} to Russia, listed goods` }]));
+          b.addEventListener("pointerleave", hideTip);
+        }
+        if (m.endsWith("-01")) {
+          el("line", { x1: x0(i), x2: x0(i), y1: 14, y2: H - 14, class: "des-year" }, svg);
+          const yt = el("text", { x: x0(i) + 2, y: H - 3, class: "des-tick" }, svg); yt.textContent = m.slice(0, 4);
+        }
+        (byM[m] || []).forEach((r, k) => {
+          const g = group(r[0]), col = css(COL[g]);
+          const dot = el("circle", { cx: x0(i) + bw / 2, cy: yb + 8 + dotR + k * (dotR * 2 + gap), r: dotR, fill: r[4] ? css("--paper") : col, stroke: col, "stroke-width": 1.6, tabindex: 0, class: "des-dot" }, svg);
+          const tip = (cx, cy) => showTip(cx, cy, r[3], [{ color: col, value: fmtD(r[2]), label: `${r[0]}${r[4] ? " (date first seen by OpenSanctions)" : ""}` }]);
+          dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+          dot.addEventListener("pointerleave", hideTip);
+          dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
+          dot.addEventListener("blur", hideTip);
+        });
+      });
+      el("line", { x1: L, x2: W - R, y1: yb, y2: yb, stroke: css("--axis"), "stroke-width": 0.75 }, svg);
+      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: `${NAMES[c]} · ${rows.length} organisations` }), svg]));
+    }
+    box.replaceChildren(...kids);
+    table(document.getElementById("des-table"), ["Date", "Country", "List", "Organisation"],
+      S.rows.map((r) => [r[2] + (r[4] ? " (first seen)" : ""), NAMES[r[1]], r[0], r[3]]));
+  }
+
   // ---------- sanctions events: three questions ----------
   const pctChange = (after, before) => {
     if (after == null || before == null) return "no data";
@@ -1564,6 +1651,15 @@
         ? `Neighbour codes (the other codes of headings 8457 and 8517), against the same months of 2025: EU shipments to Kyrgyzstan ` +
           `${nb("eu", "KG", "bansib")} (banned codes ${nb("eu", "KG", "ban")}); Kyrgyz imports from China ${nb("cn", "KG", "bansib")} ` +
           `(banned codes ${nb("cn", "KG", "ban")}); exports to Russia ${nb("ru", "KG", "bansib")} (banned codes ${nb("ru", "KG", "ban")}).`
+        : "";
+      // Price per kg of 8517.62 to Russia, before and after, next to the EU and China prices.
+      const BU = D.unitValues && D.unitValues.ban && D.unitValues.ban.prices;
+      const pk = (leg, c, w) => { const x = BU && BU[`${leg}|${c}|851762`]; return x && x[w].usd_per_kg != null && x[w].kg >= 1000 ? x[w].usd_per_kg : null; };
+      const dk = (v) => (v == null ? "too little weight" : `$${Math.round(v)}`);
+      document.getElementById("ban-uv").textContent = pk("ru", "KG", "before") != null
+        ? `Price per kg of 8517.62 (routers and data transmitters), before and after: Kyrgyzstan to Russia ${dk(pk("ru", "KG", "before"))} and ${dk(pk("ru", "KG", "after"))}; ` +
+          `EU to Kyrgyzstan ${dk(pk("eu", "KG", "before"))} and ${dk(pk("eu", "KG", "after"))}; China to Kyrgyzstan (Kyrgyz records) ${dk(pk("cn", "KG", "before"))} and ${dk(pk("cn", "KG", "after"))}. ` +
+          `Kazakhstan to Russia: ${dk(pk("ru", "KZ", "before"))} and ${dk(pk("ru", "KZ", "after"))}.`
         : "";
       document.getElementById("ban-months").textContent =
         `The data after the ban are short: ${n("eu|KG|banned")} months for EU exports, ${n("cn|KG|banned")} for China, ${n("ru|KG|banned")} for exports to Russia. ` +
@@ -1772,7 +1868,7 @@
   seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
 
   document.getElementById("built").textContent =
-    `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, Kazakhstan Bureau of National Statistics, ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;
+    `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, Kazakhstan Bureau of National Statistics, OpenSanctions (CC BY-NC 4.0), ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;
 
   // A line above each chart that the filters change, so the reader sees what it shows.
   function scopes() {
@@ -1793,6 +1889,7 @@
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
     if (D.mirrorCn) mirrorChina();
     if (D.unitValues) uvStudy();
+    if (D.designations) designationStudy();
     if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
@@ -1803,7 +1900,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

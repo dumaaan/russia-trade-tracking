@@ -21,6 +21,7 @@ from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
 
 RAW = config.RAW / "suppliers"
 CN = 156
+HK = 344  # Hong Kong: re-exports mostly Chinese goods; its exports include re-exports
 # Comext partner code -> (name, UN M49)
 DESTINATIONS = {
     "KG": ("Kyrgyzstan", 417), "UZ": ("Uzbekistan", 860), "KZ": ("Kazakhstan", 398),
@@ -78,18 +79,23 @@ def build():
         eu["usd"] = eu["eur"] * eu["year"].map(fx)
         eu["supplier"], eu["dest"] = "eu", p
         frames.append(eu[["supplier", "dest", "year", "code", "usd"]])
-        rows = []
-        recs = {y: ct.records("A", "X", CN, m49, y) for y in config.YEARS}
-        totals = {y: sum(r["primaryValue"] for r in recs[y] if r["cmdCode"] == "TOTAL") for y in config.YEARS}
-        for y in config.YEARS:
-            others = [t for yy, t in totals.items() if yy != y and t]
-            # A total of all goods that is absent, or under 5% of the other years' average, is a
-            # reporting gap (China to Armenia, 2023-2024), not a real collapse of trade.
-            if not totals[y] or (others and totals[y] < 0.05 * sum(others) / len(others)):
-                missing.append(f"cn|{p}|{y}")
-                continue
-            rows += [{"supplier": "cn", "dest": p, "year": y, "code": r["cmdCode"], "usd": r["primaryValue"]} for r in recs[y]]
-        frames.append(pd.DataFrame(rows, columns=["supplier", "dest", "year", "code", "usd"]))
+        for sup, rep in (("cn", CN), ("hk", HK)):
+            if sup == "hk" and p == "RU":
+                continue  # direct flows to Russia are outside the detour
+            rows = []
+            recs = {y: ct.records("A", "X", rep, m49, y) for y in config.YEARS}
+            totals = {y: sum(r["primaryValue"] for r in recs[y] if r["cmdCode"] == "TOTAL") for y in config.YEARS}
+            for y in config.YEARS:
+                others = sorted(t for yy, t in totals.items() if yy != y and t)
+                # A total of all goods that is absent, or under 5% of the other years' median, is a
+                # reporting gap, not a real collapse of trade. The median, not the mean: one large
+                # year (Hong Kong to Uzbekistan, 2023) must not make normal years look like gaps.
+                med = others[len(others) // 2] if others else 0
+                if not totals[y] or (others and totals[y] < 0.05 * med):
+                    missing.append(f"{sup}|{p}|{y}")
+                    continue
+                rows += [{"supplier": sup, "dest": p, "year": y, "code": r["cmdCode"], "usd": r["primaryValue"]} for r in recs[y]]
+            frames.append(pd.DataFrame(rows, columns=["supplier", "dest", "year", "code", "usd"]))
     df = pd.concat(frames, ignore_index=True)
     df["code"] = df["code"].map(lambda c: old_to_new.get(c, c))
     df = df[df["code"].isin(basket)]
