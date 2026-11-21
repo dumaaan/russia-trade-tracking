@@ -2,6 +2,17 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.9.0 — 2026-11-21
+
+### Added
+- **Price per kilogram:** for the largest listed codes to Russia, the price per kg from the EU
+  (Comext), from China and to Russia (Comtrade), with a year switch and a price index (the value to
+  Russia divided by the same kilograms at EU or China prices). Codes under $100k a year to Russia
+  are left out; hollow dots mark weights that the reporter estimated.
+- **Comtrade store:** every download now keeps net weight and quantity with their "estimated"
+  flags. A module can declare weight needs; a stored value without a weight is downloaded again
+  only when its weight is needed (the first time: 1 call for both legs and 7 years).
+
 ## 1.8.0 — 2026-11-21
 
 ### Added

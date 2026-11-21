@@ -423,3 +423,17 @@ table.xc a { color: var(--ink-2); }
 /* ---------- sanctions events ---------- */
 #ev-table thead th { white-space: normal; min-width: 0; }
 #ev-table td { padding-left: 8px; padding-right: 8px; }
+
+/* ---------- price per kg ---------- */
+.uv-key .k-eu::before { border-top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--flow-eu); }
+.uv-key .k-cn::before { border-top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--text-primary); }
+.uv-key .k-ru::before { border-top: 0; width: 11px; height: 11px; border-radius: 50%; background: var(--flow-ru); }
+.uv-block { margin-bottom: 10px; }
+.uv-svg { display: block; overflow: visible; }
+.uv-svg .uv-grid { stroke: var(--rule); stroke-width: 0.75; }
+.uv-svg .uv-tick { font-size: 11px; fill: var(--ink-3); }
+.uv-svg .uv-lbl { font-size: 12.5px; fill: var(--ink-2); }
+.uv-svg .uv-val { font-size: 12.5px; font-weight: 600; fill: var(--ink); font-stretch: 87.5%; }
+.uv-svg .uv-span { stroke: var(--ink-3); stroke-width: 1; stroke-opacity: 0.6; }
+.uv-svg .uv-dot:focus-visible { outline: none; stroke-width: 3; }
+#uv-table td.lbl { text-align: left; white-space: normal; font-stretch: 100%; font-weight: 500; }

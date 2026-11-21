@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.12">
+  <link rel="stylesheet" href="style.css?v=1.13">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -169,6 +169,27 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" id="unitvalue" aria-labelledby="uv-h">
+    <div class="ch-text">
+      <h2 id="uv-h">Price per kilogram</h2>
+      <p class="finding" id="uv-sub"></p>
+      <p class="finding">Each row is one code: its price per kg from the EU, from China, and to Russia, on one log scale.
+        A price to Russia near the EU price fits EU-made goods; near the China price, Chinese or other cheaper goods.</p>
+      <p class="aside">One customs code holds cheap and dear goods, so the price points to an origin but does not
+        prove it. Hollow dots: the reporter estimated the weight. Uzbekistan estimates or leaves out most weights,
+        so it has few or no rows. Codes under $100k a year to Russia are left out.</p>
+      <div class="seg" role="radiogroup" aria-label="Year" id="uv-year"></div>
+    </div>
+    <div class="ch-figure">
+      <p class="scope">The largest listed codes to Russia · current US dollars per kg · the filters at the top do not change this</p>
+      <p class="exc-key uv-key"><span class="k-eu">from the EU</span><span class="k-cn">from China</span><span class="k-ru">to Russia</span></p>
+      <div id="uv-plot"></div>
+      <h3 class="ctl-group">Price index: the value to Russia ÷ the same kilograms at the supplier's price</h3>
+      <div class="table-wrap"><table class="supertable" id="uv-table"></table></div>
+      <p class="aside" id="uv-note"></p>
+    </div>
+  </section>
+
   <section class="chapter chapter-wide wrap" id="events" aria-labelledby="ev-h">
     <div class="ch-text">
       <h2 id="ev-h">Sanctions events, 2023–2025</h2>
@@ -257,7 +278,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.11"></script>
-<script src="app.js?v=1.21"></script>
+<script src="data.js?v=1.12"></script>
+<script src="app.js?v=1.25"></script>
 </body>
 </html>

@@ -72,6 +72,9 @@ def _db():
             last_released TEXT, PRIMARY KEY (freq, reporter, period));
         CREATE TABLE IF NOT EXISTS release_checked (freq TEXT, reporter INT, checked_at TEXT, PRIMARY KEY (freq, reporter));
         CREATE TABLE IF NOT EXISTS calls (day TEXT PRIMARY KEY, n INT);
+        CREATE TABLE IF NOT EXISTS wgt (freq TEXT, flow TEXT, reporter INT, partner INT, period TEXT, cmd TEXT,
+            net_wgt REAL, wgt_est INT, qty REAL, qty_unit INT, qty_est INT,
+            PRIMARY KEY (freq, flow, reporter, partner, period, cmd));
     """)
     return con
 
@@ -79,6 +82,16 @@ def _db():
 # ------------------------------------------------------------------ needs
 
 _NEEDS = set()
+
+
+_WNEEDS = set()
+
+
+def need_weight(freq, flow, reporters, partners, periods, cmds):
+    """Declare cells whose net weight and quantity a module will read (also a value need)."""
+    need(freq, flow, reporters, partners, periods, cmds)
+    for r, p, t, c in itertools.product(reporters, partners, periods, cmds):
+        _WNEEDS.add((freq, flow, int(r), int(p), str(t), str(c)))
 
 
 def need(freq, flow, reporters, partners, periods, cmds):
@@ -173,9 +186,18 @@ class Client:
                     out.append((freq, fl, r, p, t, c))
         return out
 
-    def plan(self, needs):
+    def missing_weight(self, wneeds):
+        """Weight-needed cells with a stored non-zero value but no stored weight row. Cells with no
+        trade have no weight to get, so they cost nothing."""
+        if not wneeds:
+            return []
+        have_w = set(self.con.execute("SELECT freq, flow, reporter, partner, period, cmd FROM wgt"))
+        have_v = {tuple(r[:6]) for r in self.con.execute("SELECT freq, flow, reporter, partner, period, cmd, value FROM obs") if r[6]}
+        return [n for n in wneeds if n in have_v and n not in have_w]
+
+    def plan(self, needs, wneeds=()):
         """Group missing cells into calls: reporters x partners x periods x codes, within the limits."""
-        miss = self.missing(needs)
+        miss = sorted(set(self.missing(needs)) | set(self.missing_weight(wneeds)))
         groups = {}
         for (freq, fl, r, p, t, c) in miss:
             g = groups.setdefault((freq, fl), {"R": set(), "P": set(), "T": set(), "C": set()})
@@ -216,8 +238,11 @@ class Client:
             for x in data:
                 if (x.get("motCode", 0), x.get("customsCode", "C00"), x.get("partner2Code", 0)) != (0, "C00", 0):
                     continue
-                self.con.execute("INSERT OR REPLACE INTO obs VALUES (?,?,?,?,?,?,?)",
-                                 (k["freq"], k["flow"], x["reporterCode"], x["partnerCode"], str(x["period"]), x["cmdCode"], x["primaryValue"]))
+                key = (k["freq"], k["flow"], x["reporterCode"], x["partnerCode"], str(x["period"]), x["cmdCode"])
+                self.con.execute("INSERT OR REPLACE INTO obs VALUES (?,?,?,?,?,?,?)", (*key, x["primaryValue"]))
+                self.con.execute("INSERT OR REPLACE INTO wgt VALUES (?,?,?,?,?,?,?,?,?,?,?)", (
+                    *key, x.get("netWgt"), int(bool(x.get("isNetWgtEstimated"))), x.get("qty"),
+                    x.get("qtyUnitCode"), int(bool(x.get("isQtyEstimated")))))
             rel = self._released(k["freq"])
             self.con.executemany("INSERT OR REPLACE INTO cover VALUES (?,?,?,?,?,?,?)", [
                 (k["freq"], k["flow"], r, p, t, c, now)
@@ -227,13 +252,14 @@ class Client:
         return done
 
 
-def sync(needs=None, dry=False, verbose=True):
+def sync(needs=None, dry=False, verbose=True, wneeds=None):
     """Download what the declared needs are missing. Returns (calls planned, calls made)."""
     needs = set(needs if needs is not None else _NEEDS)
+    wneeds = set(wneeds if wneeds is not None else (_WNEEDS if needs is _NEEDS or needs == _NEEDS else ()))
     cl = Client(verbose=verbose)
     for freq in sorted({n[0] for n in needs}):
         cl.refresh_releases(freq, {n[2] for n in needs if n[0] == freq})
-    calls, nmiss = cl.plan(needs)
+    calls, nmiss = cl.plan(needs, wneeds)
     if verbose:
         _, used = cl._calls_today()
         print(f"Comtrade: {len(needs)} cells needed, {nmiss} missing or revised, {len(calls)} calls planned "
@@ -249,6 +275,15 @@ def sync(needs=None, dry=False, verbose=True):
 
 
 # ------------------------------------------------------------------ reading
+
+def weights(freq, flow, reporter, partner, period):
+    """{cmd: (net weight kg, estimated?, quantity, unit code, estimated?)} for one cell group."""
+    con = _db()
+    q = ("SELECT cmd, net_wgt, wgt_est, qty, qty_unit, qty_est FROM wgt WHERE freq=? AND flow=? AND reporter=? "
+         "AND partner=? AND period=?")
+    return {c: (w, bool(we), qn, qu, bool(qe)) for c, w, we, qn, qu, qe in
+            con.execute(q, (freq, flow, int(reporter), int(partner), str(period)))}
+
 
 def released(freq, reporter, period):
     con = _db()

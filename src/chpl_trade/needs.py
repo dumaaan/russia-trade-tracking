@@ -35,6 +35,10 @@ def declare_all():
     comtrade.need("A", "M", [KZ, KG], config.EU27_M49.values(), years, codes)
     # Listed goods as a share of all trade: the same codes plus the total of all goods.
     comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
+    # Unit values (value per kg): weights for the listed codes, annual, on the two Comtrade legs.
+    # Both are flow X, so the planner joins them into one request. The EU leg is from Comext.
+    comtrade.need_weight("A", "X", [KG, UZ, KZ], [RU], years, codes)
+    comtrade.need_weight("A", "X", [CN], [KG, UZ, KZ], years, codes)
     # China leg of the mirror check: the route countries' imports from China, as they report them
     # (China's side is the "China as a supplier" need below).
     comtrade.need("A", "M", [KG, UZ, KZ], [CN], years, codes + ["TOTAL"])

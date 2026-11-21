@@ -51,7 +51,7 @@
   const state = {
     basket: "all", currency: "USD", prices: "real", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru",
-    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned",
+    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned", uvYear: YEARS[YEARS.length - 1],
   };
 
   // ---------- data ----------
@@ -1337,6 +1337,123 @@
     ])]));
   }
 
+
+  // ---------- price per kg: EU, China, to Russia ----------
+  function uvStudy() {
+    const U = D.unitValues, yr = state.uvYear;
+    const NAMES = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const cell = {};
+    for (const [leg, c, y, code, usd, kg, est] of U.rows) cell[`${leg}|${c}|${y}|${code}`] = { usd, kg, est, uv: usd / kg };
+    const get = (leg, c, y, code) => cell[`${leg}|${c}|${y}|${code}`];
+    const codesOf = (c, y) => [...new Set(U.rows.filter((r) => r[0] === "ru" && r[1] === c && r[2] === y).map((r) => r[3]))];
+    const name = (code) => SHORT[code] || code;
+    const fmtCode = (code) => `${code.slice(0, 4)}.${code.slice(4)}`;
+    const uvf = (v) => (v == null ? "—" : v >= 100 ? `$${Math.round(v).toLocaleString("en-US")}` : `$${v.toFixed(v >= 10 ? 0 : 1)}`);
+    const TOP = 6;
+    // Rows: the largest codes to Russia with a weight, and an EU or China price to compare with.
+    const blocks = ["KZ", "KG", "UZ"].map((c) => {
+      const rows = codesOf(c, yr).map((code) => ({ code, ru: get("ru", c, yr, code), eu: get("eu", c, yr, code), cn: get("cn", c, yr, code) }))
+        .filter((r) => r.ru && r.ru.usd >= 1e5 && (r.eu || r.cn) && !(c === "UZ" && r.ru.est))
+        .sort((a, b) => b.ru.usd - a.ru.usd).slice(0, TOP);
+      return { c, rows };
+    }).filter((b) => b.rows.length);
+    // Headline: for each country, the share of the value to Russia in codes priced nearer the EU than China.
+    {
+      const near = blocks.map(({ c }) => {
+        let e = 0, t = 0;
+        for (const code of codesOf(c, yr)) {
+          const r = get("ru", c, yr, code), eu = get("eu", c, yr, code), cn = get("cn", c, yr, code);
+          if (!r || !eu || !cn || r.est) continue;
+          t += r.usd;
+          if (Math.abs(Math.log(r.uv / eu.uv)) < Math.abs(Math.log(r.uv / cn.uv))) e += r.usd;
+        }
+        return { c, share: t ? (100 * e) / t : null };
+      }).filter((x) => x.share != null && x.c !== "UZ");
+      // Largest share first: "71% of Kyrgyzstan's ...; for Kazakhstan, 27%".
+      near.sort((a, b) => b.share - a.share);
+      document.getElementById("uv-h").textContent = near.length
+        ? `${yr}: ${Math.round(near[0].share)}% of ${NAMES[near[0].c]}'s listed exports to Russia are priced nearer EU goods than Chinese goods` +
+          near.slice(1).map((x) => `; for ${NAMES[x.c]}, ${Math.round(x.share)}%`).join("")
+        : "Price per kilogram";
+      const k = get("ru", "KG", yr, "851762"), ke = get("eu", "KG", yr, "851762"), kc = get("cn", "KG", yr, "851762");
+      const z = get("ru", "KZ", yr, "851762"), ze = get("eu", "KZ", yr, "851762"), zc = get("cn", "KZ", yr, "851762");
+      document.getElementById("uv-sub").textContent = k && ke && kc && z && ze && zc
+        ? `Routers and data transmitters (8517.62), ${yr}: from Kyrgyzstan to Russia ${uvf(k.uv)} a kg (EU ${uvf(ke.uv)}, China ${uvf(kc.uv)}); from Kazakhstan ${uvf(z.uv)} (EU ${uvf(ze.uv)}, China ${uvf(zc.uv)}).`
+        : "";
+    }
+    // One log scale for all rows.
+    const all = blocks.flatMap((b) => b.rows.flatMap((r) => [r.ru, r.eu, r.cn].filter(Boolean).map((x) => x.uv)));
+    const lo = 10 ** Math.floor(Math.log10(Math.min(...all))), hi = 10 ** Math.ceil(Math.log10(Math.max(...all)));
+    const box = document.getElementById("uv-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 130 : 250, R = small ? 54 : 84, rowH = 24, top = 22;
+    const x = (v) => L + ((Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * (W - L - R);
+    const ticks = []; for (let t = lo; t <= hi * 1.0001; t *= 10) ticks.push(t);
+    const kids = [];
+    for (const b of blocks) {
+      const H = top + b.rows.length * rowH + 6;
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "uv-svg", role: "img",
+        "aria-label": `${NAMES[b.c]}, ${yr}: price per kg of the largest listed codes, from the EU, from China and to Russia` });
+      for (const t of ticks) {
+        el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 4, class: "uv-grid" }, svg);
+        const tx = el("text", { x: x(t), y: 12, "text-anchor": "middle", class: "uv-tick" }, svg);
+        tx.textContent = t >= 1000 && small ? `$${t / 1000}k` : t >= 1 ? `$${t.toLocaleString("en-US")}` : `$${t}`;
+      }
+      if (!small) {
+        const vt = el("text", { x: W - 2, y: 12, "text-anchor": "end", class: "uv-tick" }, svg);
+        vt.textContent = "to Russia";
+      }
+      b.rows.forEach((r, i) => {
+        const y = top + i * rowH + rowH / 2;
+        const lab = el("text", { x: 0, y: y + 4, class: "uv-lbl" }, svg);
+        lab.textContent = small ? fmtCode(r.code) : `${fmtCode(r.code)} ${name(r.code)}`;
+        const pts = [["eu", r.eu, "--flow-eu"], ["cn", r.cn, "--text-primary"], ["ru", r.ru, "--flow-ru"]].filter((p) => p[1]);
+        const xs = pts.map((p) => x(p[1].uv));
+        el("line", { x1: Math.min(...xs), x2: Math.max(...xs), y1: y, y2: y, class: "uv-span" }, svg);
+        for (const [leg, v, col] of pts) {
+          const dot = el("circle", { cx: x(v.uv), cy: y, r: leg === "ru" ? 5.5 : 4.5, fill: v.est ? css("--paper") : css(col), stroke: css(col), "stroke-width": 2, tabindex: 0, class: "uv-dot" }, svg);
+          const label = { eu: "from the EU", cn: "from China", ru: "to Russia" }[leg];
+          const tip = (cx, cy) => showTip(cx, cy, `${fmtCode(r.code)} ${name(r.code)}, ${yr}`, [{ color: css(col), value: `${uvf(v.uv)} a kg`, label: `${label}${v.est ? " (weight estimated)" : ""}, ${moneyK(v.usd)}` }]);
+          dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+          dot.addEventListener("pointerleave", hideTip);
+          dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
+          dot.addEventListener("blur", hideTip);
+        }
+        const val = el("text", { x: W - 2, y: y + 4, "text-anchor": "end", class: "uv-val" }, svg);
+        val.textContent = moneyK(r.ru.usd);
+      });
+      kids.push(h("div", { class: "uv-block" }, [h("h3", { class: "ctl-group", text: NAMES[b.c] }), svg]));
+    }
+    box.replaceChildren(...kids);
+
+    // The price index table: per country, against the EU and against China, with and without bearings.
+    const index = (c, y, ref, noBear) => {
+      let v = 0, at = 0;
+      for (const code of codesOf(c, y)) {
+        if (noBear && code.startsWith("8482")) continue;
+        const r = get("ru", c, y, code), s = get(ref, c, y, code);
+        if (!r || !s) continue;
+        v += r.usd; at += r.kg * s.uv;
+      }
+      return at ? v / at : null;
+    };
+    const head = h("thead", {}, h("tr", {}, [h("th", { text: "" }), h("th", { text: "Against" }), ...YEARS.map((y) => h("th", { text: String(y) }))]));
+    const body = [];
+    for (const c of ["KZ", "KG", "UZ"]) {
+      [["eu", false, "EU prices"], ["cn", false, "China prices"], ["eu", true, "EU prices, without bearings"], ["cn", true, "China prices, without bearings"]].forEach(([ref, nb, lab], j) => {
+        body.push(h("tr", {}, [
+          j === 0 ? h("th", { scope: "rowgroup", rowspan: 4, text: NAMES[c] }) : null,
+          h("td", { class: "lbl", text: lab }),
+          ...YEARS.map((y) => { const v = index(c, y, ref, nb); return h("td", { class: y === yr ? "chg" : "", text: v == null ? "—" : `×${v < 10 ? v.toFixed(2) : Math.round(v)}` }); }),
+        ].filter(Boolean)));
+      });
+    }
+    document.getElementById("uv-table").replaceChildren(head, h("tbody", {}, body));
+    document.getElementById("uv-note").textContent =
+      "×1: the goods sent to Russia cost as much per kg as the supplier's goods of the same codes. Under ×1, they are cheaper. " +
+      "Only codes with a weight on both legs count. A few codes with small values can move Kyrgyzstan's and Uzbekistan's index a lot.";
+  }
+
   // ---------- sanctions events: three questions ----------
   const pctChange = (after, before) => {
     if (after == null || before == null) return "no data";
@@ -1648,13 +1765,14 @@
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
+  if (D.unitValues) seg(document.getElementById("uv-year"), [2021, 2022, 2023, 2024, 2025].map((y) => ({ value: y, label: String(y) })), () => state.uvYear, (v) => { state.uvYear = v; uvStudy(); });
   if (D.ban) seg(document.getElementById("ban-goods"), [{ value: "banned", label: "The two banned codes" }, { value: "other", label: "The other 47 codes" }], () => state.banGoods, (v) => { state.banGoods = v; banStudy(); });
   seg(document.getElementById("tiers-country"), countryOpts, () => state.tiersCountry, (v) => { state.tiersCountry = v; tiers(); });
   seg(document.getElementById("goods-country"), countryOpts, () => state.goodsCountry, (v) => { state.goodsCountry = v; goods(); });
   seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
 
   document.getElementById("built").textContent =
-    `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;
+    `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, Kazakhstan Bureau of National Statistics, ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;
 
   // A line above each chart that the filters change, so the reader sees what it shows.
   function scopes() {
@@ -1674,6 +1792,7 @@
     scopes();
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
     if (D.mirrorCn) mirrorChina();
+    if (D.unitValues) uvStudy();
     if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
@@ -1684,7 +1803,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();
