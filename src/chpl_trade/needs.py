@@ -35,6 +35,9 @@ def declare_all():
     comtrade.need("A", "M", [KZ, KG], config.EU27_M49.values(), years, codes)
     # Listed goods as a share of all trade: the same codes plus the total of all goods.
     comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
+    # China leg of the mirror check: the route countries' imports from China, as they report them
+    # (China's side is the "China as a supplier" need below).
+    comtrade.need("A", "M", [KG, UZ, KZ], [CN], years, codes + ["TOTAL"])
     # Excess growth: the chapters (84, 85, 88, 90) and the HS4 headings of the listed codes, so that
     # "other goods" = chapter (or heading) minus the listed codes.
     from .control import headings

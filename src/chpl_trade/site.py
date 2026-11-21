@@ -79,6 +79,18 @@ def excess_data():
     }
 
 
+def mirror_cn_data():
+    """China leg of the mirror check, if the mirror_cn module has run."""
+    path, mpath = config.PROCESSED / "mirror_cn.csv", config.PROCESSED / "mirror_cn_meta.json"
+    if not (path.exists() and mpath.exists()):
+        return None
+    d = pd.read_csv(path)
+    return {
+        "rows": [[r.country, int(r.year), r.side, _num(r.listed / 1e6), _num(r.total / 1e6)] for r in d.itertuples()],
+        "meta": json.loads(mpath.read_text()),
+    }
+
+
 def events_data():
     """Event windows (three questions), if the events module has run."""
     path = config.PROCESSED / "events.json"
@@ -134,6 +146,7 @@ def export():
         "suppliers": suppliers_data(),
         "excess": excess_data(),
         "eventStudy": events_data(),
+        "mirrorCn": mirror_cn_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -142,7 +155,7 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")

@@ -1,0 +1,12 @@
+{
+  "countries": {
+    "KZ": "Kazakhstan",
+    "KG": "Kyrgyzstan",
+    "UZ": "Uzbekistan"
+  },
+  "missing": [
+    "imp-listed|KZ|2020",
+    "imp-listed|KZ|2021",
+    "imp-listed|KZ|2022"
+  ]
+}

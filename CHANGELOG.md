@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.8.0 — 2026-11-21
+
+### Added
+- **Mirror check, China leg:** each route country's recorded imports of the listed goods from
+  China, divided by China's recorded exports to it, against the country's pre-war ratio
+  (Kazakhstan: 2019 only). One line also gives all goods for Kyrgyzstan (2025: China $22.0bn,
+  Kyrgyzstan $4.81bn). Kyrgyzstan's ratio already fell in 2021, so its pre-war level is low and
+  its excess gap is probably too small.
+
+### Fixed
+- Kazakhstan's 2020–2022 imports from China have a total but no product rows: the listed goods
+  for those years are missing, not zero.
+
 ## 1.7.0 — 2026-11-21
 
 ### Added

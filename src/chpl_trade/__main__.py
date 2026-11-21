@@ -6,7 +6,7 @@
 
 import argparse
 
-from . import ban, bns, china, comtrade, control, events, excess
+from . import ban, bns, china, comtrade, control, events, excess, mirror_cn
 from .needs import declare_all
 from .build import build
 from .fetch import fetch_all
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     events.build()
     china.fetch_all(args.refresh)
     china.build()
+    mirror_cn.build()
     outs, comp = plot_all()
     outs.append(export())
     print(comp.to_string(index=False))

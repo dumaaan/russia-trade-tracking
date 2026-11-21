@@ -1278,6 +1278,65 @@
   }
 
 
+
+  // ---------- mirror check, China leg ----------
+  function mirrorChina() {
+    // Always current US dollars: the currency and price filters do not apply here.
+    const usdM = (v) => (v == null ? "no data" : v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 1 : 2)}bn` : `$${fmtM(v)}M`);
+    const M = D.mirrorCn, miss = new Set(M.meta.missing), names = M.meta.countries;
+    const val = (c, side, k, y) => {
+      if (miss.has(`${side}|${c}|${y}`) || (k === "listed" && miss.has(`${side}-listed|${c}|${y}`))) return null;
+      const r = M.rows.find((x) => x[0] === c && x[1] === y && x[2] === side);
+      return r ? r[k === "listed" ? 3 : 4] : null;
+    };
+    const order = ["KZ", "KG", "UZ"].filter((c) => names[c]);
+    const style = { KZ: { marker: "circle" }, KG: { marker: "square", tint: 0.5 }, UZ: { marker: "circle", dash: "4 3" } };
+    const pick = state.baseline === "avg" ? D.baselineYears : [2021];
+    const data = {};
+    for (const c of order) {
+      const cn = YEARS.map((y) => val(c, "cn", "listed", y)), imp = YEARS.map((y) => val(c, "imp", "listed", y));
+      const ratio = YEARS.map((_, i) => (cn[i] && imp[i] != null ? (100 * imp[i]) / cn[i] : null));
+      let sc = 0, si = 0; const used = [];
+      for (const y of pick) { const i = YEARS.indexOf(y); if (cn[i] && imp[i] != null) { sc += cn[i]; si += imp[i]; used.push(y); } }
+      const pre = sc ? (100 * si) / sc : null;
+      data[c] = { cn, imp, ratio, pre, used, excess: YEARS.map((_, i) => (pre != null && ratio[i] != null ? Math.max(0, (cn[i] * (pre - ratio[i])) / 100) : null)) };
+    }
+    const ly = YEARS.length - 1, yr = YEARS[ly];
+    {
+      let best = null;
+      for (const c of order) data[c].ratio.forEach((v, i) => {
+        // The largest fall relative to the country's own pre-war ratio (pre-war levels differ a lot).
+        if (v != null && data[c].pre && YEARS[i] >= 2022 && (!best || 1 - v / data[c].pre > best.drop)) best = { c, i, v, drop: 1 - v / data[c].pre };
+      });
+      document.getElementById("mcn-h").textContent = best && best.drop > 0.1
+        ? `From China: in ${YEARS[best.i]}, ${names[best.c]}'s records showed ${Math.round(best.v)}% of what China shipped (pre-war ${Math.round(data[best.c].pre)}%)`
+        : "The same check for China";
+    }
+    lineChart(document.getElementById("mcn-chart"), {
+      series: order.map((c) => ({ label: names[c], endName: names[c], color: "--text-primary", ...style[c], values: data[c].ratio, gapNote: "no data" })),
+      fmt: fmtPct, tickFmt: (t) => t + "%", baseline: 100, endNames: true,
+      aria: "Mirror ratio: imports from China as recorded by the country, divided by China's exports to it, percent",
+    });
+    document.getElementById("mcn-legend").replaceChildren();
+    const tot = (c, side) => val(c, side, "total", yr);
+    const kg = "KG";
+    document.getElementById("mcn-summary").replaceChildren(
+      h("strong", { text: "All 49 codes, current US dollars (the filters do not apply). " }),
+      ...order.flatMap((c, k) => {
+        const d = data[c];
+        if (d.ratio[ly] == null) return [];
+        return [k ? h("br") : null, `${names[c]}, ${yr}: China recorded ${usdM(d.cn[ly])}, ${names[c]} ${usdM(d.imp[ly])} (${fmtPct(d.ratio[ly])}; pre-war ${fmtPct(d.pre)}). ` +
+          (d.excess[ly] > 0 ? `${usdM(d.excess[ly])} is missing above the pre-war gap.` : "No gap above the pre-war level.")].filter(Boolean);
+      }),
+      ...(tot(kg, "cn") && tot(kg, "imp") ? [h("br"), `All goods, ${yr}: China recorded ${usdM(tot(kg, "cn"))} of exports to Kyrgyzstan; Kyrgyzstan recorded ${usdM(tot(kg, "imp"))} of imports from China (${fmtPct((100 * tot(kg, "imp")) / tot(kg, "cn"))}).`] : []),
+    );
+    const head = ["Year"];
+    for (const c of order) head.push(`${names[c]}: China's exports`, `${names[c]}: recorded imports`, `${names[c]}: ratio`);
+    table(document.getElementById("mcn-table"), head, YEARS.map((y, i) => [String(y), ...order.flatMap((c) => [
+      data[c].cn[i] == null ? "no data" : usdM(data[c].cn[i]), data[c].imp[i] == null ? "no data" : usdM(data[c].imp[i]), data[c].ratio[i] == null ? "—" : fmtPct(data[c].ratio[i]),
+    ])]));
+  }
+
   // ---------- sanctions events: three questions ----------
   const pctChange = (after, before) => {
     if (after == null || before == null) return "no data";
@@ -1614,6 +1673,7 @@
     document.getElementById("f-note").textContent = `These filters change the charts that show a filter line above them. Prices: ${state.prices === "real" ? `${state.currency === "EUR" ? "euro-area HICP" : "US consumer prices (CPI-U)"}, ${REF_YEAR} = 100` : "as recorded each year"}.`;
     scopes();
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
+    if (D.mirrorCn) mirrorChina();
     if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
@@ -1624,7 +1684,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();
