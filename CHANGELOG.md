@@ -2,6 +2,28 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.7.0 — 2026-11-21
+
+### Added
+- **Excess growth:** the listed goods against the other goods of chapters 84, 85 and 90 (and of
+  the same HS4 headings), on both legs, for Kazakhstan and Kyrgyzstan (EAEU), Uzbekistan, and
+  Georgia, Azerbaijan and Mongolia (EU leg only; their listed exports to Russia are too small).
+  Results with and without bearings (8482) are shown as equals: the sign of the result to Russia
+  depends on them. Aircraft (88) are not in the control, because single sales move it.
+- **Sanctions events, 2023–2025:** for 5 dated events, the 6 months after against the 6 months
+  before, with three questions (fall, neighbour codes, other countries). The comparison is the
+  other route countries, or EU exports to Türkiye, the UAE, Georgia and Azerbaijan.
+- **Ban chapter:** a line on the other codes of headings 8457 and 8517.
+- **Kazakhstan 2024 monthly:** from Kazakhstan's statistics bureau (Comtrade has only Jan–Feb).
+  The bureau's final 2024 figures are 3–5% above Comtrade's earlier ones for Jan–Feb.
+- **Report:** reports/Detour data sources and methods.md.
+
+### Fixed
+- The ban module read every stored code; it now reads only the listed codes, so new HS4 totals
+  in the store cannot be counted twice. Its results did not change.
+- A released month with no rows for any of 25 headings (Kazakhstan's imports, 2021–2022) is now
+  missing, not zero.
+
 ## 1.6.0 — 2026-11-19
 
 ### Changed after a content review

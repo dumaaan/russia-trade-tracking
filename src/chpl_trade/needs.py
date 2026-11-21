@@ -35,6 +35,10 @@ def declare_all():
     comtrade.need("A", "M", [KZ, KG], config.EU27_M49.values(), years, codes)
     # Listed goods as a share of all trade: the same codes plus the total of all goods.
     comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
+    # Excess growth: the chapters (84, 85, 88, 90) and the HS4 headings of the listed codes, so that
+    # "other goods" = chapter (or heading) minus the listed codes.
+    from .control import headings
+    comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, ["84", "85", "88", "90"] + headings())
     # China as a supplier: China's exports of the listed goods (and all goods) to the route countries
     # and to Russia, as China reports them.
     comtrade.need("A", "X", [CN], [KG, UZ, KZ, RU], years, codes + ["TOTAL"])
@@ -42,6 +46,12 @@ def declare_all():
     t = date.today()
     ms = months("2024-01", f"{t.year}-{t.month:02d}")
     comtrade.need("M", "X", [KG, UZ, KZ], [RU], ms, codes)
+    # Events: monthly exports to Russia from 2022, with the HS4 headings of the listed codes (for
+    # moves to neighbour codes); China's monthly exports to the route countries for 2022-2024
+    # (China's own monthly data in Comtrade ends in December 2024).
+    ems = months("2021-01", f"{t.year}-{t.month:02d}")
+    comtrade.need("M", "X", [KG, UZ, KZ], [RU], ems, codes + headings())
+    comtrade.need("M", "X", [CN], [KG, UZ, KZ], months("2022-01", "2024-12"), codes + headings())
     # The ban: each route country's monthly imports from China, as the country reports them
     # (China's own monthly data in Comtrade ends in December 2024).
-    comtrade.need("M", "M", [KG, UZ, KZ], [CN], ms, codes)
+    comtrade.need("M", "M", [KG, UZ, KZ], [CN], ems, codes + headings())

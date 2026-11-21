@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.10">
+  <link rel="stylesheet" href="style.css?v=1.12">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -137,6 +137,49 @@
     </div>
   </section>
 
+  <section class="chapter chapter-wide wrap" id="excess" aria-labelledby="exc-h">
+    <div class="ch-text">
+      <h2 id="exc-h">Did listed goods grow faster than similar goods?</h2>
+      <p class="finding" id="exc-sub"></p>
+      <p class="finding">Each chart compares the listed goods with the other goods of the same customs chapters:
+        machines (84), electronics (85) and instruments (90). The lines are times the pre-war level,
+        on one log scale for all charts. Where the coloured lines are above the grey line, the listed goods grew faster.</p>
+      <p class="aside">Many of the other goods are also under EU export bans to Russia, so this compares priority goods
+        with other technical goods, not banned goods with free goods. Bearings (8482) are most of Kazakhstan's pre-war
+        listed exports to Russia, so the results are given with and without them. Georgia, Azerbaijan and Mongolia
+        export too little of the listed goods to Russia for a comparison; for them, only the EU leg is shown.
+        Aircraft (88) are not in the control: one aircraft sale can be $100–500M. Three route countries are too few
+        to prove an EAEU effect; the table shows the difference, not its cause.</p>
+    </div>
+    <div class="ch-figure">
+      <p class="scope" id="scope-exc"></p>
+      <p class="exc-key"><span class="k-solid">listed goods</span><span class="k-dash">listed, without bearings</span><span class="k-grey">other goods, same chapters</span></p>
+      <div class="ctl-head" aria-hidden="true"><span></span><span>From the EU</span><span>To Russia</span></div>
+      <div class="ctl-rows" id="exc-grid"></div>
+      <h3 class="ctl-group">Excess growth, 2022–25: listed goods' growth divided by other goods' growth</h3>
+      <div class="table-wrap"><table class="supertable" id="exc-table"></table></div>
+      <p class="aside" id="exc-note"></p>
+    </div>
+  </section>
+
+  <section class="chapter chapter-wide wrap" id="events" aria-labelledby="ev-h">
+    <div class="ch-text">
+      <h2 id="ev-h">Sanctions events, 2023–2025</h2>
+      <p class="finding" id="ev-sub"></p>
+      <p class="finding">For each event: the average month in the 6 months after it against the 6 months before it
+        (the event month is left out). Three questions: did the listed goods fall; did trade move to the
+        other codes of the same HS4 headings; did it move to other countries.</p>
+      <p class="aside">The comparison is the other two route countries for an event aimed at one country. For an event
+        that applied to all three, it is EU exports to Türkiye, the UAE, Georgia and Azerbaijan. Below $50k a month
+        before, the change is in dollars. Other things change in the same months, so a change after an event does not
+        prove that the event caused it. Kazakhstan 2024: its statistics bureau; Comtrade has only January and February.</p>
+    </div>
+    <div class="ch-figure">
+      <p class="scope">All 49 codes · current US dollars · the filters at the top do not change this table</p>
+      <div class="table-wrap"><table class="supertable" id="ev-table"></table></div>
+    </div>
+  </section>
+
   <section class="chapter chapter-wide wrap" id="ban" aria-labelledby="ban-h">
     <div class="ch-text">
       <h2 id="ban-h">The April 2026 EU ban on Kyrgyzstan</h2>
@@ -147,6 +190,7 @@
         current US dollars; the filters at the top do not change this table.
       </p>
       <p class="finding" id="ban-did"></p>
+      <p class="finding" id="ban-nb"></p>
       <p class="aside" id="ban-months"></p>
       <div class="seg" role="radiogroup" aria-label="Goods" id="ban-goods"></div>
     </div>
@@ -206,7 +250,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.7"></script>
-<script src="app.js?v=1.11"></script>
+<script src="data.js?v=1.10"></script>
+<script src="app.js?v=1.18"></script>
 </body>
 </html>

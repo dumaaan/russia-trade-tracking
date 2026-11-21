@@ -1,0 +1,69 @@
+{
+  "countries": {
+    "KG": {
+      "name": "Kyrgyzstan",
+      "group": "route",
+      "eaeu": true
+    },
+    "UZ": {
+      "name": "Uzbekistan",
+      "group": "route",
+      "eaeu": false
+    },
+    "KZ": {
+      "name": "Kazakhstan",
+      "group": "route",
+      "eaeu": true
+    },
+    "GE": {
+      "name": "Georgia",
+      "group": "comparison",
+      "eaeu": false
+    },
+    "AZ": {
+      "name": "Azerbaijan",
+      "group": "comparison",
+      "eaeu": false
+    },
+    "MN": {
+      "name": "Mongolia",
+      "group": "comparison",
+      "eaeu": false
+    }
+  },
+  "chapters": [
+    "84",
+    "85",
+    "90"
+  ],
+  "headings": [
+    "8457",
+    "8458",
+    "8459",
+    "8466",
+    "8471",
+    "8482",
+    "8486",
+    "8504",
+    "8517",
+    "8525",
+    "8526",
+    "8529",
+    "8532",
+    "8534",
+    "8536",
+    "8541",
+    "8542",
+    "8543",
+    "8548",
+    "8807",
+    "9013",
+    "9014",
+    "9027",
+    "9030"
+  ],
+  "missing": [
+    "ru|MN|2024",
+    "ru|MN|2025"
+  ]
+}

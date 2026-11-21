@@ -1175,6 +1175,174 @@
       h("tr", {}, [h("th", { scope: "row", text: r.info.name }), ...cell(r.eu), ...cell(r.ru)]))));
   }
 
+
+  // ---------- excess growth: listed goods against the other goods of the same chapters ----------
+  function excessStudy() {
+    const E = D.excess, meta = E.meta, miss = new Set(meta.missing);
+    const val = {};
+    for (const r of E.rows) val[`${r[0]}|${r[1]}|${r[3]}|${r[2]}`] = r[4];
+    const ser = (flow, dest, k) => YEARS.map((y) => (miss.has(`${flow}|${dest}|${y}`) ? null : val[`${flow}|${dest}|${k}|${y}`] ?? null));
+    const idx = (v) => { const b = baseOf(v); return v.map((x) => (x == null || b == null || b < MIN_BASE ? null : x / b)); };
+    const ROUTE = ["KZ", "KG", "UZ"].filter((c) => meta.countries[c]), COMP = ["GE", "AZ", "MN"].filter((c) => meta.countries[c]);
+    const name = (c) => meta.countries[c].name;
+    const after = YEARS.filter((y) => y >= 2022);
+    // A leg is "too small" when the listed goods are under MIN_BASE a year before or after the war.
+    const avgOf = (v, ys) => { const a = ys.map((y) => v[YEARS.indexOf(y)]).filter((x) => x != null); return a.length ? a.reduce((p, q) => p + q, 0) / a.length : null; };
+    const tooSmall = (flow, c) => { const L = ser(flow, c, "listed"); const b = baseOf(L), a = avgOf(L, after); return b == null || b < MIN_BASE || a == null || a < MIN_BASE; };
+    // Countries of a group added together; only years that all of them report.
+    const pooled = (flow, cs, listed, other) => {
+      const sum = (k) => YEARS.map((_, i) => { let t = 0; for (const c of cs) { const v = ser(flow, c, k)[i]; if (v == null) return null; t += v; } return t; });
+      const L = sum(listed), O = sum(other);
+      const bl = baseOf(L), bo = baseOf(O), al = avgOf(L, after), ao = avgOf(O, after);
+      return bl && bo && al != null && ao && bl >= MIN_BASE ? (al / bl) / (ao / bo) : null;
+    };
+    const eaeu = ROUTE.filter((c) => meta.countries[c].eaeu), out = ROUTE.filter((c) => !meta.countries[c].eaeu);
+    const list = (a) => a.map(name).join(", ").replace(/, ([^,]*)$/, " and $1");
+    {
+      const a = pooled("ru", eaeu, "listed", "other_ch"), b = pooled("ru", eaeu, "listed_nb", "other_ch");
+      const c = pooled("ru", out, "listed", "other_ch"), d = pooled("ru", out, "listed_nb", "other_ch");
+      const word = (v) => (v >= 1.1 ? "faster" : v <= 0.9 ? "slower" : "at the same rate");
+      document.getElementById("exc-h").textContent = a == null || b == null ? "Did listed goods grow faster than similar goods?"
+        : word(a) === word(b) ? `To Russia, listed goods from ${list(eaeu)} grew ${word(a)} than other machines and electronics`
+        : `To Russia, listed goods from ${list(eaeu)} grew ${word(a)} than other machines and electronics; without bearings, ${word(b)}`;
+      document.getElementById("exc-sub").textContent = a == null ? "" :
+        `${list(eaeu)}, in the EAEU (no customs checks on trade with Russia), 2022–25 against the ${baseLabel()}: the listed goods to Russia grew ${fmtX(a)} as much as the other goods; without bearings, ${fmtX(b)}.` +
+        (c != null ? ` ${list(out)}, outside the EAEU: ${fmtX(c)}; without bearings, ${fmtX(d)}.` : "");
+    }
+    // One log scale for every chart in the grid.
+    const all = [];
+    const cells = {};
+    for (const c of [...ROUTE, ...COMP]) for (const f of ["eu", "ru"]) {
+      if (tooSmall(f, c) && f === "ru") continue;
+      cells[`${f}|${c}`] = ["listed", "listed_nb", "other_ch"].map((k) => idx(ser(f, c, k)));
+      all.push(...cells[`${f}|${c}`].flat().filter((v) => v > 0));
+    }
+    const dom = [Math.min(...all, 1) * 0.8, Math.max(...all, 1) * 1.15];
+    const grid = document.getElementById("exc-grid");
+    const kids = [];
+    for (const c of [...ROUTE, ...COMP]) {
+      if (c === COMP[0]) kids.push(h("h3", { class: "ctl-group", text: "Comparison countries, outside the EAEU" }));
+      const ru = cells[`ru|${c}`]
+        ? h("div", { class: "chart sm" })
+        : h("p", { class: "exc-small", text: `Too small for a ratio: listed goods ${fmtMoney(baseOf(ser("ru", c, "listed")) || 0)} a year before the war, ${fmtMoney(avgOf(ser("ru", c, "listed"), after) || 0)} in 2022–25` });
+      kids.push(h("div", { class: "ctl-row", "data-c": c }, [
+        h("div", { class: "ctl-name", text: name(c) + (meta.countries[c].eaeu ? " (EAEU)" : "") }),
+        h("figure", {}, [h("figcaption", { class: "mobile-only", text: "From the EU" }), h("div", { class: "chart sm" })]),
+        h("figure", {}, [h("figcaption", { class: "mobile-only", text: "To Russia" }), ru]),
+      ]));
+    }
+    grid.replaceChildren(...kids);
+    const xt = (t) => `×${t < 1 ? t : t.toLocaleString("en-US")}`;
+    for (const row of grid.querySelectorAll(".ctl-row")) {
+      const c = row.dataset.c, charts = row.querySelectorAll(".chart");
+      ["eu", "ru"].forEach((f, i) => {
+        const s = cells[`${f}|${c}`];
+        if (!s || !charts[i]) return;
+        lineChart(charts[i], {
+          series: [
+            { label: "listed goods", color: FLOW[f].color, values: s[0] },
+            { label: "listed, without bearings", color: FLOW[f].color, values: s[1], dash: "4 3" },
+            { label: "other goods, same chapters", color: "--ink-3", values: s[2] },
+          ],
+          fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom, tickCount: 3,
+          aria: `${name(c)}, ${f === "eu" ? "EU exports" : "exports to Russia"}: listed and other goods, times the ${baseLabel()}`,
+        });
+      });
+    }
+    // The table: each group, two control groups, four results.
+    const cell = (f, cs, l, o) => {
+      if (f === "ru" && cs.every((c) => tooSmall("ru", c))) return h("td", { text: "too small" });
+      const v = pooled(f, cs.filter((c) => !(f === "ru" && tooSmall("ru", c))), l, o);
+      return h("td", { class: "chg", text: v == null ? "—" : fmtX(v) });
+    };
+    const groups = [[`${list(eaeu)} (EAEU)`, eaeu], [`${list(out)} (not EAEU)`, out], [list(COMP), COMP]];
+    const ctrls = [["other_ch", "Other goods, same chapters"], ["other_hs4", "Other goods, same HS4 headings"]];
+    const head = h("thead", {}, [
+      h("tr", {}, [h("th", { text: "" }), h("th", { text: "" }), h("th", { colspan: 2, text: "From the EU" }), h("th", { colspan: 2, text: "To Russia" })]),
+      h("tr", {}, [h("th", { text: "" }), h("th", { text: "Control goods" }), ...["All codes", "Without bearings", "All codes", "Without bearings"].map((t) => h("th", { text: t }))]),
+    ]);
+    const body = [];
+    for (const [gname, cs] of groups) {
+      if (!cs.length) continue;
+      ctrls.forEach(([k, label], j) => body.push(h("tr", {}, [
+        j === 0 ? h("th", { scope: "rowgroup", rowspan: 2, text: gname }) : null,
+        h("td", { class: "lbl", text: label }),
+        cell("eu", cs, "listed", k), cell("eu", cs, "listed_nb", k), cell("ru", cs, "listed", k), cell("ru", cs, "listed_nb", k),
+      ].filter(Boolean))));
+    }
+    document.getElementById("exc-table").replaceChildren(head, h("tbody", {}, body));
+    document.getElementById("exc-note").textContent =
+      `Growth: the 2022–25 average against the ${baseLabel()}. ×1: the listed goods grew as much as the control goods. ` +
+      `Countries in one group are added together. A ratio of two values in the same currency does not change with prices or exchange rates. ` +
+      `The same-heading control is tighter, but goods can move between codes of one heading. Exports to Russia are reported by the exporting country and are a lower limit.`;
+  }
+
+
+  // ---------- sanctions events: three questions ----------
+  const pctChange = (after, before) => {
+    if (after == null || before == null) return "no data";
+    if (before < MIN_BASE_MONTH) { const d = after - before; return `${d >= 0 ? "+" : "−"}${moneyK(Math.abs(d))}`; }
+    const v = Math.round(100 * (after / before - 1));
+    return v === 0 ? "0%" : `${v > 0 ? "+" : "−"}${Math.abs(v).toLocaleString("en-US")}%`;
+  };
+  const pctOf = (c) => (c && c.before >= MIN_BASE_MONTH && c.after != null ? 100 * (c.after / c.before - 1) : null);
+
+  function eventStudy() {
+    const E = D.eventStudy, N = E.names;
+    const evById = Object.fromEntries(E.events.map((e) => [e.id, e]));
+    const fmtDate = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    const list = (a) => a.map((c) => N[c]).join(", ").replace(/, ([^,]*)$/, " and $1");
+    {
+      const rows = E.table.map((r) => ({ r, v: pctOf(r.q1.ru) })).filter((x) => x.v != null);
+      const fell = rows.filter((x) => x.v <= -30);
+      document.getElementById("ev-h").textContent =
+        `Listed exports to Russia fell by more than 30% in the 6 months after an event in ${fell.length} of ${rows.length} cases`;
+      const top = [...rows].sort((a, b) => a.v - b.v).slice(0, 2);
+      document.getElementById("ev-sub").textContent = top.length ? "The largest falls: " + top.map(({ r, v }) => {
+        const cmp = r.q3.ru ? pctOf(r.q3.ru) : null;
+        return `${N[r.country]} after ${evById[r.event].label.split(":")[0].replace(/ \(.*\)$/, "")} (${fmtDate(evById[r.event].date)}), ${v < 0 ? "−" : "+"}${Math.abs(Math.round(v))}%` +
+          (cmp != null ? `, while ${list(r.q3.ru_who)} changed ${cmp >= 0 ? "+" : "−"}${Math.abs(Math.round(cmp))}%` : "");
+      }).join("; ") + "." : "";
+    }
+    const head = h("thead", {}, [
+      h("tr", {}, [
+        h("th", { text: "" }), h("th", { class: "spark-cell", text: "" }),
+        h("th", { colspan: 3, text: "1. Did the listed goods fall?" }),
+        h("th", { text: "2. Moved to neighbour codes?" }),
+        h("th", { colspan: 2, text: "3. Moved to other countries?" }),
+      ]),
+      h("tr", {}, [
+        h("th", { text: "" }),
+        h("th", { class: "spark-cell" }, ["Exports to Russia, a month", h("span", { class: "use", text: "12 months either side; line: the event; bright: the windows" })]),
+        h("th", { text: "From the EU" }), h("th", { text: "From China" }), h("th", { text: "To Russia" }),
+        h("th", { text: "Other codes, to Russia" }),
+        h("th", { text: "Comparison, from the EU" }), h("th", { text: "Comparison, to Russia" }),
+      ]),
+    ]);
+    const body = [];
+    let last = null;
+    for (const r of E.table) {
+      const e = evById[r.event];
+      if (r.event !== last) {
+        body.push(h("tr", { class: "group" }, h("th", { colspan: 8, scope: "rowgroup" }, [
+          `${fmtDate(e.date)}: ${e.label} `, h("a", { href: e.url, target: "_blank", rel: "noopener", text: "source" }),
+        ])));
+        last = r.event;
+      }
+      const lit = (i) => (i >= 6 && i < 12) || (i > 12 && i <= 18);
+      const cmpEu = r.q3.eu ? h("td", { text: pctChange(r.q3.eu.after, r.q3.eu.before), title: `EU exports to ${list(r.q3.eu_who)}` }) : h("td", { text: "—" });
+      const cmpRu = r.q3.ru ? h("td", { text: pctChange(r.q3.ru.after, r.q3.ru.before), title: `${list(r.q3.ru_who)} to Russia` }) : h("td", { text: "—", title: "The event applied to all three route countries" });
+      body.push(h("tr", {}, [
+        h("th", { scope: "row", text: N[r.country] }),
+        h("td", { class: "spark-cell" }, sparkline(r.spark, { color: "--flow-ru", lit, mark: 12, w: 125 })),
+        ...["eu", "cn", "ru"].map((leg) => h("td", { class: leg === "ru" ? "chg" : "", text: r.q1[leg] ? pctChange(r.q1[leg].after, r.q1[leg].before) : "no data" })),
+        h("td", { text: r.q2.ru ? pctChange(r.q2.ru.after, r.q2.ru.before) : "no data" }),
+        cmpEu, cmpRu,
+      ]));
+    }
+    document.getElementById("ev-table").replaceChildren(head, h("tbody", {}, body));
+  }
+
   // ---------- the April 2026 ban: one supertable ----------
   const monthName = (mm) => new Date(mm + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
   const moneyK = (v) => (v == null ? "no data" : v >= 1e6 ? `$${(v / 1e6).toFixed(v >= 1e7 ? 1 : 2)}M` : v >= 1e3 ? `$${Math.round(v / 1e3)}k` : `$${Math.round(v)}`);
@@ -1213,6 +1381,13 @@
       document.getElementById("ban-did").textContent = did.length
         ? `Kazakhstan is the comparison: the ban does not cover it. Against the same months of 2025, Kyrgyzstan minus Kazakhstan: ` +
           did.map((x) => `${x.what} ${pt(x.g - x.z)} points (${pt(x.g)}% against ${pt(x.z)}%)`).join("; ") + "."
+        : "";
+      const NB = D.eventStudy && D.eventStudy.ban_neighbours;
+      const nb = (leg, c, g) => { const x = NB && NB[`${leg}|${c}|${g}`]; return x ? pctChange(x.after, x.year_ago) : null; };
+      document.getElementById("ban-nb").textContent = NB && nb("eu", "KG", "ban") != null
+        ? `Neighbour codes (the other codes of headings 8457 and 8517), against the same months of 2025: EU shipments to Kyrgyzstan ` +
+          `${nb("eu", "KG", "bansib")} (banned codes ${nb("eu", "KG", "ban")}); Kyrgyz imports from China ${nb("cn", "KG", "bansib")} ` +
+          `(banned codes ${nb("cn", "KG", "ban")}); exports to Russia ${nb("ru", "KG", "bansib")} (banned codes ${nb("ru", "KG", "ban")}).`
         : "";
       document.getElementById("ban-months").textContent =
         `The data after the ban are short: ${n("eu|KG|banned")} months for EU exports, ${n("cn|KG|banned")} for China, ${n("ru|KG|banned")} for exports to Russia. ` +
@@ -1431,6 +1606,7 @@
     set("scope-cmp", [goods, money, base]);
     set("scope-mirror", [goods, `pre-war ratio: ${baseLabel()}`]);
     set("scope-ctl", [goods, `pre-war share: ${baseLabel()}`]);
+    set("scope-exc", ["All 49 codes (the goods and price filters do not apply)", `against the ${baseLabel()}`, "one log scale"]);
     set("scope-tiers", ["Each tier on its own (the goods filter does not apply)", money, base]);
     set("scope-goods", [goods, money, base]);
   }
@@ -1438,15 +1614,17 @@
     document.getElementById("f-note").textContent = `These filters change the charts that show a filter line above them. Prices: ${state.prices === "real" ? `${state.currency === "EUR" ? "euro-area HICP" : "US consumer prices (CPI-U)"}, ${REF_YEAR} = 100` : "as recorded each year"}.`;
     scopes();
     routeAll(); flows(); comparison(); mirror(); tiers(); goods();
+    if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
+    if (D.excess) excessStudy();
     if (D.suppliers) supplierStudy();
     summaryBox();
   }
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

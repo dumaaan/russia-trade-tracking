@@ -411,3 +411,15 @@ table.xc a { color: var(--ink-2); }
   .summary-table th, .summary-table td { padding: 6px 4px; }
   .summary-table td { white-space: normal; }
 }
+
+/* ---------- excess growth ---------- */
+.exc-key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); margin: 0 0 8px; }
+.exc-key span::before { content: ""; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 2px solid var(--ink-2); }
+.exc-key .k-dash::before { border-top-style: dashed; }
+.exc-key .k-grey::before { border-top-color: var(--ink-3); }
+.exc-small { font-size: 13px; color: var(--ink-3); margin: 0; align-self: center; }
+#exc-table td.lbl { text-align: left; white-space: normal; font-stretch: 100%; font-weight: 500; }
+
+/* ---------- sanctions events ---------- */
+#ev-table thead th { white-space: normal; min-width: 0; }
+#ev-table td { padding-left: 8px; padding-right: 8px; }

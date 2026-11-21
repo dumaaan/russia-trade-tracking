@@ -140,13 +140,24 @@ def build():
         p = ct.latest_period("M", m49)
         latest[iso2] = f"{p[:4]}-{p[4:6]}"
     rows = []
-    unreported = []  # (reporter, month) with no rows at all: the month is missing, not zero
+    unreported = []  # (flows, reporter, month) not released: the month is missing, not zero
+    # The store also holds HS4 and HS2 totals for other modules; this module reads the listed codes only.
+    wanted = set(query_codes())
+    # Kazakhstan 2024: Comtrade has only January and February; the statistics bureau has every month.
+    bns_path = config.PROCESSED / "bns_kz_monthly.csv"
+    bns = pd.read_csv(bns_path, dtype={"hs6": str}) if bns_path.exists() else None
     for iso2 in LEG2:
         for m in months(START, latest[iso2]):
-            data = ct.records("M", "X", LEG2[iso2], config.RUSSIA_M49, m.replace("-", ""))
+            if iso2 == "KZ" and m.startswith("2024") and bns is not None:
+                b = bns[(bns.partner == "RU") & (bns.month == m) & bns.usd.notna() & bns.hs6.isin(wanted)]
+                rows += [{"hs6": c, "month": m, "usd": float(v), "flow": "ru", "country": iso2} for c, v in zip(b.hs6, b.usd)]
+                if not ct.released("M", LEG2[iso2], m.replace("-", "")):
+                    unreported.append((("cn",), iso2, m))  # the bureau's file has EAEU trade only
+                continue
+            data = [r for r in ct.records("M", "X", LEG2[iso2], config.RUSSIA_M49, m.replace("-", "")) if r["cmdCode"] in wanted]
             released = ct.released("M", LEG2[iso2], m.replace("-", ""))
             if not released:
-                unreported.append((iso2, m))  # not released: missing; released with no rows: zero trade
+                unreported.append((("ru", "cn"), iso2, m))  # not released: missing; released with no rows: zero trade
             for r in data:
                 if (r["motCode"], r["customsCode"], r["partner2Code"]) != (0, "C00", 0):
                     continue
@@ -157,6 +168,8 @@ def build():
             if not ct.released("M", LEG2[iso2], m.replace("-", "")):
                 continue
             for r in ct.records("M", "M", LEG2[iso2], 156, m.replace("-", "")):
+                if r["cmdCode"] not in wanted:
+                    continue
                 rows.append({"hs6": r["cmdCode"], "month": m, "usd": float(r["primaryValue"]), "flow": "cn", "country": iso2})
     ru = pd.DataFrame(rows)
     df = pd.concat([eu, ru], ignore_index=True)
@@ -179,8 +192,8 @@ def build():
             grid.append((flow, country, group, m))
     g = pd.DataFrame(grid, columns=["flow", "country", "group", "month"])
     out = g.merge(out, how="left").fillna({"usd": 0.0})
-    for iso2, m in unreported:
-        out.loc[out["flow"].isin(["ru", "cn"]) & (out["country"] == iso2) & (out["month"] == m), "usd"] = float("nan")
+    for flows, iso2, m in unreported:
+        out.loc[out["flow"].isin(flows) & (out["country"] == iso2) & (out["month"] == m), "usd"] = float("nan")
     out = out.sort_values(["flow", "country", "group", "month"])
     config.PROCESSED.mkdir(parents=True, exist_ok=True)
     out.to_csv(config.PROCESSED / "ban_monthly.csv", index=False)
@@ -192,7 +205,7 @@ def build():
         "neighbours": NEIGHBOURS,
         "rows": list(LEG2),
         "names": {"KG": "Kyrgyzstan", **NEIGHBOURS},
-        "unreported": [f"{i} {m}" for i, m in unreported],
+        "unreported": [f"{i} {m}" for f, i, m in unreported if "ru" in f],
     })
     (config.PROCESSED / "ban_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return out, summary

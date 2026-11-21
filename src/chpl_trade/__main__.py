@@ -6,7 +6,7 @@
 
 import argparse
 
-from . import ban, china, comtrade, control
+from . import ban, bns, china, comtrade, control, events, excess
 from .needs import declare_all
 from .build import build
 from .fetch import fetch_all
@@ -21,10 +21,16 @@ if __name__ == "__main__":
     declare_all()
     comtrade.sync()
     build()
+    bns.fetch(args.refresh)
+    bns.build()
     ban.fetch_all(args.refresh)
     ban.build()
     control.fetch_all(args.refresh)
     control.build()
+    excess.fetch_all(args.refresh)
+    excess.build()
+    events.fetch_all(args.refresh)
+    events.build()
     china.fetch_all(args.refresh)
     china.build()
     outs, comp = plot_all()
