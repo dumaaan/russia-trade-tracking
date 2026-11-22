@@ -33,8 +33,8 @@ def declare_all():
     years = [str(y) for y in config.YEARS]
     codes = query_codes()
     # Main module: Kazakhstan and Kyrgyzstan, exports to Russia and imports from the 27 EU states.
-    comtrade.need("A", "X", [KZ, KG], [RU], years, codes)
-    comtrade.need("A", "M", [KZ, KG], config.EU27_M49.values(), years, codes)
+    comtrade.need("A", "X", [KZ, KG, UZ], [RU], years, codes)
+    comtrade.need("A", "M", [KZ, KG, UZ], config.EU27_M49.values(), years, codes)
     # Listed goods as a share of all trade: the same codes plus the total of all goods.
     comtrade.need("A", "X", [KG, UZ, KZ, GE, AZ, MN], [RU], years, codes + ["TOTAL"])
     # Unit values (value per kg): weights for the listed codes, annual, on the two Comtrade legs.
@@ -54,6 +54,8 @@ def declare_all():
     # China leg of the mirror check: the route countries' imports from China, as they report them
     # (China's side is the "China as a supplier" need below).
     comtrade.need("A", "M", [KG, UZ, KZ], [CN], years, codes + ["TOTAL"])
+    # Price per kg of imports from China as the importer records them (a check on China's own prices).
+    comtrade.need_weight("A", "M", [KG, UZ, KZ], [CN], years, codes)
     # Excess growth: the chapters (84, 85, 88, 90) and the HS4 headings of the listed codes, so that
     # "other goods" = chapter (or heading) minus the listed codes.
     from .control import headings

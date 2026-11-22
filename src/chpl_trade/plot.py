@@ -15,8 +15,8 @@ MI_FLOW = "Country imports from EU-27"
 
 # Colors from the reference categorical palette (fixed order).
 FLOW_COLOR = {EU_FLOW: "#2a78d6", RU_FLOW: "#eb6834"}
-COUNTRY_COLOR = {"Kazakhstan": "#1baf7a", "Kyrgyzstan": "#6250d6"}
-COUNTRY_MARKER = {"Kazakhstan": "o", "Kyrgyzstan": "s"}
+COUNTRY_COLOR = {"Kazakhstan": "#1baf7a", "Kyrgyzstan": "#6250d6", "Uzbekistan": "#b5651d"}
+COUNTRY_MARKER = {"Kazakhstan": "o", "Kyrgyzstan": "s", "Uzbekistan": "^"}
 INK = "#0b0b0b"
 INK_2 = "#52514e"
 GRID = "#e4e3de"

@@ -2,6 +2,23 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.11.0 — 2026-11-22
+
+### Changed after a content review
+- **Uzbekistan in every chapter:** legs, comparison, tiers, goods, the EU mirror check and the key
+  numbers (Uzbekistan's imports from the EU: 1 Comtrade call).
+- **Four parts and a contents list:** what moved; how good the records are; tests; enforcement;
+  then the cross-checks. The data dates are under the title.
+- **Key numbers:** the three countries' recorded exports to Russia as a share of what the EU, China
+  and Hong Kong recorded as shipped to them (2025: 9%), and the China mirror gap.
+- **Headlines:** the tiers headline leads with growth and gives the largest tier's own multiple;
+  the mirror headlines use the fall in proportion to the pre-war ratio; the events text uses the
+  largest fall beyond the comparison and the largest fall in dollars, not the largest percentage.
+- **Price per kg:** the share priced nearer EU goods is also given with China's prices from the
+  importers' records (2025: Kyrgyzstan 72% against 71%, Kazakhstan 23% against 27%).
+- **Cross-checks:** the European Commission's −32% (ours −32%), CISES's Kazakhstan figures, and
+  Kharon's China–Kyrgyzstan gap (ours $22.0bn against $4.81bn).
+
 ## 1.10.0 — 2026-11-21
 
 ### Added

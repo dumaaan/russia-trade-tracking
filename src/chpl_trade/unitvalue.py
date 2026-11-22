@@ -161,10 +161,11 @@ def build():
             if code in basket and v.get("VALUE_IN_EUROS") and v.get("QUANTITY_IN_100KG"):
                 rows.append({"leg": "eu", "country": p, "year": y, "hs6": code, "usd": v["VALUE_IN_EUROS"] * fx[y],
                              "kg": v["QUANTITY_IN_100KG"] * 100, "estimated": False})
-        for leg, rep, par in (("cn", CN, m49), ("ru", m49, config.RUSSIA_M49)):
+        # cm: imports from China as the importing country records them (a check on China's own prices).
+        for leg, flow, rep, par in (("cn", "X", CN, m49), ("ru", "X", m49, config.RUSSIA_M49), ("cm", "M", m49, CN)):
             for y in config.YEARS:
-                vals = {r["cmdCode"]: r["primaryValue"] for r in ct.records("A", "X", rep, par, y)}
-                for c, (kg, est, *_) in ct.weights("A", "X", rep, par, y).items():
+                vals = {r["cmdCode"]: r["primaryValue"] for r in ct.records("A", flow, rep, par, y)}
+                for c, (kg, est, *_) in ct.weights("A", flow, rep, par, y).items():
                     code = old_to_new.get(c, c)
                     if code in basket and vals.get(c) and kg:
                         rows.append({"leg": leg, "country": p, "year": y, "hs6": code, "usd": vals[c], "kg": kg, "estimated": est})

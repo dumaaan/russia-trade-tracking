@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.14">
+  <link rel="stylesheet" href="style.css?v=1.15">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -24,6 +24,7 @@
       China through Kazakhstan, Kyrgyzstan and Uzbekistan into Russia. The site uses 49 of the
       50 codes: the code for light sensors has no comparable data before 2022.
     </p>
+    <p class="data-dates" id="data-dates"></p>
   </div>
   <figure class="route wrap" aria-labelledby="route-caption">
     <div class="route-diagram" id="route"></div>
@@ -33,6 +34,13 @@
     </div>
   </figure>
   <div class="wrap"><div class="summary" id="summary"></div><p class="summary-note" id="summary-note"></p></div>
+  <nav class="toc wrap" aria-label="Contents">
+    <div class="toc-part"><a class="toc-h" href="#part-moved">Part 1 · What moved</a><ul><li><a href="#legs">Both legs</a></li><li><a href="#suppliers">Suppliers</a></li><li><a href="#comparison">Kazakhstan, Kyrgyzstan, Uzbekistan</a></li><li><a href="#tiers">Tier by tier</a></li><li><a href="#goods">Code by code</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-records">Part 2 · How good the records are</a><ul><li><a href="#mirror">Mirror checks</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-tests">Part 3 · Tests</a><ul><li><a href="#control">Share of all trade</a></li><li><a href="#excess">Against similar goods</a></li><li><a href="#unitvalue">Price per kg</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#designations">Designations</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-check">Checks · Our numbers against published ones</a><ul><li><a href="#checks">Cross-checks</a></li></ul></div>
+  </nav>
 </header>
 
 <div class="filterbar" role="group" aria-label="Filters for every chart on the page">
@@ -48,6 +56,8 @@
 </div>
 
 <main>
+  <div class="part wrap" id="part-moved"><p class="part-label"><span>Part 1</span> What moved</p></div>
+
   <section class="chapter wrap" id="legs" aria-labelledby="flows-h">
     <div class="ch-text">
       <h2 id="flows-h">Both legs, year by year</h2>
@@ -75,7 +85,7 @@
     </div>
   </section>
 
-  <section class="chapter chapter-wide wrap" aria-labelledby="cmp-h">
+  <section class="chapter chapter-wide wrap" id="comparison" aria-labelledby="cmp-h">
     <div class="ch-text">
       <h2 id="cmp-h">Kazakhstan's flows are larger; Kyrgyzstan's grew faster</h2>
       <p class="finding" id="cmp-sub"></p>
@@ -99,7 +109,39 @@
     </div>
   </section>
 
-  <section class="chapter wrap" aria-labelledby="mirror-h">
+  <section class="chapter chapter-wide wrap" id="tiers" aria-labelledby="tiers-h">
+    <div class="ch-text">
+      <h2 id="tiers-h">Tier by tier</h2>
+      <p class="finding" id="tiers-sub"></p>
+      <div class="seg" role="radiogroup" aria-label="Country" id="tiers-country"></div>
+    </div>
+    <div class="ch-figure">
+      <p class="scope" id="scope-tiers"></p>
+      <div class="legend" id="tiers-legend"></div>
+      <div class="grid3 tiers" id="tiers-grid"></div>
+      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart.</p>
+    </div>
+  </section>
+
+  <section class="chapter chapter-wide wrap" id="goods" aria-labelledby="goods-h">
+    <div class="ch-text">
+      <h2 id="goods-h">Which goods</h2>
+      <p class="finding" id="goods-sub"></p>
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
+        <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
+      </div>
+    </div>
+    <div class="ch-figure">
+      <p class="scope" id="scope-goods"></p>
+      <div class="table-wrap"><table class="supertable goods-table" id="goods-super"></table></div>
+      <p class="src-note">Uses: <a href="https://finance.ec.europa.eu/document/download/5a2494db-d874-4e2b-bf2a-ec5a191d2dc0_en">EU List of Common High Priority Items, February 2024</a>; for 8457.10 and 8517.62, <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506">Regulation (EU) 2026/506, recital 34</a>.</p>
+    </div>
+  </section>
+
+  <div class="part wrap" id="part-records"><p class="part-label"><span>Part 2</span> How good the records are</p></div>
+
+  <section class="chapter wrap" id="mirror" aria-labelledby="mirror-h">
     <div class="ch-text">
       <h2 id="mirror-h">Part of the EU's shipments never appear in the importers' records</h2>
       <p class="finding">
@@ -130,6 +172,8 @@
       <details class="table-view"><summary>Show the numbers</summary><div id="mcn-table"></div></details>
     </div>
   </section>
+
+  <div class="part wrap" id="part-tests"><p class="part-label"><span>Part 3</span> Tests</p></div>
 
   <section class="chapter chapter-wide wrap" id="control" aria-labelledby="ctl-h">
     <div class="ch-text">
@@ -192,6 +236,8 @@
     </div>
   </section>
 
+  <div class="part wrap" id="part-enforcement"><p class="part-label"><span>Part 4</span> Enforcement</p></div>
+
   <section class="chapter chapter-wide wrap" id="designations" aria-labelledby="des-h">
     <div class="ch-text">
       <h2 id="des-h">Sanctions designations next to the flows</h2>
@@ -250,37 +296,9 @@
     </div>
   </section>
 
-  <section class="chapter chapter-wide wrap" aria-labelledby="tiers-h">
-    <div class="ch-text">
-      <h2 id="tiers-h">Tier by tier</h2>
-      <p class="finding" id="tiers-sub"></p>
-      <div class="seg" role="radiogroup" aria-label="Country" id="tiers-country"></div>
-    </div>
-    <div class="ch-figure">
-      <p class="scope" id="scope-tiers"></p>
-      <div class="legend" id="tiers-legend"></div>
-      <div class="grid3 tiers" id="tiers-grid"></div>
-      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart.</p>
-    </div>
-  </section>
+  <div class="part wrap" id="part-check"><p class="part-label"><span>Checks</span> Our numbers against published ones</p></div>
 
-  <section class="chapter chapter-wide wrap" aria-labelledby="goods-h">
-    <div class="ch-text">
-      <h2 id="goods-h">Which goods</h2>
-      <p class="finding" id="goods-sub"></p>
-      <div class="controls">
-        <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
-        <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
-      </div>
-    </div>
-    <div class="ch-figure">
-      <p class="scope" id="scope-goods"></p>
-      <div class="table-wrap"><table class="supertable goods-table" id="goods-super"></table></div>
-      <p class="src-note">Uses: <a href="https://finance.ec.europa.eu/document/download/5a2494db-d874-4e2b-bf2a-ec5a191d2dc0_en">EU List of Common High Priority Items, February 2024</a>; for 8457.10 and 8517.62, <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506">Regulation (EU) 2026/506, recital 34</a>.</p>
-    </div>
-  </section>
-
-  <section class="chapter chapter-wide wrap" aria-labelledby="xc-h">
+  <section class="chapter chapter-wide wrap" id="checks" aria-labelledby="xc-h">
     <div class="ch-text">
       <h2 id="xc-h">Our numbers match published trade data, and Kyrgyz reports undercount</h2>
       <p class="finding">Our figures next to published ones. Ours always use all 49 codes in current US dollars; the filters at the top do not change this table.</p>
@@ -301,7 +319,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.15"></script>
-<script src="app.js?v=1.29"></script>
+<script src="data.js?v=1.16"></script>
+<script src="app.js?v=1.32"></script>
 </body>
 </html>

@@ -18,6 +18,7 @@ BASELINE_YEARS = [2019, 2020, 2021]
 COUNTRIES = {
     "KZ": {"name": "Kazakhstan", "m49": 398},
     "KG": {"name": "Kyrgyzstan", "m49": 417},
+    "UZ": {"name": "Uzbekistan", "m49": 860},
 }
 RUSSIA_M49 = 643
 
