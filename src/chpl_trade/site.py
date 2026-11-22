@@ -124,7 +124,7 @@ def estimate_data():
     if not (path.exists() and mpath.exists()):
         return None
     d = pd.read_csv(path)
-    cols = ["country", "year", "recorded", "kse_low", "kse_high", "eu_gap", "china_gap", "low", "high", "eu_priced_share"]
+    cols = ["country", "year", "recorded", "eu_gap", "china_gap", "low", "high", "eu_priced_share"]
     return {"rows": [[None if (isinstance(v, float) and v != v) else v for v in r] for r in d[cols].itertuples(index=False)],
             "cols": cols, "meta": json.loads(mpath.read_text())}
 

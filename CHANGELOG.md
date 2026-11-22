@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.13.0 — 2026-11-22
+
+### Fixed
+- **Part 5 mixed two measures.** KSE's $98M for Kyrgyzstan (January–October 2023) counts sales by
+  Kyrgyz companies in Russia's customs records, mostly of goods shipped from China and Hong Kong:
+  by country of dispatch, Kyrgyzstan is not in KSE's top ten (the tenth is $75M), and KSE says its
+  data do not include all trade inside the EAEU. The "times 3–4" factor built on it is removed from
+  the physical-route range. Part 5 now gives two measures: through the country (from the record to
+  the record plus missing imports; Kyrgyzstan 2025: $15.8M–$131M), and sold by the country's
+  companies (Kyrgyz companies: $98M, January–October 2023).
+- **Cross-checks:** the KSE row says that it is not the same measure; the chapter headline no
+  longer says that Kyrgyz reports undercount.
+
 ## 1.12.0 — 2026-11-22
 
 ### Added

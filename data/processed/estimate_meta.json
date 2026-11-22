@@ -1,10 +1,11 @@
 {
-  "kse": {
-    "low": 3.0,
-    "high": 4.0,
-    "measured": 3.8318520748696976,
+  "sellers": {
     "source": "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
-    "source_2026": "https://institute.kse.ua/news/official-trade-statistics-may-not-reflect-the-full-volume-of-imports-of-military-goods-into-russia-russian-chp-imports-tracker-for-the-third-quarter-of-2026/"
+    "period": "January-October 2023",
+    "KG": 98000000.0,
+    "seller_10th": 78000000.0,
+    "dispatch_10th": 75000000.0,
+    "measured_recorded_KG": 25575100.0
   },
   "years": [
     2022,

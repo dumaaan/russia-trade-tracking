@@ -718,8 +718,8 @@
         const r = E.rows.find((q) => q[0] === "KG" && q[1] === yr);
         if (!r) return [];
         const i = (c) => E.cols.indexOf(c);
-        return [`Estimate: between `, h("b", { text: `${usd(r[i("low")] / 1e6)}` }), ` and `, h("b", { text: `${usd(r[i("high")] / 1e6)}` }),
-          ` probably reached Russia through Kyrgyzstan in ${yr} (`, h("a", { href: "#estimate", text: "Part 5" }), `).`];
+        return [`Through Kyrgyzstan in ${yr}: `, h("b", { text: `${usd(r[i("low")] / 1e6)}` }), ` to Russia on record, up to `, h("b", { text: `${usd(r[i("high")] / 1e6)}` }),
+          ` with the goods that reached Kyrgyzstan unrecorded (`, h("a", { href: "#estimate", text: "Part 5" }), `).`];
       })(),
     ]);
   }
@@ -1615,20 +1615,25 @@
     {
       const kg = get("KG", ly);
       document.getElementById("est-h").textContent = kg && kg.high != null
-        ? `Between ${usd(kg.low)} and ${usd(kg.high)} of listed goods probably reached Russia through Kyrgyzstan in ${ly}, against ${usd(kg.recorded)} recorded`
-        : "How much probably reached Russia";
-      document.getElementById("est-sub").textContent = ["KZ", "UZ"].map((c) => {
+        ? `${ly}: ${usd(kg.recorded)} of listed goods went from Kyrgyzstan to Russia on record; up to ${usd(kg.high - kg.recorded)} more reached Kyrgyzstan unrecorded`
+        : "How much reached Russia through each country";
+      document.getElementById("est-sub").textContent = `Through the country, ${ly}: ` + ["KG", "KZ", "UZ"].map((c) => {
         const r = get(c, ly);
-        return r ? `${N[c]}: ${usd(r.low)} to ${r.high != null ? usd(r.high) : "no ceiling (no import detail)"}, against ${usd(r.recorded)} recorded.` : "";
-      }).join(" ") + (kg && kg.eu_priced_share != null ? ` In Kyrgyzstan's recorded exports to Russia, ${Math.round(100 * kg.eu_priced_share)}% of the value is in codes priced nearer EU goods than Chinese goods (see Price per kg).` : "");
-      const k = M.kse;
+        return r ? `${N[c]} ${usd(r.low)} to ${r.high != null ? usd(r.high) : "no ceiling (no import detail)"}` : "";
+      }).filter(Boolean).join("; ") + "." +
+        (kg && kg.eu_priced_share != null ? ` In Kyrgyzstan's recorded exports to Russia, ${Math.round(100 * kg.eu_priced_share)}% of the value is in codes priced nearer EU goods than Chinese goods (see Price per kg).` : "");
+      const S = M.sellers;
+      document.getElementById("est-sellers").replaceChildren(
+        `Sold by the country's companies, ${S.period.replace("-", "–")}: Russia's customs records show `, h("b", { text: usd(S.KG) }),
+        ` of battlefield goods sold by Kyrgyz companies, against ${usd(S.measured_recorded_KG)} that Kyrgyzstan recorded as exported to Russia in the same months. ` +
+        `By country of dispatch, Kyrgyzstan is not in the top ten (the tenth is ${usd(S.dispatch_10th)}): most of what Kyrgyz companies sold was shipped from other countries, mainly China and Hong Kong. ` +
+        `Kazakh and Uzbek companies are not in the top ten sellers (the tenth is ${usd(S.seller_10th)}).`
+      );
       document.getElementById("est-note").replaceChildren(
-        "Sources of the parts. Russian records: ",
-        h("a", { href: k.source, target: "_blank", rel: "noopener", text: "KSE (Jan 2024)" }),
-        ` found $98M of these goods sold by Kyrgyz sellers in Russia's import records for January–October 2023, against ${usd(98e6 / k.measured)} in Kyrgyzstan's records for the same months: ${k.measured.toFixed(1)} times; `,
-        h("a", { href: k.source_2026, target: "_blank", rel: "noopener", text: "KSE (Oct 2026)" }),
-        " finds recorded volumes of tiers 1, 2 and 3.A 3–4 times lower than in transaction records. No such factor is published for Kazakhstan or Uzbekistan, so their low end is the record. " +
-        "Missing imports: the mirror checks in Part 2 (EU leg: 2022 Kazakhstan has no import detail). The ceiling assumes that every missing shipment went on to Russia; some can stay in the country unrecorded, so the true value is under it. " +
+        "Sources. Russia's customs records: ",
+        h("a", { href: S.source, target: "_blank", rel: "noopener", text: "KSE, “Challenges of Export Controls Enforcement” (January 2024), Appendix 3" }),
+        "; KSE says these records do not include all trade inside the EAEU, so they cannot measure the physical route through Kazakhstan or Kyrgyzstan. " +
+        "Missing imports: the mirror checks in Part 2 (Kazakhstan 2022 has no import detail, so no ceiling). The ceiling assumes that every missing shipment went on to Russia; some can stay in the country unrecorded, so the true value is under it. " +
         "Uzbekistan's ceiling is large because its import records from China fell far below its pre-war ratio, which was over 100%: part of that can be a change in how origin is recorded."
       );
     }
@@ -1655,11 +1660,9 @@
       const lab = el("text", { x: 0, y: cy + 4, class: "uv-lbl" }, svg);
       lab.textContent = `${N[r.country]} ${small ? String(r.year).slice(2) : r.year}`;
       if (r.high != null) el("rect", { x: x(r.low), y: cy - 5, width: Math.max(1, x(r.high) - x(r.low)), height: 10, class: "est-range" }, svg);
-      if (r.kse_low != null) el("rect", { x: x(r.kse_low), y: cy - 5, width: Math.max(1, x(r.kse_high) - x(r.kse_low)), height: 10, class: "est-kse" }, svg);
       const dot = el("circle", { cx: x(r.recorded), cy, r: 4.5, class: "est-rec", tabindex: 0 }, svg);
       const tip = (px, py) => showTip(px, py, `${N[r.country]}, ${r.year}`, [
         { color: css("--flow-ru"), value: usd(r.recorded), label: "recorded exports to Russia" },
-        ...(r.kse_low != null ? [{ color: css("--flow-ru"), value: `${usd(r.kse_low)}–${usd(r.kse_high)}`, label: "times 3–4 (Russian records)" }] : []),
         { color: css("--ink-3"), value: `${usd(r.eu_gap)} + ${usd(r.china_gap)}`, label: "missing imports, EU + China legs" },
         { color: css("--ink-3"), value: r.high != null ? `${usd(r.low)}–${usd(r.high)}` : "no ceiling", label: "range" },
       ]);
@@ -1675,10 +1678,9 @@
     }
     box.replaceChildren(svg);
     // The table: every part, so each number can be checked.
-    const head = h("thead", {}, h("tr", {}, ["", "Year", "Recorded", "× 3–4 (Russian records)", "Missing imports, EU leg", "Missing imports, China leg", "Range", "Priced nearer EU goods"].map((t) => h("th", { text: t }))));
+    const head = h("thead", {}, h("tr", {}, ["", "Year", "Recorded", "Missing imports, EU leg", "Missing imports, China leg", "Through the country", "Priced nearer EU goods"].map((t) => h("th", { text: t }))));
     const body = list.map((r) => h("tr", {}, [
       h("th", { scope: "row", text: N[r.country] }), h("td", { text: String(r.year) }), h("td", { text: usd(r.recorded) }),
-      h("td", { text: r.kse_low != null ? `${usd(r.kse_low)}–${usd(r.kse_high)}` : "no published factor" }),
       h("td", { text: r.eu_gap == null ? "no data" : usd(r.eu_gap) }), h("td", { text: r.china_gap == null ? "no data" : usd(r.china_gap) }),
       h("td", { class: "chg", text: r.high != null ? `${usd(r.low)}–${usd(r.high)}` : `${usd(r.low)}, no ceiling` }),
       h("td", { text: r.eu_priced_share == null ? "too few weights" : `${Math.round(100 * r.eu_priced_share)}%` }),
@@ -1982,8 +1984,8 @@
       ["Kyrgyzstan → Russia, Jan–Oct 2025 vs pre-war", "+1,200% (×13)", "Regulation (EU) 2026/506, recital 34", "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506",
         `2025: ${x(at(kgru, 2025), avg(kgru))} vs 2019–21 (${x(at(kgruR, 2025), avg(kgruR))} in 2025 prices), ${x(at(kgru, 2025), y21(kgru))} vs 2021`,
         `Ours lower. Our pre-war base is only about $${fmtM(avg(kgru))}M a year ($${fmtM(avg(kgruR))}M in 2025 prices), so small changes move the multiple a lot.`],
-      ["Kyrgyzstan → Russia, 2023", "$98M (Jan–Oct only)", "KSE, Russian customs records, sales by Kyrgyz sellers, earlier 45-code version of the list", "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
-        `$${fmtM(at(kgru, 2023))}M (full year)`, "Ours is about one third. Kyrgyz-reported exports to Russia are under-reported."],
+      ["Kyrgyz companies' sales to Russia, 2023", "$98M (Jan–Oct, by country of seller)", "KSE, Russian customs records, earlier 45-code version of the list", "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
+        `$${fmtM(at(kgru, 2023))}M (full year, Kyrgyzstan's exports to Russia)`, "Not the same measure. KSE counts sales by Kyrgyz companies, mostly of goods shipped from other countries: by country of dispatch, Kyrgyzstan is not in KSE's top ten (the tenth is $75M)."],
     ];
     // Monthly exports to Russia of the three countries (from the designations data), for the Commission's check.
     const FL = D.designations && D.designations.flows;

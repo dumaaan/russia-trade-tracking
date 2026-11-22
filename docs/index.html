@@ -297,21 +297,23 @@
     </div>
   </section>
 
-  <div class="part wrap" id="part-estimate"><p class="part-label"><span>Part 5</span> How much probably reached Russia</p></div>
+  <div class="part wrap" id="part-estimate"><p class="part-label"><span>Part 5</span> How much reached Russia</p></div>
 
   <section class="chapter chapter-wide wrap" id="estimate" aria-labelledby="est-h">
     <div class="ch-text">
-      <h2 id="est-h">How much probably reached Russia</h2>
+      <h2 id="est-h">How much reached Russia through each country</h2>
       <p class="finding" id="est-sub"></p>
-      <p class="finding">Each range joins three documented parts. The low end is the country's own record of exports to
-        Russia; for Kyrgyzstan, that record times 3, because Russia's own customs records show 3 to 4 times more
-        (KSE). The high end adds the shipments that reached the country but are missing from its import records, above
-        its pre-war gap, on the EU leg and the China leg: if all of them went on to Russia, this is the ceiling.</p>
+      <p class="finding">Two measures, kept apart. Through the country: goods that physically passed through it. The low end
+        is the country's own record of exports to Russia. The high end adds the shipments that reached the country but
+        are missing from its import records, above its pre-war gap, on the EU leg and the China leg: if all of them
+        went on to Russia, this is the ceiling. Sold by the country's companies: Russia's own customs records by country
+        of seller, which include goods shipped from other countries.</p>
+      <p class="finding" id="est-sellers"></p>
       <p class="aside" id="est-note"></p>
     </div>
     <div class="ch-figure">
       <p class="scope">The 49 codes · current US dollars · the filters at the top do not change this</p>
-      <p class="exc-key est-key"><span class="k-rec">recorded</span><span class="k-kse">times 3–4 (Russian records, Kyrgyzstan)</span><span class="k-gap">plus missing imports (ceiling)</span></p>
+      <p class="exc-key est-key"><span class="k-rec">recorded</span><span class="k-gap">plus missing imports (ceiling)</span></p>
       <div id="est-plot"></div>
       <div class="table-wrap"><table class="supertable" id="est-table"></table></div>
     </div>
@@ -321,7 +323,7 @@
 
   <section class="chapter chapter-wide wrap" id="checks" aria-labelledby="xc-h">
     <div class="ch-text">
-      <h2 id="xc-h">Our numbers match published trade data, and Kyrgyz reports undercount</h2>
+      <h2 id="xc-h">Our numbers match published trade data where they measure the same thing</h2>
       <p class="finding">Our figures next to published ones. Ours always use all 49 codes in current US dollars; the filters at the top do not change this table.</p>
     </div>
     <div class="ch-figure">
@@ -340,7 +342,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.17"></script>
-<script src="app.js?v=1.35"></script>
+<script src="data.js?v=1.18"></script>
+<script src="app.js?v=1.37"></script>
 </body>
 </html>

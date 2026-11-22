@@ -1,25 +1,20 @@
-"""How much of the listed goods probably reached Russia through each route country: one range a year.
+"""How much of the listed goods reached Russia through each route country: two separate measures.
 
-Four documented parts, for each country (KZ, KG, UZ) and year (2022-2025):
+1. Through the country (physical route), for each country (KZ, KG, UZ) and year (2022-2025):
+   low   R     the country's own record of its exports of the 49 codes to Russia (Comtrade);
+   high  R + missing imports: shipments to the country that are missing from its own import records,
+         above the gap it had before the war, on the EU leg (Comext against the country's imports
+         from the EU) and the China leg (China's exports against the country's imports from China).
+         Goods that arrive but are not recorded are the signature of re-export through a customs
+         union (EBRD, "The Eurasian roundabout"). If all of them went on to Russia, this is the
+         ceiling; some can stay in the country unrecorded.
+   The price-per-kg split gives the share of R in codes priced nearer EU goods than Chinese goods.
 
-1. Recorded   R    the country's own record of its exports of the 49 codes to Russia (Comtrade).
-2. Records of Russia's customs (Kyrgyzstan only): KSE found $98M of these goods sold by Kyrgyz
-   sellers in Russian import records for January-October 2023 (45-code list), against $25.6M in
-   Kyrgyzstan's own records for the same months: a factor of 3.8. KSE's Q3 2026 tracker finds
-   recorded volumes of tiers 1, 2 and 3.A 3-4 times lower than in transaction records (all
-   partners). Factor range: 3 to 4.
-   No such published factor exists for Kazakhstan or Uzbekistan, so none is used for them.
-3. Supply side: shipments to the country that are missing from its own import records, above the
-   gap it had before the war (the mirror checks): EU leg (Comext against the country's imports from
-   the EU) and China leg (China's exports against the country's imports from China). Goods that
-   arrive but are not recorded are the signature of re-export through a customs union (EBRD,
-   "The Eurasian roundabout"). If all of them went on to Russia, R + gaps is a ceiling.
-4. Price per kg: the share of R in codes priced nearer EU goods than Chinese goods. It splits the
-   range by likely origin; it does not change its size.
-
-Range:  low  = R x 3 (Kyrgyzstan), else R
-        high = the larger of R x 4 (Kyrgyzstan) and R + EU gap + China gap
-Every part is a published or computed number; the assumptions are only which parts count.
+2. Sold by the country's companies (any route): Russia's customs records by country of seller
+   (KSE, January 2024, Appendix 3): Kyrgyz sellers $98M of battlefield goods in January-October
+   2023. By country of dispatch, Kyrgyzstan, Kazakhstan and Uzbekistan are not in the top 10 (the
+   10th is $75M), and KSE notes that its data do not include all trade inside the EAEU. So these
+   records measure the middleman role, not the physical route, and they are not used in measure 1.
 
 Output: data/processed/estimate.csv, data/processed/estimate_meta.json.
 """
@@ -33,10 +28,16 @@ from . import config
 
 YEARS = [2022, 2023, 2024, 2025]
 NAMES = {"KZ": "Kazakhstan", "KG": "Kyrgyzstan", "UZ": "Uzbekistan"}
-KSE = {"low": 3.0, "high": 4.0, "measured": None,
-       "source": "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
-       "source_2026": "https://institute.kse.ua/news/official-trade-statistics-may-not-reflect-the-full-volume-of-imports-of-military-goods-into-russia-russian-chp-imports-tracker-for-the-third-quarter-of-2026/"}
-KSE_PUBLISHED = 98e6  # Kyrgyz sellers, Jan-Oct 2023, Russian customs records
+# Russia's customs records (KSE, "Challenges of Export Controls Enforcement", January 2024, Appendix 3),
+# January-October 2023, battlefield goods.
+SELLERS = {
+    "source": "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
+    "period": "January-October 2023",
+    "KG": 98e6,              # Kyrgyz sellers, rank 9 of the seller table
+    "seller_10th": 78e6,     # the 10th seller country (Thailand): KZ and UZ sellers are under this
+    "dispatch_10th": 75e6,   # the 10th dispatch country (South Korea): KG, KZ and UZ are under this
+    "measured_recorded_KG": None,  # Kyrgyzstan's own record for the same months (filled in build)
+}
 
 
 def _china_gap():
@@ -102,45 +103,43 @@ def _eu_priced_share():
     return out
 
 
-def _kse_measured():
+def _recorded_kg_jan_oct_2023():
     f = pd.read_csv(config.PROCESSED / "events_monthly.csv")
     g = f[(f.leg == "ru") & (f.group == "listed") & (f.country == "KG") & (f.month >= "2023-01") & (f.month <= "2023-10")]
-    return KSE_PUBLISHED / g.usd.sum() if len(g) == 10 and g.usd.sum() else None
+    return float(g.usd.sum()) if len(g) == 10 else None
 
 
 def build():
     rec, eu, cn, share = _recorded(), _eu_gap(), _china_gap(), _eu_priced_share()
-    KSE["measured"] = _kse_measured()
+    SELLERS["measured_recorded_KG"] = _recorded_kg_jan_oct_2023()
     rows = []
     for c in NAMES:
         for y in YEARS:
             r = rec[(c, y)]
             if r is None:
                 continue
-            kse = c == "KG"
             known = [g for g in (eu[(c, y)], cn[(c, y)]) if g is not None]
             gaps = sum(known) if known else None  # None: no import detail, so no supply-side check
-            low = r * KSE["low"] if kse else r
-            high = max(r * KSE["high"] if kse else r, r + gaps) if gaps is not None else (r * KSE["high"] if kse else None)
+            low = r
+            high = r + gaps if gaps is not None else None
             sh, cov = share.get((c, y), (None, 0.0))
             rows.append({"country": c, "year": y, "recorded": r,
-                         "kse_low": r * KSE["low"] if kse else None, "kse_high": r * KSE["high"] if kse else None,
                          "eu_gap": eu[(c, y)], "china_gap": cn[(c, y)], "low": low, "high": high,
                          "eu_priced_share": sh if cov >= 0.5 else None, "price_coverage": cov})
     df = pd.DataFrame(rows)
     config.PROCESSED.mkdir(parents=True, exist_ok=True)
     df.to_csv(config.PROCESSED / "estimate.csv", index=False)
-    meta = {"kse": KSE, "years": YEARS, "names": NAMES}
+    meta = {"sellers": SELLERS, "years": YEARS, "names": NAMES}
     (config.PROCESSED / "estimate_meta.json").write_text(json.dumps(meta, indent=2) + "\n")
     return df, meta
 
 
 if __name__ == "__main__":
     df, meta = build()
-    print("KSE factor measured:", round(meta["kse"]["measured"], 2))
+    print("Kyrgyzstan's own record, Jan-Oct 2023:", round(meta["sellers"]["measured_recorded_KG"] / 1e6, 1), "M; Kyrgyz sellers in Russian records: 98M")
     show = df.copy()
     show["price_coverage"] = (show["price_coverage"] * 100).round(0)
-    for k in ("recorded", "kse_low", "kse_high", "eu_gap", "china_gap", "low", "high"):
+    for k in ("recorded", "eu_gap", "china_gap", "low", "high"):
         show[k] = (show[k] / 1e6).round(1)
     show["eu_priced_share"] = (show["eu_priced_share"] * 100).round(0)
     print(show.to_string(index=False))
