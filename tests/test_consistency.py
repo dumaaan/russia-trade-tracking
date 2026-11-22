@@ -101,11 +101,41 @@ class DesignationsAreClean(unittest.TestCase):
         self.assertFalse(d.programme.fillna("").str.contains("SDGT|GLOMAG|DPRK|US-IRAN", regex=True).any())
 
 
+class CuratedAndBureauData(unittest.TestCase):
+    def test_hs10_adds_up_to_hs6(self):
+        """Kazakhstan's 10-digit lines to Russia add up to the bureau's 6-digit monthly totals (2024)."""
+        t10 = pd.read_csv(P / "bns_kz_hs10.csv", dtype={"hs10": str, "hs6": str})
+        t6 = pd.read_csv(P / "bns_kz_monthly.csv", dtype={"hs6": str})
+        a = t10[(t10.partner == "RU") & t10.month.str.startswith("2024")].groupby("hs6").usd.sum()
+        b = t6[(t6.partner == "RU") & t6.hs6.isin(a.index)].groupby("hs6").usd.sum()
+        for k in a.index:
+            self.assertAlmostEqual(a[k], b.get(k, 0.0), delta=1e3 + 1e-3 * a[k], msg=k)
+
+    def test_hs10_matches_comtrade_2025(self):
+        t10 = pd.read_csv(P / "bns_kz_hs10.csv", dtype={"hs10": str, "hs6": str})
+        comp = pd.read_csv(P / "comparison.csv")
+        a = t10[(t10.partner == "RU") & t10.month.str.startswith("2025")].usd.sum()
+        b = comp[(comp.country == "Kazakhstan") & (comp.year == 2025)].exports_to_ru_usd.iloc[0]
+        self.assertLess(abs(a - b) / b, 0.02, f"{a} against {b}")
+
+    def test_responses_are_well_formed(self):
+        r = pd.read_csv(ROOT / "data" / "responses.csv")
+        self.assertTrue(r.country.isin(["KZ", "KG", "UZ"]).all())
+        self.assertTrue(r.kind.isin(["promise", "measure", "bank", "plays down", "objection"]).all())
+        self.assertTrue(r.source.str.startswith("https://").all())
+        self.assertTrue(pd.to_datetime(r.date, errors="coerce").notna().all())
+
+    def test_weapon_parts_are_listed_codes(self):
+        w = pd.read_csv(ROOT / "data" / "weapons.csv", dtype={"hs6": str})
+        listed = set(pd.read_csv(ROOT / "data" / "chpl_hs_codes.csv", dtype={"hs6": str}).hs6)
+        self.assertTrue(w.hs6.isin(listed).all(), set(w.hs6) - listed)
+
+
 class SiteDataIsWhole(unittest.TestCase):
     def test_sections_present(self):
         d = site_data()
         for key in ("codes", "suppliers", "control", "ban", "excess", "eventStudy", "mirrorCn", "unitValues",
-                    "designations", "estimate", "cnImports"):
+                    "designations", "estimate", "cnImports", "responses", "weapons", "hs10"):
             self.assertIn(key, d)
             self.assertTrue(d[key], key)
 

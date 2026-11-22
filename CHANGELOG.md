@@ -2,6 +2,22 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.16.0 — 2026-11-22
+
+### Added
+- **Government responses (Part 4):** 14 dated statements and measures of Kazakhstan, Kyrgyzstan and
+  Uzbekistan (promises, own measures, bank steps, statements that play down or reject sanctions),
+  each with its source, on the monthly exports to Russia, with the change in the 6 months after.
+  Curated in data/responses.csv; one measure known only from a Ukrainian intelligence report is
+  marked so.
+- **Link to weapons:** part types found in Russian missiles and drones by IISS and Conflict
+  Armament Research (2025), with pages, linked to 12 codes (data/weapons.csv). Shown in the code
+  explorer and as a mark in the goods table. The part-to-code links are ours.
+- **Kazakhstan's 10-digit lines:** the statistics bureau's 2024, 2025 and 2026 files at 10 digits;
+  the explorer shows Kazakhstan's exports to Russia by 10-digit line with the price per kg. The
+  lines add up to the 6-digit totals.
+- **Tests:** four more (15 in all).
+
 ## 1.15.0 — 2026-11-22
 
 ### Fixed

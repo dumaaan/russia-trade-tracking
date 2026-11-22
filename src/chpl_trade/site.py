@@ -110,7 +110,7 @@ def designations_data():
         return None
     d = pd.read_csv(path)
     f = pd.read_csv(fpath)
-    f = f[(f["leg"] == "ru") & (f["group"] == "listed") & (f["month"] >= "2022-01")]
+    f = f[(f["leg"] == "ru") & (f["group"] == "listed") & (f["month"] >= "2021-01")]
     return {
         "rows": [[r.list, r.country, r.date, r.name, r.date_source != "list",
                   r.also_listed_with if isinstance(r.also_listed_with, str) else ""] for r in d.itertuples()],
@@ -150,6 +150,38 @@ def china_imports_by_code():
                     acc[k] = acc.get(k, 0.0) + r["primaryValue"]
             rows += [[iso, y, k, _num(v / 1e6)] for k, v in acc.items()]
     return rows
+
+
+def responses_data():
+    """Dated statements and measures of the route countries' governments (curated: data/responses.csv)."""
+    path = config.DATA / "responses.csv"
+    if not path.exists():
+        return None
+    d = pd.read_csv(path)
+    return [[r.country, r.date, r.kind, r.actor, r.summary, r.source, r.source_type, r.checked] for r in d.itertuples()]
+
+
+def weapons_data():
+    """Part types of the listed codes found in Russian weapons (curated from IISS/CAR, data/weapons.csv)."""
+    path = config.DATA / "weapons.csv"
+    if not path.exists():
+        return None
+    d = pd.read_csv(path, dtype={"hs6": str, "page": str})
+    return [[r.hs6, r.part, r.weapons, r.page, r.note if isinstance(r.note, str) else ""] for r in d.itertuples()]
+
+
+def hs10_data():
+    """Kazakhstan's exports of the listed codes by 10-digit line, a year (statistics bureau), for the explorer."""
+    path = config.PROCESSED / "bns_kz_hs10.csv"
+    if not path.exists():
+        return None
+    d = pd.read_csv(path, dtype={"hs10": str, "hs6": str})
+    d["year"] = d["month"].str[:4].astype(int)
+    last = d["month"].max()
+    g = d.groupby(["partner", "year", "hs6", "hs10", "name", "unit"], dropna=False, as_index=False)[["usd", "tonnes", "units"]].sum(min_count=1)
+    return {"last": last,
+            "rows": [[r.partner, int(r.year), r.hs6, r.hs10, r.name, r.unit if isinstance(r.unit, str) else "",
+                      _num(r.usd), _num(r.tonnes), _num(r.units)] for r in g.itertuples()]}
 
 
 def events_data():
@@ -212,6 +244,9 @@ def export():
         "designations": designations_data(),
         "estimate": estimate_data(),
         "cnImports": china_imports_by_code(),
+        "responses": responses_data(),
+        "weapons": weapons_data(),
+        "hs10": hs10_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -220,10 +255,14 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv", "estimate.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv", "estimate.csv", "bns_kz_hs10.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")
+    if (config.DATA / "responses.csv").exists():
+        shutil.copy(config.DATA / "responses.csv", dl / "government_responses.csv")
+    if (config.DATA / "weapons.csv").exists():
+        shutil.copy(config.DATA / "weapons.csv", dl / "weapon_parts_by_code.csv")
     return out
 
 

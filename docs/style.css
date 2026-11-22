@@ -486,3 +486,25 @@ table.xc a { color: var(--ink-2); }
 .xp-key .k-ru::before { border-top-color: var(--flow-ru); }
 a.xp-link { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 2px; }
 a.xp-link:hover { text-decoration-color: var(--ink); }
+
+/* ---------- government responses ---------- */
+.resp-key span::before { border-top: 0; width: 10px; height: 10px; border-radius: 50%; }
+.resp-key .k-promise::before { border: 1.6px solid var(--ink-3); background: var(--paper); }
+.resp-key .k-measure::before { background: var(--flow-eu); }
+.resp-key .k-bank::before { background: var(--c-kz); }
+.resp-key .k-down::before { background: var(--c-kg); }
+.resp-key .k-object::before { background: var(--flow-ru); }
+.des-svg .resp-num { font-size: 9.5px; font-weight: 700; pointer-events: none; }
+.des-svg .resp-mark:focus-visible circle { stroke-width: 3; }
+#resp-table td.lbl { text-align: left; white-space: normal; font-stretch: 100%; font-weight: 500; }
+#resp-table td.resp-what { min-width: 220px; }
+#resp-table thead th { white-space: normal; }
+
+/* ---------- weapons link ---------- */
+.xp-weapons { margin: 6px 0 4px; }
+.xp-wlist { margin: 4px 0 6px; padding-left: 18px; font-size: 14.5px; line-height: 1.5; }
+.weapon-key { display: inline-block; margin-left: 6px; padding: 0 5px; font-size: 11px; font-weight: 600; border: 1px solid var(--flow-ru); color: var(--flow-ru); border-radius: 3px; vertical-align: 1px; }
+
+/* ---------- 10-digit lines ---------- */
+#xp-hs10 td.xp-ru { min-width: 260px; font-size: 13px; }
+#xp-hs10 thead th { white-space: normal; }

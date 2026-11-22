@@ -1534,7 +1534,7 @@
     const COL = { US: "--c-kg", UK: "--c-kz", EU: "--flow-eu" };
     const order = ["KZ", "KG", "UZ"];
     const flows = S.flows;
-    const months = [...new Set(order.flatMap((c) => (flows[c] || []).map((x) => x[0])))].sort();
+    const months = [...new Set(order.flatMap((c) => (flows[c] || []).map((x) => x[0])))].sort().filter((m) => m >= "2022-01"); // the store starts in 2021, for the 6 months before early events
     const last = months[months.length - 1];
     const dmonths = [...new Set(S.rows.map((r) => r[2].slice(0, 7)))].filter((m) => m > last);
     const all = [...months, ...dmonths].sort();
@@ -1750,6 +1750,18 @@
       (D.art12f.includes(code) ? " Under the April 2026 EU ban on exports to Kyrgyzstan." : "") +
       (D.excluded.includes(code) ? " Not in the 49-code basket: no comparable data before 2022." : ""),
     );
+    // found in Russian weapons (IISS/CAR teardowns, part types linked to codes by us)
+    {
+      const W = (D.weapons || []).filter((r) => r[0] === code);
+      const src = h("a", { href: "https://www.iiss.org/globalassets/media-library---content--migration/files/research-papers/2025/09/pub25-094-tracking-the-components-of-missiles-and-uavs-used-by-russia-in-ukraine.pdf", target: "_blank", rel: "noopener", text: "IISS and Conflict Armament Research (2025)" });
+      document.getElementById("xp-weapons").replaceChildren(
+        h("h3", { class: "ctl-group", text: "Found in Russian weapons" }),
+        W.length
+          ? h("ul", { class: "xp-wlist" }, W.map((r) => h("li", {}, [h("b", { text: r[1] }), `: ${r[2]} (${String(r[3]).includes(";") ? `pp. ${String(r[3]).replace(/;\s*/g, ", ")}` : `p. ${r[3]}`})` + (r[4] ? `; ${r[4]}` : "") + "."])))
+          : h("p", { class: "aside", text: "The IISS/CAR report names no part of this code. The EU lists every code as found in, or critical to, Russian weapon systems used in Ukraine." }),
+        h("p", { class: "aside" }, ["Source: ", src, ". The report names part types, not customs codes; the link from a part to a code is ours, and some parts fit more than one code. In CAR's sample, more than 25% of Shahed-136 parts and about 40% of Kh-69 parts are in tier 1, and under 10% of all parts are outside the list (p. 10)."]),
+      );
+    }
     // the finding: largest route to Russia, and the supply into it
     {
       const best = order.map((iso) => ({ iso, v: data[iso].ru[ly] })).filter((x) => x.v != null).sort((a, b) => b.v - a.v)[0];
@@ -1833,10 +1845,163 @@
           h("tbody", {}, rowsB)])));
     } else banBox.replaceChildren();
 
+    // inside the code: Kazakhstan's exports to Russia by 10-digit line (statistics bureau, 2024 onwards)
+    {
+      const box = document.getElementById("xp-hs10");
+      const T = D.hs10;
+      const rows10 = T ? T.rows.filter((r) => r[0] === "RU" && r[2] === code) : [];
+      if (!rows10.length) box.replaceChildren();
+      else {
+        const years = [...new Set(rows10.map((r) => r[1]))].sort();
+        const lines = [...new Set(rows10.map((r) => r[3]))];
+        const tot = (l) => rows10.filter((r) => r[3] === l).reduce((t, r) => t + (r[6] || 0), 0);
+        lines.sort((a, b) => tot(b) - tot(a));
+        const lastY = years[years.length - 1], lastLab = T.last.slice(0, 4) === String(lastY) && T.last.slice(5) !== "12" ? `${lastY} (Jan–${monthName(T.last).split(" ")[0]})` : String(lastY);
+        const k = (v) => (v == null ? "—" : moneyK(v));
+        const body = lines.slice(0, 10).map((l) => {
+          const any = rows10.find((r) => r[3] === l);
+          const cells = years.map((y) => { const r = rows10.find((q) => q[3] === l && q[1] === y); return h("td", { text: r ? k(r[6]) : "—" }); });
+          const r = rows10.find((q) => q[3] === l && q[1] === lastY);
+          const perKg = r && r[7] ? r[6] / (r[7] * 1000) : null;
+          return h("tr", {}, [h("td", { class: "code", text: `${l.slice(0, 4)}.${l.slice(4, 6)}.${l.slice(6)}` }), h("td", { class: "lbl xp-ru", text: any[4] }),
+            ...cells, h("td", { class: "chg", text: perKg == null ? "—" : `$${perKg >= 100 ? Math.round(perKg).toLocaleString("en-US") : perKg.toFixed(1)}` })]);
+        });
+        box.replaceChildren(
+          h("h3", { class: "ctl-group", text: "Inside this code: Kazakhstan's exports to Russia by 10-digit line" }),
+          h("div", { class: "table-wrap" }, h("table", { class: "supertable" }, [
+            h("thead", {}, h("tr", {}, ["Line", "Goods (the bureau's text, in Russian)", ...years.map((y) => (y === lastY ? lastLab : String(y))), `Per kg, ${lastY}`].map((t) => h("th", { text: t })))),
+            h("tbody", {}, body)])),
+          h("p", { class: "aside", text: `Source: Kazakhstan's Bureau of National Statistics, trade with EAEU countries by 10-digit code (company reports, form 1-TS). ${lines.length > 10 ? `The 10 largest of ${lines.length} lines. ` : ""}No 10-digit data are published here for Kyrgyzstan or Uzbekistan.` }),
+        );
+      }
+    }
+
     // the numbers
     const head = ["Country", "Flow", ...YEARS.map(String)];
     const L = { eu: "EU exports to the country", cn: "China's exports to the country", hk: "Hong Kong's exports to the country", mi: "Recorded imports from the EU", cm: "Recorded imports from China", ru: "Exports to Russia" };
     table(document.getElementById("xp-table"), head, order.flatMap((iso) => Object.keys(L).map((k) => [NAME[iso], L[k], ...data[iso][k].map((v) => (v == null ? "no data" : usdM(v)))])));
+  }
+
+
+  // ---------- what the governments said and did ----------
+  const RESP_KIND = {
+    promise: { label: "promise", col: "--ink-3", hollow: true },
+    measure: { label: "own measure", col: "--flow-eu" },
+    bank: { label: "banks", col: "--c-kz" },
+    "plays down": { label: "plays down", col: "--c-kg" },
+    objection: { label: "objection", col: "--flow-ru" },
+  };
+  function responsesStudy() {
+    const R = D.responses, FL = D.designations && D.designations.flows;
+    if (!R || !FL) return;
+    const NAMES = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const order = ["KZ", "KG", "UZ"];
+    const items = R.map((r, i) => ({ n: i + 1, c: r[0], date: r[1], kind: r[2], actor: r[3], what: r[4], src: r[5], srcType: r[6], checked: r[7] }));
+    const fmtD = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    const shift = (m, k) => { const [y, mo] = m.split("-").map(Number); const t = y * 12 + mo - 1 + k; return `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, "0")}`; };
+    // 6 months after the statement's month against the 6 months before; at least 3 months after
+    const change = (c, date) => {
+      const f = Object.fromEntries((FL[c] || []).map((x) => [x[0], x[1]]));
+      const m = date.slice(0, 7);
+      const before = []; for (let k = -6; k <= -1; k++) before.push(f[shift(m, k)]);
+      const after = []; for (let k = 1; k <= 6; k++) { const v = f[shift(m, k)]; if (v == null) break; after.push(v); }
+      if (before.some((v) => v == null)) return { text: "no data before", v: null };
+      if (after.length < 3) return { text: "under 3 months", v: null };
+      const b = before.reduce((a, x) => a + x, 0) / 6, a = after.reduce((p, x) => p + x, 0) / after.length;
+      if (b < MIN_BASE_MONTH) return { text: `${a - b >= 0 ? "+" : "−"}${moneyK(Math.abs(a - b))}`, v: null };
+      const v = Math.round(100 * (a / b - 1));
+      return { text: v === 0 ? "0%" : `${v > 0 ? "+" : "−"}${Math.abs(v)}%`, v };
+    };
+    for (const it of items) it.chg = change(it.c, it.date);
+    {
+      const kz = items.filter((x) => x.c === "KZ" && x.kind === "promise");
+      const kgM = items.filter((x) => x.c === "KG" && x.kind === "measure");
+      const kgO = items.filter((x) => x.c === "KG" && (x.kind === "objection" || x.kind === "plays down"));
+      const yr = (d) => d.slice(0, 4);
+      document.getElementById("resp-h").textContent = kz.length && kgM.length
+        ? `Kazakhstan promised from ${yr(kz[0].date)} not to be a route around sanctions; Kyrgyzstan's first own measure came in ${yr(kgM[0].date)}`
+        : "What the governments said and did";
+      const firstKzMeasure = items.find((x) => x.c === "KZ" && x.kind === "measure");
+      document.getElementById("resp-sub").textContent = [
+        kz.length ? `Kazakhstan: ${kz.length} public promises, ${fmtD(kz[0].date)} to ${fmtD(kz[kz.length - 1].date)}.` : "",
+        firstKzMeasure && firstKzMeasure.chg.v != null ? `After its goods-tracking system was announced (${fmtD(firstKzMeasure.date)}), its listed exports to Russia changed ${firstKzMeasure.chg.text} in 6 months.` : "",
+        kgO.length ? `Kyrgyzstan: ${kgO.length} statements that play down or reject the sanctions on its banks before its first own measure (${fmtD(kgM[0].date)}).` : "",
+      ].filter(Boolean).join(" ");
+    }
+    // timeline: one row a country, bars = monthly exports to Russia, numbered markers above
+    const box = document.getElementById("resp-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 0 : 92, Rm = 6, barH = 42;
+    const months = [...new Set(order.flatMap((c) => (FL[c] || []).map((x) => x[0])))].sort().filter((m) => m >= "2022-01");
+    const last = items.map((x) => x.date.slice(0, 7)).reduce((a, b) => (a > b ? a : b), months[months.length - 1]);
+    const all = []; for (let m = months[0]; m <= last; m = shift(m, 1)) all.push(m);
+    const bw = (W - L - Rm) / all.length, x0 = (i) => L + i * bw;
+    const kids = [];
+    for (const c of order) {
+      const f = Object.fromEntries((FL[c] || []).map((x) => [x[0], x[1]]));
+      const mine = items.filter((x) => x.c === c);
+      const max = Math.max(...Object.values(f).filter((v) => v != null), 1);
+      // A marker that would touch the one before it goes one level higher (markers are 16 px wide).
+      const levels = [];
+      for (const it of mine) {
+        const i = all.indexOf(it.date.slice(0, 7));
+        const cx = x0(i) + bw / 2;
+        let lv = 0;
+        while (levels.some((q) => q.lv === lv && Math.abs(q.cx - cx) < 17)) lv++;
+        levels.push({ cx, lv });
+        it.lv = lv;
+      }
+      const top = 12 + 17 * Math.max(0, ...levels.map((q) => q.lv));
+      const H = top + 18 + barH + 18;
+      const yb = top + 18 + barH;
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "des-svg", role: "img",
+        "aria-label": `${NAMES[c]}: monthly listed exports to Russia and ${mine.length} government statements or measures` });
+      if (!small) { const t = el("text", { x: 0, y: yb - barH / 2, class: "des-lbl" }, svg); t.textContent = "to Russia"; }
+      all.forEach((m, i) => {
+        const v = f[m];
+        if (v != null) { const hh = (v / max) * barH; el("rect", { x: x0(i) + 0.5, y: yb - hh, width: Math.max(bw - 1, 0.8), height: hh, fill: css("--flow-ru"), "fill-opacity": 0.35 }, svg); }
+        if (m.endsWith("-01")) {
+          el("line", { x1: x0(i), x2: x0(i), y1: yb - barH - 4, y2: H - 14, class: "des-year" }, svg);
+          const yt = el("text", { x: x0(i) + 2, y: H - 3, class: "des-tick" }, svg); yt.textContent = m.slice(0, 4);
+        }
+      });
+      // markers, at the level found above
+      for (const it of mine) {
+        const i = all.indexOf(it.date.slice(0, 7));
+        if (i < 0) continue;
+        const cx = x0(i) + bw / 2, cy = top - 17 * it.lv;
+        const K = RESP_KIND[it.kind] || RESP_KIND.measure, col = css(K.col);
+        el("line", { x1: cx, x2: cx, y1: cy + 6, y2: yb, stroke: col, "stroke-width": 1, "stroke-dasharray": it.checked === "yes" ? null : "2 2" }, svg);
+        const g = el("g", { tabindex: 0, class: "resp-mark" }, svg);
+        el("circle", { cx, cy, r: 8, fill: K.hollow ? css("--paper") : col, stroke: col, "stroke-width": 1.6, "stroke-dasharray": it.checked === "yes" ? null : "2 2" }, g);
+        const t = el("text", { x: cx, y: cy + 3.5, "text-anchor": "middle", class: "resp-num", fill: K.hollow ? css("--ink") : css("--paper") }, g);
+        t.textContent = String(it.n);
+        const tip = (px, py) => showTip(px, py, `${it.n}. ${fmtD(it.date)}, ${it.actor}`, [{ color: col, value: K.label, label: it.what }]);
+        g.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+        g.addEventListener("pointerleave", hideTip);
+        g.addEventListener("focus", () => { const q = g.getBoundingClientRect(); tip(q.left, q.top); });
+        g.addEventListener("blur", hideTip);
+      }
+      el("line", { x1: L, x2: W - Rm, y1: yb, y2: yb, stroke: css("--axis"), "stroke-width": 0.75 }, svg);
+      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: NAMES[c] }), svg]));
+    }
+    box.replaceChildren(...kids);
+    // the table
+    const head = h("thead", {}, h("tr", {}, ["#", "Date", "", "Who", "What", "Source", "Exports to Russia, 6 months after"].map((t) => h("th", { text: t }))));
+    const body = [];
+    for (const c of order) {
+      body.push(h("tr", { class: "group" }, h("th", { colspan: 7, scope: "rowgroup", text: NAMES[c] })));
+      for (const it of items.filter((x) => x.c === c)) {
+        const K = RESP_KIND[it.kind] || RESP_KIND.measure;
+        body.push(h("tr", {}, [
+          h("td", { text: String(it.n) }), h("td", { text: fmtD(it.date) }), h("td", { class: "lbl", text: K.label }),
+          h("td", { class: "lbl", text: it.actor }), h("td", { class: "lbl resp-what", text: it.what + (it.checked === "yes" ? "" : " (Not confirmed by a Kazakh source.)") }),
+          h("td", { class: "lbl" }, h("a", { href: it.src, target: "_blank", rel: "noopener", text: it.srcType })),
+          h("td", { class: "chg", text: it.chg.text }),
+        ]));
+      }
+    }
+    document.getElementById("resp-table").replaceChildren(head, h("tbody", {}, body));
   }
 
   // ---------- sanctions events: three questions ----------
@@ -2083,6 +2248,7 @@
           h("td", { class: "code" }, h("a", { href: "#explorer", class: "xp-link", "data-code": r.code, text: fmtCode(r.code), title: "Open in the code explorer" })),
           h("th", { scope: "row" }, [SHORT[r.code] || (chplByCode[r.code] || {}).description,
             D.art12f.includes(r.code) ? h("span", { class: "ban-key", text: "EU ban" }) : null,
+            (D.weapons || []).some((w) => w[0] === r.code) ? h("span", { class: "weapon-key", text: "in weapons", title: (D.weapons || []).filter((w) => w[0] === r.code).map((w) => `${w[1]}: ${w[2]}`).join("; ") + " (IISS/CAR 2025)" }) : null,
             CODE_USE[r.code] ? h("span", { class: "use", text: CODE_USE[r.code] }) : null]),
           ...r.v.map(cell),
           h("td", { class: "spark-cell" }, sparkline(r.v, { kind: "line", color: FLOW[f].color, w: 90, h: 22, max: tierMax })),
@@ -2248,6 +2414,7 @@
     if (D.mirrorCn) mirrorChina();
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
+    if (D.responses) responsesStudy();
     if (D.estimate) estimateStudy();
     codeExplorer();
     if (D.eventStudy) eventStudy();
@@ -2260,7 +2427,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();
