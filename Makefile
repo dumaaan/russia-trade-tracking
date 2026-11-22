@@ -1,6 +1,6 @@
 PY := .venv/bin/python
 
-.PHONY: setup run refresh serve plan status
+.PHONY: setup run refresh serve plan status test
 
 setup:
 	python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -19,3 +19,6 @@ plan:
 
 status:
 	cd src && ../$(PY) -m chpl_trade.comtrade status
+
+test:
+	$(PY) -m unittest discover -s tests

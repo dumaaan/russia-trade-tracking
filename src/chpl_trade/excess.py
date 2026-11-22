@@ -26,7 +26,7 @@ from . import comtrade as ct
 from . import config
 from .build import load_fx
 from .control import DESTINATIONS, LEFT_OUT, OLD_HEADING, RAW, _comext_frame, _stamp, headings
-from .fetch import COMEXT_URL, _get, chpl_codes
+from .fetch import COMEXT_URL, _get, chpl_codes, keep_comext
 
 CHAPTERS = ["84", "85", "88", "90"]  # downloaded
 CONTROL_CHAPTERS = ["84", "85", "90"]  # used for the chapter control
@@ -36,7 +36,7 @@ EAEU = {"KZ", "KG"}
 
 def fetch_comext_chapters(partner, refresh=False):
     out = RAW / f"comext_eu27_to_{partner}_CHAPTERS.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),

@@ -1,96 +1,80 @@
-list,dataset,id,name,country,schema,date,month,date_source,programme
-US OFAC,us_ofac_sdn,NK-f7u9JR4f7piS8PngjTkUSa,Gazprombank Joint Stock Company,KZ,Organization,2022-02-24,2022-02,list,UKRAINE-EO13662
-US trade list (incl. BIS),us_trade_csl,NK-m5uxh7GMpRei95QkP8qEUA,Serniya Engineering,KZ,Organization,2022-03-09,2022-03,list,Entity List (EL) - Bureau of Industry and Security
-US trade list (incl. BIS),us_trade_csl,NK-jSWECEUJ5FYQh79cAeHEBn,Promcomplektlogistic Private Company,UZ,Organization,2022-06-30,2022-06,list,Entity List (EL) - Bureau of Industry and Security
-US trade list (incl. BIS),us_trade_csl,NK-apEqbCL4AnLNYycLELms9B,Alfa Beta Creative LLC,UZ,LegalEntity,2023-04-12,2023-04,list,Entity List (EL) - Bureau of Industry and Security
-US trade list (incl. BIS),us_trade_csl,NK-izJcsoM5TeBU5mTo7st38X,GFK Logistic Asia LLC,UZ,LegalEntity,2023-04-12,2023-04,list,Entity List (EL) - Bureau of Industry and Security
-US OFAC,us_ofac_sdn,NK-oEBUcE5q26uYuoosNgFTno,Akkermann Cement CA Limited Liability Company,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-HYsnU75abGt4W8EqCaxxhh,BANK VTB KAZAKHSTAN JOINT STOCK COMPANY,KZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-4qmAi6UhNx8oMpWnzhSvMB,KYRGYZ TRANS AVIA,KG,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-n2JAZieqxQvr5VX33BsPzj,Katibat al Tawhid wal Jihad,KG,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-jSWECEUJ5FYQh79cAeHEBn,Private Company Promcomplektlogistic,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-bhKUDViZEEcuSsD38L54B7,SBER VOSTOK LIMITED LIABILITY PARTNERSHIP,KZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-j5v5PQgwosdGZuxaBLzgP4,Windfel Properties Limited,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-o3s7jCgLWRPg4WSCuteYb3,Акционерное Общество Ахангаранцемент,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-YofLoM3xwC3KVyAAVdBukG,Belmagistralavtotrans Speditions GmbH,KZ,Organization,2023-05-19,2023-05,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-e7ZxDGTsohQWZDQQFu2XrK,"Tro.Ya, LLC",KG,Organization,2023-05-19,2023-05,list,Entity List (EL) - Bureau of Industry and Security
-US trade list (incl. BIS),us_trade_csl,trade-csl-13dacc23d9dc8aa8f45ac2d3ac8e706055c5167fc9f52b37a7dc50ab,APEX Kazakhstan,KZ,LegalEntity,2023-05-27,2023-05,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-kL5urGiKf2sPAGbR25qiuj,LLC RM Design and Development,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-m29JmYZAmh5oUEnxGoNSYZ,OSOO Kargolayn,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-CEWqnZ8R6N4Dhs4gkgHJ9k,OSOO Progress Lider,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-GdQ9n6KnSM6JNgqunNLxdQ,ZAO GTME Tekhnologii,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-YguD5p37AvksQE2z6peDXb,Defense Engineering Limited Liability Partnership,KZ,Organization,2023-08-16,2023-08,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-WgretgXm6dmg9R68JxmJZW,OOO MVIZION,UZ,Organization,2023-11-02,2023-11,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-WgretgXm6dmg9R68JxmJZW,Mvizion LLC,UZ,Organization,2023-11-02,2023-11,list,Entity List (EL) - Bureau of Industry and Security
-UK,gb_fcdo_sanctions,NK-WgretgXm6dmg9R68JxmJZW,OOO MVIZION,UZ,Organization,2023-12-06,2023-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US trade list (incl. BIS),us_trade_csl,NK-VdC3KXo6RXzT8GBhWCL8RG,LIMITED LIABILITY PARTNERSHIP ELEM GROUP,KZ,Organization,2023-12-07,2023-12,list,Entity List (EL) - Bureau of Industry and Security
-US OFAC,us_ofac_sdn,NK-bR9LrgYFmRC6LGprSoq7Ga,WEITMANN HANDELN ALLIANZ LLC,KG,Organization,2023-12-12,2023-12,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-oYViCtqhZ3kZkwwHpuqrzA,Limited Liability Partnership Da Group 22,KZ,Organization,2024-02-23,2024-02,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-PZEEYLHYdVb9xBw6gDVUA3,OBSHCHESTVO S OGRANICHENNOY OTVETSTVENNOSTYU UKON,KG,Organization,2024-02-23,2024-02,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-VdC3KXo6RXzT8GBhWCL8RG,Товарищество С Ограниченной Ответственностью Элем Групп,KZ,Organization,2024-02-23,2024-02,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-dTdWGJ9diZciMN2JwfnG89,بولر ستار لوجستيكس ش. ذ. م. م,UZ,Organization,2024-02-23,2024-02,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-iyvjB2Ba2RvN7QZbT4okca,Muller Markt LLC,KG,LegalEntity,2024-02-23,2024-02,list,Entity List (EL) - Bureau of Industry and Security
-US trade list (incl. BIS),us_trade_csl,NK-R7K6GXsNRhn5UggU53ipUt,Profflab LLC,KG,Organization,2024-02-23,2024-02,list,Entity List (EL) - Bureau of Industry and Security
-US OFAC,us_ofac_sdn,NK-e7ZxDGTsohQWZDQQFu2XrK,TRO YA LLC,KG,Organization,2024-05-01,2024-05,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-R7K6GXsNRhn5UggU53ipUt,Общество с ограниченной ответственностью ПроффЛаб,KG,Organization,2024-05-01,2024-05,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-iMEkzqSz7ELjEX5HhUrE5L,KBR Tekhnologii TOO,KZ,Organization,2024-06-12,2024-06,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-CeknxnYSkEs3f3F8HThGNj,OBSHESTVO S OGRANICHENNOY OTVETSTVENNOSTYU NOVA PROEKT,KG,Organization,2024-06-12,2024-06,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-dtbeazteYXRoYXbgUjy4UX,Общество C Ограниченной Ответственностью Транзит Сервис Бишкек,KG,Organization,2024-06-12,2024-06,first seen by OpenSanctions,
-UK,gb_fcdo_sanctions,NK-6F6tVGQZpDRanCEz5wtcqx,LLC Inter Style Plus,KG,Organization,2024-06-13,2024-06,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US trade list (incl. BIS),us_trade_csl,trade-csl-f7ba8d4b3f89373b5a14f40ff038d12bd0649e4def6a5da1de223c4d,Inerto LLC,KG,LegalEntity,2024-07-02,2024-07,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-Wg8muLbBkLtKUdJR74sPgv,CATU TECH LIMITED LIABILITY COMPANY,KZ,Organization,2024-08-23,2024-08,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-hHqdqCVYBbfUjtgZrhcdY9,LIMITED LIABILITY COMPANY AKFORTA,KG,Organization,2024-08-23,2024-08,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-6QoErD9zBuMndvK9B693kK,Limited Liability Company Intem Lab,UZ,Organization,2024-08-23,2024-08,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-BtyckfPE334LjjwSjXurWu,All Global Trading Elektronik Dis Ticaret Ltd Sti,KG,LegalEntity,2024-08-27,2024-08,list,Entity List (EL) - Bureau of Industry and Security
-US OFAC,us_ofac_sdn,NK-M7kC3bQ4mjvs3QSYQxFoZK,Kazstanex,KZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-G5dGPnDoYEejKHXBzofckg,LLC SERVICE FLY BISHKEK,KG,Organization,2024-10-30,2024-10,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-QXJUxVrh7bXdNRhEeei3KD,OOO Uzstanex,UZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-VYWG7ZCYjNWYwcjCVr6rMY,The Elite Investment Group Mas'uliyati Cheklangan Jamiyat,UZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,
-UK,gb_fcdo_sanctions,NK-KqzmAVRpskJY8vyCPzRF6h,'ZAPCHASTRAYD' LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-M7kC3bQ4mjvs3QSYQxFoZK,KAZSTANEX LIMITED LIABILITY PARTNERSHIP,KZ,Company,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-CahHSei8Ph2koFEtwA3gkp,Rabadazija LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-hzDQRpzUDZRqwnvFCk3SqM,STANEX GROUP HOLDING,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-Ejn3wey5DN6T3vxLSHthWw,Speed Energy LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-VCn2AjczjLNKRi2t4VVXVY,TOO TauKZ,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-QXJUxVrh7bXdNRhEeei3KD,UZSTANEX LLC,UZ,Company,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US OFAC,us_ofac_sdn,NK-Vsh3i9KX79PFmrgsmoh4xS,MIRDK FYUELS OSOO,KG,Organization,2024-12-09,2024-12,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-78YbPnuPSBvpXb2yPty339,ROYAL SONA OSOO,KG,Organization,2024-12-09,2024-12,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-7jJ8ZiJtpoXXtaPG99tNWb,SAKHARA PETROLEUM OSOO,KG,Organization,2024-12-09,2024-12,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-5jXhEBuTjncTumyeNAkzr9,SUPRIM EF IKS OSOO,KG,Organization,2024-12-09,2024-12,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-dgizjCZhRn5yDPSvYzDmJT,Gazprom Neft Kazakhstan LLC,KZ,Organization,2025-01-10,2025-01,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-mFuJH7pUGnr7fegsQYbRWp,OSOO Gazprom Neft Aziya,KG,Organization,2025-01-10,2025-01,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-WYQAxMQH2TDJ4MatBRhdKF,UMBRA NAVI SHIPMANAGEMENT CORP,KZ,Organization,2025-01-10,2025-01,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-UmArNE6G2Gz9FrznwdyBxA,ZAO Munay Myrza,KG,Organization,2025-01-10,2025-01,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-7dnxtoeLXcd9PPofZ6qMqY,OJSC Keremet Bank,KG,Company,2025-01-15,2025-01,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-DQ3FLHi9Gd4zYp2NgBZJy6,FC MARAKANDA 7777 LLC,UZ,LegalEntity,2025-02-06,2025-02,list,Denied Persons List (DPL) - Bureau of Industry and Security
-UK,gb_fcdo_sanctions,NK-7dnxtoeLXcd9PPofZ6qMqY,OJSC Rosinbank,KG,Company,2025-02-24,2025-02,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-hYDP4nQDHWK64YnGLjMnSm,RAMA GROUP LLC,KG,Organization,2025-02-24,2025-02,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US trade list (incl. BIS),us_trade_csl,NK-KNLjWPNaJ9LGRiJWD98th9,EltexAlatau,KZ,LegalEntity,2025-04-25,2025-04,first seen by OpenSanctions,
-US trade list (incl. BIS),us_trade_csl,NK-TCECCbLc26ozsEmyNCAbsH,Inter-Traid Electro,KZ,LegalEntity,2025-04-25,2025-04,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-nCCRCEZeb4t4Rz8QxUji3C,Grinex,KG,Organization,2025-08-14,2025-08,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-BWSfTq3iX7YzFrwPyiszKh,Old Vector LLC,KG,Organization,2025-08-14,2025-08,first seen by OpenSanctions,
-UK,gb_fcdo_sanctions,NK-bKjG4Jgft5Dt7Vjpp4NwFa,CJSC TENGRICOIN,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-nCCRCEZeb4t4Rz8QxUji3C,GRINEX LLC,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-ecuZjAJqCvxjwW7CdTmAx4,OJSC CAPITAL BANK OF CENTRAL ASIA,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-BWSfTq3iX7YzFrwPyiszKh,OLD VECTOR LLC,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-EU,eu_fsf,NK-nCCRCEZeb4t4Rz8QxUji3C,Grinex,KG,Organization,2025-10-23,2025-10,list,UKR
-EU,eu_fsf,NK-BWSfTq3iX7YzFrwPyiszKh,Общество с ограниченной ответственностью Олд Вектор,KG,Organization,2025-10-23,2025-10,list,UKR
-US OFAC,us_ofac_sdn,NK-75k8TLpgV4C9baYSBEXCoY,Datavice MCHJ,UZ,Organization,2025-11-19,2025-11,first seen by OpenSanctions,
-UK,gb_fcdo_sanctions,NK-NhXZPaM3qGGUDPg63FpkQH,KIFIKO LLC,KG,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-nJJwC3iKxwJpLRV6Ffz3yJ,LLC JV CHEMISTRY INTERNATIONAL,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-ZpYdt7kpGdKjDWbiRj444U,OOO FERGON CHEMICAL PLANT,UZ,Company,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-D9hNZbkSUA936rVXMbqVsS,OOO GELION BUSINESS TRADE,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-kJn2osteuyHJ4AHnCTvmjf,RAW MATERIALS CELLULOSE MCHJ,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US OFAC,us_ofac_sdn,NK-ACtKXV7VtWWDd7Buj86Fp3,Advance Security Solutions,UZ,Organization,2026-02-24,2026-02,first seen by OpenSanctions,
-EU,eu_fsf,NK-DAS5G7AwrJnkXAtHDwTuZM,LLP “United Trading Group”,KZ,Organization,2026-04-23,2026-04,list,UKR
-EU,eu_fsf,NK-bKjG4Jgft5Dt7Vjpp4NwFa,ЗАО «ТенгриКоин»,KG,Organization,2026-04-23,2026-04,list,UKR
-EU,eu_fsf,NK-ZpYdt7kpGdKjDWbiRj444U,ООО “FARG’ONA KIMYO ZAVODI”,UZ,Organization,2026-04-23,2026-04,list,UKR
-EU,eu_fsf,NK-kJn2osteuyHJ4AHnCTvmjf,ООО “Raw Materials Cellulose”,UZ,Organization,2026-04-23,2026-04,list,UKR
-UK,gb_fcdo_sanctions,NK-Go6tSnWQrxMpcJ8BCetzDU,OJSC EURASIAN SAVINGS BANK,KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-QdWEU8TFRGkLSZuApTThoZ,OPEN JOINT-STOCK COMPANY 'VIRTUAL ASSETS ISSUER',KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-K3cTkBcTnHMn9MPFbT2zHn,STATE BROKERAGE COMPANY,KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-US OFAC,us_ofac_sdn,NK-9EyJsMnhVdNLgnFMvEXrww,Tour Invest LLC,KZ,Organization,2026-09-08,2026-09,first seen by OpenSanctions,
-US OFAC,us_ofac_sdn,NK-LWe624wpJaurf8FVBEQJk2,A7 Network,KG,Organization,2026-10-01,2026-10,first seen by OpenSanctions,
-UK,gb_fcdo_sanctions,NK-AWtormBoqouLeXo5mkZGqq,OJSC PROCESSING KG,KG,Company,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-ikreVfU8nPbf5gipcLJMy4,TOKENSPOT CJSC,KG,Organization,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019
-UK,gb_fcdo_sanctions,NK-hmkkBFS2HZbuyF7AXYSfNb,TSUNAMI PAYMENTS LLC,KG,Organization,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019
+list,dataset,id,name,country,schema,date,month,date_source,programme,also_listed_with
+US trade list (incl. BIS),us_trade_csl,NK-m5uxh7GMpRei95QkP8qEUA,Serniya Engineering,KZ,Organization,2022-03-09,2022-03,list,Entity List (EL) - Bureau of Industry and Security,RU
+US trade list (incl. BIS),us_trade_csl,NK-jSWECEUJ5FYQh79cAeHEBn,Promcomplektlogistic Private Company,UZ,Organization,2022-06-30,2022-06,list,Entity List (EL) - Bureau of Industry and Security,
+US trade list (incl. BIS),us_trade_csl,NK-apEqbCL4AnLNYycLELms9B,Alfa Beta Creative LLC,UZ,LegalEntity,2023-04-12,2023-04,list,Entity List (EL) - Bureau of Industry and Security,
+US trade list (incl. BIS),us_trade_csl,NK-izJcsoM5TeBU5mTo7st38X,GFK Logistic Asia LLC,UZ,LegalEntity,2023-04-12,2023-04,list,Entity List (EL) - Bureau of Industry and Security,
+US OFAC,us_ofac_sdn,NK-oEBUcE5q26uYuoosNgFTno,Akkermann Cement CA Limited Liability Company,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-HYsnU75abGt4W8EqCaxxhh,BANK VTB KAZAKHSTAN JOINT STOCK COMPANY,KZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,UKRAINE-EO13662,
+US OFAC,us_ofac_sdn,NK-jSWECEUJ5FYQh79cAeHEBn,Private Company Promcomplektlogistic,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-bhKUDViZEEcuSsD38L54B7,SBER VOSTOK LIMITED LIABILITY PARTNERSHIP,KZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-j5v5PQgwosdGZuxaBLzgP4,Windfel Properties Limited,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,RUSSIA-EO14024,CY
+US OFAC,us_ofac_sdn,NK-o3s7jCgLWRPg4WSCuteYb3,Акционерное Общество Ахангаранцемент,UZ,Organization,2023-04-20,2023-04,first seen by OpenSanctions,RUSSIA-EO14024,
+US trade list (incl. BIS),us_trade_csl,NK-e7ZxDGTsohQWZDQQFu2XrK,"Tro.Ya, LLC",KG,Organization,2023-05-19,2023-05,list,Entity List (EL) - Bureau of Industry and Security,
+US trade list (incl. BIS),us_trade_csl,trade-csl-13dacc23d9dc8aa8f45ac2d3ac8e706055c5167fc9f52b37a7dc50ab,APEX Kazakhstan,KZ,LegalEntity,2023-05-27,2023-05,first seen by OpenSanctions,Entity List (EL) - Bureau of Industry and Security,
+US OFAC,us_ofac_sdn,NK-kL5urGiKf2sPAGbR25qiuj,LLC RM Design and Development,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-m29JmYZAmh5oUEnxGoNSYZ,OSOO Kargolayn,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-CEWqnZ8R6N4Dhs4gkgHJ9k,OSOO Progress Lider,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-GdQ9n6KnSM6JNgqunNLxdQ,ZAO GTME Tekhnologii,KG,Organization,2023-07-20,2023-07,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-WgretgXm6dmg9R68JxmJZW,OOO MVIZION,UZ,Organization,2023-11-02,2023-11,first seen by OpenSanctions,RUSSIA-EO14024,
+US trade list (incl. BIS),us_trade_csl,NK-WgretgXm6dmg9R68JxmJZW,Mvizion LLC,UZ,Organization,2023-11-02,2023-11,list,Entity List (EL) - Bureau of Industry and Security,
+UK,gb_fcdo_sanctions,NK-WgretgXm6dmg9R68JxmJZW,OOO MVIZION,UZ,Organization,2023-12-06,2023-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+US trade list (incl. BIS),us_trade_csl,NK-VdC3KXo6RXzT8GBhWCL8RG,LIMITED LIABILITY PARTNERSHIP ELEM GROUP,KZ,Organization,2023-12-07,2023-12,list,Entity List (EL) - Bureau of Industry and Security,
+US OFAC,us_ofac_sdn,NK-bR9LrgYFmRC6LGprSoq7Ga,WEITMANN HANDELN ALLIANZ LLC,KG,Organization,2023-12-12,2023-12,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-oYViCtqhZ3kZkwwHpuqrzA,Limited Liability Partnership Da Group 22,KZ,Organization,2024-02-23,2024-02,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-PZEEYLHYdVb9xBw6gDVUA3,OBSHCHESTVO S OGRANICHENNOY OTVETSTVENNOSTYU UKON,KG,Organization,2024-02-23,2024-02,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-VdC3KXo6RXzT8GBhWCL8RG,Товарищество С Ограниченной Ответственностью Элем Групп,KZ,Organization,2024-02-23,2024-02,first seen by OpenSanctions,RUSSIA-EO14024,
+US trade list (incl. BIS),us_trade_csl,NK-iyvjB2Ba2RvN7QZbT4okca,Muller Markt LLC,KG,LegalEntity,2024-02-23,2024-02,list,Entity List (EL) - Bureau of Industry and Security,
+US trade list (incl. BIS),us_trade_csl,NK-R7K6GXsNRhn5UggU53ipUt,Profflab LLC,KG,Organization,2024-02-23,2024-02,list,Entity List (EL) - Bureau of Industry and Security,
+US OFAC,us_ofac_sdn,NK-e7ZxDGTsohQWZDQQFu2XrK,TRO YA LLC,KG,Organization,2024-05-01,2024-05,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-R7K6GXsNRhn5UggU53ipUt,Общество с ограниченной ответственностью ПроффЛаб,KG,Organization,2024-05-01,2024-05,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-iMEkzqSz7ELjEX5HhUrE5L,KBR Tekhnologii TOO,KZ,Organization,2024-06-12,2024-06,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-CeknxnYSkEs3f3F8HThGNj,OBSHESTVO S OGRANICHENNOY OTVETSTVENNOSTYU NOVA PROEKT,KG,Organization,2024-06-12,2024-06,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-dtbeazteYXRoYXbgUjy4UX,Общество C Ограниченной Ответственностью Транзит Сервис Бишкек,KG,Organization,2024-06-12,2024-06,first seen by OpenSanctions,RUSSIA-EO14024,
+UK,gb_fcdo_sanctions,NK-6F6tVGQZpDRanCEz5wtcqx,LLC Inter Style Plus,KG,Organization,2024-06-13,2024-06,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+US OFAC,us_ofac_sdn,NK-Wg8muLbBkLtKUdJR74sPgv,CATU TECH LIMITED LIABILITY COMPANY,KZ,Organization,2024-08-23,2024-08,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-hHqdqCVYBbfUjtgZrhcdY9,LIMITED LIABILITY COMPANY AKFORTA,KG,Organization,2024-08-23,2024-08,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-6QoErD9zBuMndvK9B693kK,Limited Liability Company Intem Lab,UZ,Organization,2024-08-23,2024-08,first seen by OpenSanctions,RUSSIA-EO14024,RU
+US trade list (incl. BIS),us_trade_csl,NK-BtyckfPE334LjjwSjXurWu,All Global Trading Elektronik Dis Ticaret Ltd Sti,KG,LegalEntity,2024-08-27,2024-08,list,Entity List (EL) - Bureau of Industry and Security,TR
+US OFAC,us_ofac_sdn,NK-M7kC3bQ4mjvs3QSYQxFoZK,Kazstanex,KZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-G5dGPnDoYEejKHXBzofckg,LLC SERVICE FLY BISHKEK,KG,Organization,2024-10-30,2024-10,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-QXJUxVrh7bXdNRhEeei3KD,OOO Uzstanex,UZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-VYWG7ZCYjNWYwcjCVr6rMY,The Elite Investment Group Mas'uliyati Cheklangan Jamiyat,UZ,Organization,2024-10-30,2024-10,first seen by OpenSanctions,RUSSIA-EO14024,
+UK,gb_fcdo_sanctions,NK-KqzmAVRpskJY8vyCPzRF6h,'ZAPCHASTRAYD' LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-M7kC3bQ4mjvs3QSYQxFoZK,KAZSTANEX LIMITED LIABILITY PARTNERSHIP,KZ,Company,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-CahHSei8Ph2koFEtwA3gkp,Rabadazija LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-hzDQRpzUDZRqwnvFCk3SqM,STANEX GROUP HOLDING,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-Ejn3wey5DN6T3vxLSHthWw,Speed Energy LLP,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-VCn2AjczjLNKRi2t4VVXVY,TOO TauKZ,KZ,Organization,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-QXJUxVrh7bXdNRhEeei3KD,UZSTANEX LLC,UZ,Company,2024-11-07,2024-11,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+US OFAC,us_ofac_sdn,NK-dgizjCZhRn5yDPSvYzDmJT,Gazprom Neft Kazakhstan LLC,KZ,Organization,2025-01-10,2025-01,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-mFuJH7pUGnr7fegsQYbRWp,OSOO Gazprom Neft Aziya,KG,Organization,2025-01-10,2025-01,first seen by OpenSanctions,RUSSIA-EO14024,RU
+US OFAC,us_ofac_sdn,NK-WYQAxMQH2TDJ4MatBRhdKF,UMBRA NAVI SHIPMANAGEMENT CORP,KZ,Organization,2025-01-10,2025-01,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-UmArNE6G2Gz9FrznwdyBxA,ZAO Munay Myrza,KG,Organization,2025-01-10,2025-01,first seen by OpenSanctions,RUSSIA-EO14024,
+US OFAC,us_ofac_sdn,NK-7dnxtoeLXcd9PPofZ6qMqY,OJSC Keremet Bank,KG,Company,2025-01-15,2025-01,first seen by OpenSanctions,RUSSIA-EO14024,
+UK,gb_fcdo_sanctions,NK-7dnxtoeLXcd9PPofZ6qMqY,OJSC Rosinbank,KG,Company,2025-02-24,2025-02,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-hYDP4nQDHWK64YnGLjMnSm,RAMA GROUP LLC,KG,Organization,2025-02-24,2025-02,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+US OFAC,us_ofac_sdn,NK-nCCRCEZeb4t4Rz8QxUji3C,Grinex,KG,Organization,2025-08-14,2025-08,first seen by OpenSanctions,CYBER4,RU
+US OFAC,us_ofac_sdn,NK-BWSfTq3iX7YzFrwPyiszKh,Old Vector LLC,KG,Organization,2025-08-14,2025-08,first seen by OpenSanctions,CYBER4,
+UK,gb_fcdo_sanctions,NK-bKjG4Jgft5Dt7Vjpp4NwFa,CJSC TENGRICOIN,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-nCCRCEZeb4t4Rz8QxUji3C,GRINEX LLC,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-ecuZjAJqCvxjwW7CdTmAx4,OJSC CAPITAL BANK OF CENTRAL ASIA,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-BWSfTq3iX7YzFrwPyiszKh,OLD VECTOR LLC,KG,Organization,2025-08-20,2025-08,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+EU,eu_fsf,NK-nCCRCEZeb4t4Rz8QxUji3C,Grinex,KG,Organization,2025-10-23,2025-10,list,UKR,
+EU,eu_fsf,NK-BWSfTq3iX7YzFrwPyiszKh,Общество с ограниченной ответственностью Олд Вектор,KG,Organization,2025-10-23,2025-10,list,UKR,
+US OFAC,us_ofac_sdn,NK-75k8TLpgV4C9baYSBEXCoY,Datavice MCHJ,UZ,Organization,2025-11-19,2025-11,first seen by OpenSanctions,CYBER4,
+UK,gb_fcdo_sanctions,NK-NhXZPaM3qGGUDPg63FpkQH,KIFIKO LLC,KG,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-nJJwC3iKxwJpLRV6Ffz3yJ,LLC JV CHEMISTRY INTERNATIONAL,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-ZpYdt7kpGdKjDWbiRj444U,OOO FERGON CHEMICAL PLANT,UZ,Company,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-D9hNZbkSUA936rVXMbqVsS,OOO GELION BUSINESS TRADE,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-kJn2osteuyHJ4AHnCTvmjf,RAW MATERIALS CELLULOSE MCHJ,UZ,Organization,2025-12-18,2025-12,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+US OFAC,us_ofac_sdn,NK-ACtKXV7VtWWDd7Buj86Fp3,Advance Security Solutions,UZ,Organization,2026-02-24,2026-02,first seen by OpenSanctions,CYBER4,AE
+EU,eu_fsf,NK-DAS5G7AwrJnkXAtHDwTuZM,LLP “United Trading Group”,KZ,Organization,2026-04-23,2026-04,list,UKR,
+EU,eu_fsf,NK-bKjG4Jgft5Dt7Vjpp4NwFa,ЗАО «ТенгриКоин»,KG,Organization,2026-04-23,2026-04,list,UKR,
+EU,eu_fsf,NK-ZpYdt7kpGdKjDWbiRj444U,ООО “FARG’ONA KIMYO ZAVODI”,UZ,Organization,2026-04-23,2026-04,list,UKR,
+EU,eu_fsf,NK-kJn2osteuyHJ4AHnCTvmjf,ООО “Raw Materials Cellulose”,UZ,Organization,2026-04-23,2026-04,list,UKR,
+UK,gb_fcdo_sanctions,NK-Go6tSnWQrxMpcJ8BCetzDU,OJSC EURASIAN SAVINGS BANK,KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-QdWEU8TFRGkLSZuApTThoZ,OPEN JOINT-STOCK COMPANY 'VIRTUAL ASSETS ISSUER',KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-K3cTkBcTnHMn9MPFbT2zHn,STATE BROKERAGE COMPANY,KG,Organization,2026-05-26,2026-05,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-AWtormBoqouLeXo5mkZGqq,OJSC PROCESSING KG,KG,Company,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-ikreVfU8nPbf5gipcLJMy4,TOKENSPOT CJSC,KG,Organization,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019,
+UK,gb_fcdo_sanctions,NK-hmkkBFS2HZbuyF7AXYSfNb,TSUNAMI PAYMENTS LLC,KG,Organization,2026-10-08,2026-10,list,The Russia (Sanctions) (EU Exit) Regulations 2019,

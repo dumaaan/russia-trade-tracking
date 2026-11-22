@@ -515,7 +515,7 @@
   function mapValue(kind, from, to, i) {
     const y = YEARS[i];
     const basket = (code) => inBasket(code, state.basket);
-    if (kind === "eu" || kind === "cn") {
+    if (kind === "eu" || kind === "cn" || kind === "hk") {
       const SP = D.suppliers;
       if (!SP || SP.meta.missing.includes(`${kind}|${to}|${y}`)) return null;
       let t = 0;
@@ -636,10 +636,11 @@
   function mapCaption() {
     const i = YEARS.indexOf(state.routeYear), yr = state.routeYear;
     const sum = (kind) => HUBS.reduce((t, hh) => { const v = mapValue(kind, kind === "ru" ? hh : kind.toUpperCase(), hh, i); return v == null ? t : t + v; }, 0);
-    const eu = sum("eu"), cn = sum("cn"), ru = HUBS.reduce((t, hh) => { const v = mapValue("ru", hh, "RU", i); return v == null ? t : t + v; }, 0);
+    const eu = sum("eu"), cn = sum("cn"), hk = sum("hk"), ru = HUBS.reduce((t, hh) => { const v = mapValue("ru", hh, "RU", i); return v == null ? t : t + v; }, 0);
     const cap = document.getElementById("route-caption");
     cap.replaceChildren(
       `${yr}: to the three countries, the EU sent `, h("b", { text: fmtMoney(eu) }), ` and China `, h("b", { text: fmtMoney(cn) }),
+      ...(hk > 0 ? [` (Hong Kong, not on the map, `, h("b", { text: fmtMoney(hk) }), `)`] : []),
       `; the three countries sent `, h("b", { text: fmtMoney(ru) }), ` of the same goods to Russia. Band widths are to scale, the same for every year.`,
     );
   }
@@ -1038,7 +1039,8 @@
       let head = "Tier by tier";
       if (bySize.length && ranked.length) {
         const big = bySize[0], fast = ranked[0];
-        const tl = (p) => `${TIER_NAMES[p.t].split(": ")[0].replace("Tier", "tier")} (${what(p)})`;
+        // Short label for the headline: the tier and the first item of its contents (the full names are in the text under it).
+        const tl = (p) => `${TIER_NAMES[p.t].split(": ")[0].replace("Tier", "tier")} (${what(p).split(",")[0]})`;
         // Growth leads; the largest tier is named with its own multiple, so its size does not read as growth.
         head = big === fast
           ? `${cap(tl(fast))}: the largest tier to Russia and the fastest-growing, ${fmtX(fast.xru[last])} in ${ly}`
@@ -1599,12 +1601,12 @@
       kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: `${NAMES[c]} · ${rows.length} organisations` }), svg]));
     }
     box.replaceChildren(...kids);
-    table(document.getElementById("des-table"), ["Date", "Country", "List", "Organisation"],
-      S.rows.map((r) => [r[2] + (r[4] ? " (first seen)" : ""), NAMES[r[1]], r[0], r[3]]));
+    table(document.getElementById("des-table"), ["Date", "Country", "List", "Organisation", "Also listed with"],
+      S.rows.map((r) => [r[2] + (r[4] ? " (first seen)" : ""), NAMES[r[1]], r[0], r[3], r[5] || ""]));
   }
 
 
-  // ---------- how much probably reached Russia: one range a country and year ----------
+  // ---------- how much reached Russia: through the country (a range), and sold by its companies ----------
   function estimateStudy() {
     const E = D.estimate, M = E.meta, N = M.names;
     const ix = Object.fromEntries(E.cols.map((c, i) => [c, i]));
@@ -1634,7 +1636,18 @@
         h("a", { href: S.source, target: "_blank", rel: "noopener", text: "KSE, “Challenges of Export Controls Enforcement” (January 2024), Appendix 3" }),
         "; KSE says these records do not include all trade inside the EAEU, so they cannot measure the physical route through Kazakhstan or Kyrgyzstan. " +
         "Missing imports: the mirror checks in Part 2 (Kazakhstan 2022 has no import detail, so no ceiling). The ceiling assumes that every missing shipment went on to Russia; some can stay in the country unrecorded, so the true value is under it. " +
-        "Uzbekistan's ceiling is large because its import records from China fell far below its pre-war ratio, which was over 100%: part of that can be a change in how origin is recorded."
+        "Uzbekistan's ceiling is large because its import records from China fell far below its pre-war ratio, which was over 100%: part of that can be a change in how origin is recorded. ",
+        ...(() => {
+          // Hong Kong is not a leg of the ceiling: its largest year to one country, as a known gap.
+          const SP = D.suppliers;
+          if (!SP) return [];
+          const by = {};
+          for (const r of SP.rows) if (r[0] === "hk" && r[1] !== "RU" && r[4] != null) by[`${r[1]}|${r[2]}`] = (by[`${r[1]}|${r[2]}`] || 0) + r[4];
+          const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+          if (!top) return [];
+          const [c, y] = top[0].split("|");
+          return [`Hong Kong is not in the ceiling: it recorded ${usd(top[1] * 1e6)} (current US dollars) of these goods to ${N[c]} in ${y}, but importers record such goods by their origin (mostly China), so they cannot be added to the China leg without counting them twice. This is a known gap.`];
+        })(),
       );
     }
     // Range plot: one row a country and year, one log scale.
@@ -1827,7 +1840,8 @@
   }
 
   // ---------- sanctions events: three questions ----------
-  const pctChange = (after, before) => {
+  const pctChange = (after, before, n) => {
+    if (n != null && n < 3) return "under 3 months";
     if (after == null || before == null) return "no data";
     if (before < MIN_BASE_MONTH) { const d = after - before; return `${d >= 0 ? "+" : "−"}${moneyK(Math.abs(d))}`; }
     const v = Math.round(100 * (after / before - 1));
@@ -1849,7 +1863,8 @@
       // (events aimed at one country), and the largest fall in dollars.
       const sgn = (v) => `${v < 0 ? "−" : "+"}${Math.abs(Math.round(v))}%`;
       const SHORT_EV = { "kz-checks": "Kazakhstan's re-export checks", "eu-11": "the EU 11th package", "dec-2023": "EO 14114 and the EU 'no Russia' clause",
-        keremet: "the Keremet Bank designation", a7a5: "the UK sanctions on the A7A5 network" };
+        keremet: "the Keremet Bank designation", a7a5: "the UK sanctions on the A7A5 network", "eu-19": "the EU 19th package",
+        "kg-suspend": "Kyrgyzstan's suspension of 50 companies", "eu-21": "the EU 21st package" };
       const what = (r) => `${N[r.country]} after ${SHORT_EV[r.event] || evById[r.event].label} (${fmtDate(evById[r.event].date)})`;
       const beyond = rows.map((x) => ({ ...x, c: x.r.q3.ru ? pctOf(x.r.q3.ru) : null })).filter((x) => x.c != null).sort((a, b) => (a.v - a.c) - (b.v - b.c))[0];
       const dollars = rows.map((x) => ({ ...x, d: x.r.q1.ru.after - x.r.q1.ru.before })).sort((a, b) => a.d - b.d)[0];
@@ -1884,13 +1899,13 @@
         last = r.event;
       }
       const lit = (i) => (i >= 6 && i < 12) || (i > 12 && i <= 18);
-      const cmpEu = r.q3.eu ? h("td", { text: pctChange(r.q3.eu.after, r.q3.eu.before), title: `EU exports to ${list(r.q3.eu_who)}` }) : h("td", { text: "—" });
-      const cmpRu = r.q3.ru ? h("td", { text: pctChange(r.q3.ru.after, r.q3.ru.before), title: `${list(r.q3.ru_who)} to Russia` }) : h("td", { text: "—", title: "The event applied to all three route countries" });
+      const cmpEu = r.q3.eu ? h("td", { text: pctChange(r.q3.eu.after, r.q3.eu.before, r.q3.eu.n), title: `EU exports to ${list(r.q3.eu_who)}` }) : h("td", { text: "—" });
+      const cmpRu = r.q3.ru ? h("td", { text: pctChange(r.q3.ru.after, r.q3.ru.before, r.q3.ru.n), title: `${list(r.q3.ru_who)} to Russia` }) : h("td", { text: "—", title: "The event applied to all three route countries" });
       body.push(h("tr", {}, [
         h("th", { scope: "row", text: N[r.country] }),
         h("td", { class: "spark-cell" }, sparkline(r.spark, { color: "--flow-ru", lit, mark: 12, w: 125 })),
-        ...["eu", "cn", "ru"].map((leg) => h("td", { class: leg === "ru" ? "chg" : "", text: r.q1[leg] ? pctChange(r.q1[leg].after, r.q1[leg].before) : "no data" })),
-        h("td", { text: r.q2.ru ? pctChange(r.q2.ru.after, r.q2.ru.before) : "no data" }),
+        ...["eu", "cn", "ru"].map((leg) => h("td", { class: leg === "ru" ? "chg" : "", text: r.q1[leg] ? pctChange(r.q1[leg].after, r.q1[leg].before, r.q1[leg].n) : "no data" })),
+        h("td", { text: r.q2.ru ? pctChange(r.q2.ru.after, r.q2.ru.before, r.q2.ru.n) : "no data" }),
         cmpEu, cmpRu,
       ]));
     }
@@ -1922,9 +1937,9 @@
       const word = (v, up, down) => (v >= 0 ? `${up} ${Math.round(v)}%` : `${down} ${Math.abs(Math.round(v))}%`);
       const a = p(S["eu|KG|banned"]), bb = p(S["cn|KG|banned"]), c = p(S["ru|KG|banned"]);
       document.getElementById("ban-h").textContent = a == null ? "The April 2026 EU ban on Kyrgyzstan"
-        : `Against the same months of 2025, EU shipments of the banned goods to Kyrgyzstan ${word(a, "rose", "fell")}` +
-          (bb != null ? `; Kyrgyz imports of them from China ${word(bb, "rose", "fell")}` : "") +
-          (c != null ? `, exports to Russia ${word(c, "rose", "fell")}` : "");
+        // Short: the comparison months and exports to Russia are in the text under it.
+        : `After the ban, EU shipments of the banned goods to Kyrgyzstan ${word(a, "rose", "fell")}` +
+          (bb != null ? `; its imports of them from China ${word(bb, "rose", "fell")}` : "");
       const n = (k) => (S[k] || {}).after_months;
       // Kazakhstan is the comparison: same customs union, same goods, no ban. The difference in points is
       // the change in Kyrgyzstan beyond the change that both countries had.
@@ -2206,7 +2221,9 @@
     const mn = (m) => (m ? monthName(m) : "—");
     if (dd) dd.textContent = `Data: yearly ${YEARS[0]}–${YEARS[YEARS.length - 1]}` +
       (B ? `; monthly, EU exports to ${mn(B.comext_last_month)}, exports to Russia to ${mn(B.comtrade_last_month.KZ)} (Kazakhstan), ` +
-        `${mn(B.comtrade_last_month.KG)} (Kyrgyzstan), ${mn(B.comtrade_last_month.UZ)} (Uzbekistan)` : "") + `. Built ${D.built}.`;
+        `${mn(B.comtrade_last_month.KG)} (Kyrgyzstan), ${mn(B.comtrade_last_month.UZ)} (Uzbekistan)` : "") +
+      (B && B.comext_updated ? `. EU data as Eurostat published it on ${new Date(B.comext_updated + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}` : "") +
+      `. Built ${D.built}.`;
   }
   document.getElementById("built").textContent =
     `Site built ${D.built}. Sources: Eurostat Comext (DS-045409), UN Comtrade, Kazakhstan Bureau of National Statistics, OpenSanctions (CC BY-NC 4.0), ECB exchange rates, European Commission CHPL list (Feb 2024). Code: MIT licence.`;

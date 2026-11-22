@@ -17,7 +17,7 @@ import pandas as pd
 from . import comtrade as ct
 from . import config
 from .build import load_fx
-from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
+from .fetch import COMEXT_URL, _get, chpl_codes, keep_comext, query_codes
 
 RAW = config.RAW / "suppliers"
 CN = 156
@@ -33,10 +33,10 @@ def fetch_comext(partner, refresh=False):
     """EU-27 exports of the listed codes; reuses the files other modules already downloaded."""
     for reuse in (config.RAW / "control" / f"comext_eu27_to_{partner}.json",
                   config.RAW / "comext" / f"eu27_exports_to_{partner}.json"):
-        if reuse.exists() and not refresh:
+        if keep_comext(reuse, refresh):
             return reuse
     out = RAW / f"comext_eu27_to_{partner}.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),

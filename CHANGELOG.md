@@ -2,6 +2,30 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.15.0 — 2026-11-22
+
+### Fixed
+- **Designations:** only listings under Russia-related programmes count (not terrorism, Global
+  Magnitsky, Iran, North Korea or organised crime; not the BIS Unverified or Denied Persons lists;
+  BIS Entity List additions since 24 February 2022 count), and only organisations whose listed
+  countries are at least half Kazakhstan, Kyrgyzstan or Uzbekistan (a Russian bank with a branch in
+  Kazakhstan is left out). The OFAC programme is now kept. 79 organisations, not 95; the list gives
+  any other country ("also listed with").
+- **Comext freshness:** a saved Comext file is downloaded again when Eurostat has updated the
+  dataset since it was saved; ECB rates after 7 days, sanctions lists after 30 days. The page gives
+  the date of the Eurostat data.
+
+### Changed
+- **Hero caption** gives Hong Kong's shipments (not on the map), so the key numbers add up.
+- **Events:** three more (EU 19th package, Kyrgyzstan's suspension of 50 companies, EU 21st
+  package); a window with fewer than 3 months after an event says so.
+- **Part 5** names Hong Kong as a known gap of the ceiling.
+- **Shorter headlines** for the tiers and ban chapters.
+
+### Added
+- **Tests:** tests/test_consistency.py (11 checks that numbers agree between files and chapters;
+  no network). Run with `make test`.
+
 ## 1.14.0 — 2026-11-22
 
 ### Added

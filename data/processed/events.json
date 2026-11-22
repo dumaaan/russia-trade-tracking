@@ -41,6 +41,30 @@
    "month": "2025-08"
   },
   {
+   "id": "eu-19",
+   "date": "2025-10-23",
+   "focus": "KG",
+   "label": "EU 19th package: sanctions on the A7A5 stablecoin network (Kyrgyzstan)",
+   "url": "https://www.nortonrosefulbright.com/en/knowledge/publications/ac68233a/beyond-the-no-russia-clause-kyrgyzstan-becomes-the-first-test",
+   "month": "2025-10"
+  },
+  {
+   "id": "kg-suspend",
+   "date": "2026-05-19",
+   "focus": "KG",
+   "label": "Kyrgyzstan suspends 50 companies on a US and UK high-risk list (one month after the EU ban)",
+   "url": "https://timesca.com/eu-sanctions-kazakhstan-kyrgyzstan-russia-package/",
+   "month": "2026-05"
+  },
+  {
+   "id": "eu-21",
+   "date": "2026-07-23",
+   "focus": null,
+   "label": "EU 21st package: Kazakh and Kyrgyz firms on the export-control list",
+   "url": "https://timesca.com/eu-sanctions-kazakhstan-kyrgyzstan-russia-package/",
+   "month": "2026-07"
+  },
+  {
    "id": "eu-ban",
    "date": "2026-04-24",
    "focus": "KG",
@@ -748,6 +772,396 @@
     827845.0
    ],
    "spark_start": "2024-08"
+  },
+  {
+   "event": "eu-19",
+   "country": "KG",
+   "q1": {
+    "eu": {
+     "before": 2721771.950686832,
+     "after": 2734703.50177627,
+     "n": 6
+    },
+    "cn": {
+     "before": 6802371.333333333,
+     "after": 8258983.666666667,
+     "n": 6
+    },
+    "ru": {
+     "before": 1208779.6666666667,
+     "after": 493522.0,
+     "n": 6
+    }
+   },
+   "q2": {
+    "ru": {
+     "before": 1042711.8333333334,
+     "after": 979848.0,
+     "n": 6
+    },
+    "eu": {
+     "before": 3726837.483155374,
+     "after": 2625807.944191205,
+     "n": 6
+    }
+   },
+   "q3": {
+    "eu": {
+     "before": 39279849.47100949,
+     "after": 39760943.375077486,
+     "n": 6
+    },
+    "ru": {
+     "before": 13741181.903333332,
+     "after": 16240895.25,
+     "n": 6
+    },
+    "eu_who": [
+     "KZ",
+     "UZ"
+    ],
+    "ru_who": [
+     "KZ",
+     "UZ"
+    ]
+   },
+   "spark": [
+    1065979.0,
+    1438070.0,
+    1450790.0,
+    1335973.0,
+    1963890.0,
+    2911906.0,
+    3058988.0,
+    816730.0,
+    1621382.0,
+    662829.0,
+    650348.0,
+    442401.0,
+    1028993.0,
+    571482.0,
+    742685.0,
+    818607.0,
+    452740.0,
+    157362.0,
+    218256.0,
+    1184098.0,
+    2139491.0,
+    340215.0,
+    827845.0,
+    null,
+    null
+   ],
+   "spark_start": "2024-10"
+  },
+  {
+   "event": "kg-suspend",
+   "country": "KG",
+   "q1": {
+    "eu": {
+     "before": 2734703.50177627,
+     "after": 2155466.7978037694,
+     "n": 4
+    },
+    "cn": {
+     "before": 8258983.666666667,
+     "after": 11584341.0,
+     "n": 3
+    },
+    "ru": {
+     "before": 493522.0,
+     "after": 1102517.0,
+     "n": 3
+    }
+   },
+   "q2": {
+    "ru": {
+     "before": 979848.0,
+     "after": 954955.3333333334,
+     "n": 3
+    },
+    "eu": {
+     "before": 2625807.944191205,
+     "after": 2011597.1673620697,
+     "n": 4
+    }
+   },
+   "q3": {
+    "eu": {
+     "before": 39760943.375077486,
+     "after": 29290366.394426424,
+     "n": 4
+    },
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "eu_who": [
+     "KZ",
+     "UZ"
+    ],
+    "ru_who": [
+     "KZ",
+     "UZ"
+    ]
+   },
+   "spark": [
+    816730.0,
+    1621382.0,
+    662829.0,
+    650348.0,
+    442401.0,
+    1028993.0,
+    571482.0,
+    742685.0,
+    818607.0,
+    452740.0,
+    157362.0,
+    218256.0,
+    1184098.0,
+    2139491.0,
+    340215.0,
+    827845.0,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "spark_start": "2025-05"
+  },
+  {
+   "event": "eu-21",
+   "country": "KZ",
+   "q1": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "cn": {
+     "before": null,
+     "after": null,
+     "n": 1
+    },
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 1
+    }
+   },
+   "q2": {
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 1
+    },
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    }
+   },
+   "q3": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "ru": null,
+    "eu_who": [
+     "TR",
+     "AE",
+     "GE",
+     "AZ"
+    ],
+    "ru_who": []
+   },
+   "spark": [
+    14791103.18,
+    13622186.43,
+    11391997.23,
+    19694670.13,
+    17945062.51,
+    17833950.03,
+    11561458.73,
+    13119100.96,
+    18683377.28,
+    18159508.99,
+    12304784.7,
+    12285657.49,
+    17123427.2,
+    15184653.89,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "spark_start": "2025-07"
+  },
+  {
+   "event": "eu-21",
+   "country": "KG",
+   "q1": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "cn": {
+     "before": null,
+     "after": null,
+     "n": 1
+    },
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 1
+    }
+   },
+   "q2": {
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 1
+    },
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    }
+   },
+   "q3": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "ru": null,
+    "eu_who": [
+     "TR",
+     "AE",
+     "GE",
+     "AZ"
+    ],
+    "ru_who": []
+   },
+   "spark": [
+    662829.0,
+    650348.0,
+    442401.0,
+    1028993.0,
+    571482.0,
+    742685.0,
+    818607.0,
+    452740.0,
+    157362.0,
+    218256.0,
+    1184098.0,
+    2139491.0,
+    340215.0,
+    827845.0,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "spark_start": "2025-07"
+  },
+  {
+   "event": "eu-21",
+   "country": "UZ",
+   "q1": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "cn": {
+     "before": null,
+     "after": null,
+     "n": 0
+    },
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 0
+    }
+   },
+   "q2": {
+    "ru": {
+     "before": null,
+     "after": null,
+     "n": 0
+    },
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    }
+   },
+   "q3": {
+    "eu": {
+     "before": null,
+     "after": null,
+     "n": 2
+    },
+    "ru": null,
+    "eu_who": [
+     "TR",
+     "AE",
+     "GE",
+     "AZ"
+    ],
+    "ru_who": []
+   },
+   "spark": [
+    194784.0,
+    1265848.0,
+    0.0,
+    0.0,
+    0.0,
+    89032.0,
+    5151.0,
+    0.0,
+    48730.0,
+    0.0,
+    8820.0,
+    0.0,
+    0.0,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "spark_start": "2025-07"
   }
  ],
  "ban_neighbours": {

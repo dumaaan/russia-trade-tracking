@@ -8,5 +8,9 @@
   },
   "built": "2026-11-22",
   "start": "2022-02-24",
-  "first_seen_dates": 51
+  "first_seen_dates": 37,
+  "left_out": {
+    "not Russia-related": 13,
+    "mostly other countries": 3
+  }
 }

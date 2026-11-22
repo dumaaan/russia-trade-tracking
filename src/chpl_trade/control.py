@@ -19,7 +19,7 @@ import pandas as pd
 from . import config
 from .build import load_fx
 from . import comtrade as ct
-from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
+from .fetch import COMEXT_URL, _get, chpl_codes, keep_comext, query_codes
 
 RAW = config.RAW / "control"
 
@@ -57,7 +57,7 @@ def _stamp(body):
 
 def fetch_comext(partner, refresh=False):
     out = RAW / f"comext_eu27_to_{partner}.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),
@@ -70,7 +70,7 @@ def fetch_comext(partner, refresh=False):
 
 def fetch_comext_total(partner, refresh=False):
     out = RAW / f"comext_eu27_to_{partner}_TOTAL.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),

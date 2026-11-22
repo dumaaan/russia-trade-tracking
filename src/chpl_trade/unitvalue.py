@@ -24,7 +24,7 @@ from . import comtrade as ct
 from . import config
 from .build import load_fx
 from .control import _stamp
-from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
+from .fetch import COMEXT_URL, _get, chpl_codes, keep_comext, query_codes
 
 RAW = config.RAW / "unitvalue"
 CN = 156
@@ -34,7 +34,7 @@ COUNTRIES = {"KZ": ("Kazakhstan", 398), "KG": ("Kyrgyzstan", 417), "UZ": ("Uzbek
 def fetch_comext(partner, refresh=False):
     """EU-27 exports to one partner: value and net weight (100 kg) of the listed codes, annual."""
     out = RAW / f"comext_eu27_to_{partner}_qty.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"), ("freq", "A"),
@@ -63,7 +63,7 @@ def fetch_comext_monthly(partner, refresh=False):
     """EU-27 monthly exports of the two banned codes: value and net weight."""
     from datetime import date
     out = RAW / f"comext_eu27_to_{partner}_ban_qty_M.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     t = date.today()

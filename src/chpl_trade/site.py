@@ -112,7 +112,8 @@ def designations_data():
     f = pd.read_csv(fpath)
     f = f[(f["leg"] == "ru") & (f["group"] == "listed") & (f["month"] >= "2022-01")]
     return {
-        "rows": [[r.list, r.country, r.date, r.name, r.date_source != "list"] for r in d.itertuples()],
+        "rows": [[r.list, r.country, r.date, r.name, r.date_source != "list",
+                  r.also_listed_with if isinstance(r.also_listed_with, str) else ""] for r in d.itertuples()],
         "flows": {c: [[m, _num(v)] for m, v in zip(g["month"], g["usd"])] for c, g in f.groupby("country")},
         "meta": json.loads(mpath.read_text()),
     }

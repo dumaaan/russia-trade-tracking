@@ -43,10 +43,47 @@ def _get(url, params, tries=5):
     raise RuntimeError(f"Request failed: {r.status_code} {r.text[:200]}")
 
 
+_COMEXT_UPDATED = None
+
+
+def comext_updated():
+    """When Eurostat last updated the Comext dataset (one small query a run)."""
+    global _COMEXT_UPDATED
+    if _COMEXT_UPDATED is None:
+        params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", "KG"), ("flow", "2"), ("freq", "A"),
+                  ("indicators", "VALUE_IN_EUROS"), ("product", "TOTAL"), ("time", str(config.YEARS[-1]))]
+        _COMEXT_UPDATED = _get(COMEXT_URL, params).json().get("updated", "")
+    return _COMEXT_UPDATED
+
+
+def keep_comext(path, refresh=False):
+    """True: use the saved Comext file. False: download it again, because it is missing, the run asks
+    for it (--refresh), or Eurostat has updated the dataset since the file was saved. Without a
+    connection to Eurostat, the saved file is kept."""
+    if refresh or not path.exists():
+        return False
+    try:
+        saved = json.loads(path.read_text()).get("updated", "")
+    except ValueError:
+        return False
+    try:
+        return saved >= comext_updated()
+    except Exception:  # no connection: keep what we have
+        return True
+
+
+def keep_recent(path, refresh=False, days=7):
+    """True: use a saved file younger than `days` (ECB rates, sanctions lists change often)."""
+    if refresh or not path.exists():
+        return False
+    age = datetime.now(timezone.utc).timestamp() - path.stat().st_mtime
+    return age < days * 86400
+
+
 def fetch_comext(partner, refresh=False):
     """EU-27 exports (flow 2) to one partner, in EUR, by HS6 and year."""
     out = config.RAW / "comext" / f"eu27_exports_to_{partner}.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [
@@ -68,7 +105,7 @@ def fetch_comext(partner, refresh=False):
 def fetch_fx(refresh=False):
     """ECB annual average USD per EUR."""
     out = config.RAW / "ecb_usd_per_eur.csv"
-    if out.exists() and not refresh:
+    if keep_recent(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = {

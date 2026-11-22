@@ -29,7 +29,7 @@ import pandas as pd
 from . import comtrade as ct
 from . import config
 from .control import LEFT_OUT, OLD_HEADING, _stamp, headings
-from .fetch import COMEXT_URL, _get, chpl_codes, query_codes
+from .fetch import COMEXT_URL, _get, chpl_codes, keep_comext, keep_recent, query_codes
 
 RAW = config.RAW / "events"
 START = "2021-01"
@@ -56,6 +56,12 @@ EVENTS = [
      "url": "https://home.treasury.gov/news/press-releases/jy2785"},
     {"id": "a7a5", "date": "2025-08-20", "focus": "KG", "label": "UK sanctions Capital Bank, Grinex and the A7A5 network (Kyrgyzstan)",
      "url": "https://24.kg/english/340437_UK_imposes_sanctions_on_Kyrgyzstans_Capital_Bank_and_crypto_exchanges"},
+    {"id": "eu-19", "date": "2025-10-23", "focus": "KG", "label": "EU 19th package: sanctions on the A7A5 stablecoin network (Kyrgyzstan)",
+     "url": "https://www.nortonrosefulbright.com/en/knowledge/publications/ac68233a/beyond-the-no-russia-clause-kyrgyzstan-becomes-the-first-test"},
+    {"id": "kg-suspend", "date": "2026-05-19", "focus": "KG", "label": "Kyrgyzstan suspends 50 companies on a US and UK high-risk list (one month after the EU ban)",
+     "url": "https://timesca.com/eu-sanctions-kazakhstan-kyrgyzstan-russia-package/"},
+    {"id": "eu-21", "date": "2026-07-23", "focus": None, "label": "EU 21st package: Kazakh and Kyrgyz firms on the export-control list",
+     "url": "https://timesca.com/eu-sanctions-kazakhstan-kyrgyzstan-russia-package/"},
     {"id": "eu-ban", "date": "2026-04-24", "focus": "KG", "label": "EU bans exports of 8457.10 and 8517.62 to Kyrgyzstan",
      "url": "https://eur-lex.europa.eu/eli/reg/2026/506/oj"},
 ]
@@ -92,7 +98,7 @@ def this_month():
 
 def fetch_comext(partner, refresh=False):
     out = RAW / f"comext_eu27_to_{partner}_M.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),
@@ -105,7 +111,7 @@ def fetch_comext(partner, refresh=False):
 
 def fetch_fx(refresh=False):
     out = RAW / "ecb_usd_per_eur_monthly.csv"
-    if out.exists() and not refresh:
+    if keep_recent(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     text = _get(ECB_M_URL, {"format": "csvdata", "startPeriod": START}).text

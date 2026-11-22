@@ -22,7 +22,7 @@ import pandas as pd
 
 from . import config
 from . import comtrade as ct
-from .fetch import COMEXT_URL, _get, query_codes
+from .fetch import COMEXT_URL, _get, keep_comext, keep_recent, query_codes
 
 ECB_M_URL = "https://data-api.ecb.europa.eu/service/data/EXR/M.USD.EUR.SP00.A"
 
@@ -70,7 +70,7 @@ def _stamp(body):
 def fetch_comext_monthly(partner, refresh=False):
     """EU-27 monthly exports (EUR) to one partner, all CHPL codes, START to now."""
     out = RAW / f"comext_eu27_to_{partner}.json"
-    if out.exists() and not refresh:
+    if keep_comext(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     params = [("format", "JSON"), ("reporter", "EU27_2020"), ("partner", partner), ("flow", "2"),
@@ -83,7 +83,7 @@ def fetch_comext_monthly(partner, refresh=False):
 
 def fetch_fx_monthly(refresh=False):
     out = RAW / "ecb_usd_per_eur_monthly.csv"
-    if out.exists() and not refresh:
+    if keep_recent(out, refresh):
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     text = _get(ECB_M_URL, {"format": "csvdata", "startPeriod": START}).text
