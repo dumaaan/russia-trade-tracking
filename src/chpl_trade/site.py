@@ -118,6 +118,17 @@ def designations_data():
     }
 
 
+def estimate_data():
+    """The range of listed goods that probably reached Russia, if the estimate module has run."""
+    path, mpath = config.PROCESSED / "estimate.csv", config.PROCESSED / "estimate_meta.json"
+    if not (path.exists() and mpath.exists()):
+        return None
+    d = pd.read_csv(path)
+    cols = ["country", "year", "recorded", "kse_low", "kse_high", "eu_gap", "china_gap", "low", "high", "eu_priced_share"]
+    return {"rows": [[None if (isinstance(v, float) and v != v) else v for v in r] for r in d[cols].itertuples(index=False)],
+            "cols": cols, "meta": json.loads(mpath.read_text())}
+
+
 def events_data():
     """Event windows (three questions), if the events module has run."""
     path = config.PROCESSED / "events.json"
@@ -176,6 +187,7 @@ def export():
         "mirrorCn": mirror_cn_data(),
         "unitValues": unit_value_data(),
         "designations": designations_data(),
+        "estimate": estimate_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -184,7 +196,7 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv", "estimate.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")

@@ -2,6 +2,17 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.12.0 — 2026-11-22
+
+### Added
+- **Part 5, how much probably reached Russia:** one range a country and year (2022–2025). Low end:
+  the country's record of exports to Russia; for Kyrgyzstan, times 3 (Russian customs records show
+  3.8 times more for January–October 2023, KSE; KSE's Q3 2026 tracker gives 3–4). High end: the
+  larger of the record times 4 (Kyrgyzstan) and the record plus the shipments missing from the
+  country's import records above its pre-war gap (EU and China legs), a ceiling. The price-per-kg
+  split is given where weights cover at least half of the value. 2025, Kyrgyzstan: $47.4M–$131M
+  against $15.8M recorded. The key numbers at the top point to it.
+
 ## 1.11.0 — 2026-11-22
 
 ### Changed after a content review

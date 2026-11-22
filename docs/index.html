@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.15">
+  <link rel="stylesheet" href="style.css?v=1.17">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -39,6 +39,7 @@
     <div class="toc-part"><a class="toc-h" href="#part-records">Part 2 · How good the records are</a><ul><li><a href="#mirror">Mirror checks</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-tests">Part 3 · Tests</a><ul><li><a href="#control">Share of all trade</a></li><li><a href="#excess">Against similar goods</a></li><li><a href="#unitvalue">Price per kg</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#designations">Designations</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-estimate">Part 5 · Estimate</a><ul><li><a href="#estimate">How much reached Russia</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-check">Checks · Our numbers against published ones</a><ul><li><a href="#checks">Cross-checks</a></li></ul></div>
   </nav>
 </header>
@@ -296,6 +297,26 @@
     </div>
   </section>
 
+  <div class="part wrap" id="part-estimate"><p class="part-label"><span>Part 5</span> How much probably reached Russia</p></div>
+
+  <section class="chapter chapter-wide wrap" id="estimate" aria-labelledby="est-h">
+    <div class="ch-text">
+      <h2 id="est-h">How much probably reached Russia</h2>
+      <p class="finding" id="est-sub"></p>
+      <p class="finding">Each range joins three documented parts. The low end is the country's own record of exports to
+        Russia; for Kyrgyzstan, that record times 3, because Russia's own customs records show 3 to 4 times more
+        (KSE). The high end adds the shipments that reached the country but are missing from its import records, above
+        its pre-war gap, on the EU leg and the China leg: if all of them went on to Russia, this is the ceiling.</p>
+      <p class="aside" id="est-note"></p>
+    </div>
+    <div class="ch-figure">
+      <p class="scope">The 49 codes · current US dollars · the filters at the top do not change this</p>
+      <p class="exc-key est-key"><span class="k-rec">recorded</span><span class="k-kse">times 3–4 (Russian records, Kyrgyzstan)</span><span class="k-gap">plus missing imports (ceiling)</span></p>
+      <div id="est-plot"></div>
+      <div class="table-wrap"><table class="supertable" id="est-table"></table></div>
+    </div>
+  </section>
+
   <div class="part wrap" id="part-check"><p class="part-label"><span>Checks</span> Our numbers against published ones</p></div>
 
   <section class="chapter chapter-wide wrap" id="checks" aria-labelledby="xc-h">
@@ -319,7 +340,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.16"></script>
-<script src="app.js?v=1.32"></script>
+<script src="data.js?v=1.17"></script>
+<script src="app.js?v=1.35"></script>
 </body>
 </html>

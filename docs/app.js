@@ -710,7 +710,17 @@
       ...(excess > 0 ? [`In 2022–${yr}, the three countries' import records miss `, h("b", { text: usd(excess) }),
         " of EU shipments above the gap they had before the war"] : []),
       ...(cnGap ? [excess > 0 ? `; in ${yr} alone, ` : `In ${yr}, `, h("b", { text: usd(cnGap) }), " of China's shipments" + (excess > 0 ? "" : " are missing above the pre-war gap")] : []),
-      ".",
+      ". ",
+      ...(() => {
+        // The estimate (Part 5): Kyrgyzstan's range in the latest year.
+        const E = D.estimate;
+        if (!E) return [];
+        const r = E.rows.find((q) => q[0] === "KG" && q[1] === yr);
+        if (!r) return [];
+        const i = (c) => E.cols.indexOf(c);
+        return [`Estimate: between `, h("b", { text: `${usd(r[i("low")] / 1e6)}` }), ` and `, h("b", { text: `${usd(r[i("high")] / 1e6)}` }),
+          ` probably reached Russia through Kyrgyzstan in ${yr} (`, h("a", { href: "#estimate", text: "Part 5" }), `).`];
+      })(),
     ]);
   }
 
@@ -1593,6 +1603,89 @@
       S.rows.map((r) => [r[2] + (r[4] ? " (first seen)" : ""), NAMES[r[1]], r[0], r[3]]));
   }
 
+
+  // ---------- how much probably reached Russia: one range a country and year ----------
+  function estimateStudy() {
+    const E = D.estimate, M = E.meta, N = M.names;
+    const ix = Object.fromEntries(E.cols.map((c, i) => [c, i]));
+    const rows = E.rows.map((r) => Object.fromEntries(E.cols.map((c) => [c, r[ix[c]]])));
+    const get = (c, y) => rows.find((r) => r.country === c && r.year === y);
+    const usd = (v) => (v == null ? "—" : v < 500 ? "$0" : v >= 1e9 ? `$${(v / 1e9).toFixed(2)}bn` : v >= 1e6 ? `$${(v / 1e6).toFixed(v >= 1e8 ? 0 : 1)}M` : `$${Math.round(v / 1e3)}k`);
+    const ly = Math.max(...rows.map((r) => r.year));
+    {
+      const kg = get("KG", ly);
+      document.getElementById("est-h").textContent = kg && kg.high != null
+        ? `Between ${usd(kg.low)} and ${usd(kg.high)} of listed goods probably reached Russia through Kyrgyzstan in ${ly}, against ${usd(kg.recorded)} recorded`
+        : "How much probably reached Russia";
+      document.getElementById("est-sub").textContent = ["KZ", "UZ"].map((c) => {
+        const r = get(c, ly);
+        return r ? `${N[c]}: ${usd(r.low)} to ${r.high != null ? usd(r.high) : "no ceiling (no import detail)"}, against ${usd(r.recorded)} recorded.` : "";
+      }).join(" ") + (kg && kg.eu_priced_share != null ? ` In Kyrgyzstan's recorded exports to Russia, ${Math.round(100 * kg.eu_priced_share)}% of the value is in codes priced nearer EU goods than Chinese goods (see Price per kg).` : "");
+      const k = M.kse;
+      document.getElementById("est-note").replaceChildren(
+        "Sources of the parts. Russian records: ",
+        h("a", { href: k.source, target: "_blank", rel: "noopener", text: "KSE (Jan 2024)" }),
+        ` found $98M of these goods sold by Kyrgyz sellers in Russia's import records for January–October 2023, against ${usd(98e6 / k.measured)} in Kyrgyzstan's records for the same months: ${k.measured.toFixed(1)} times; `,
+        h("a", { href: k.source_2026, target: "_blank", rel: "noopener", text: "KSE (Oct 2026)" }),
+        " finds recorded volumes of tiers 1, 2 and 3.A 3–4 times lower than in transaction records. No such factor is published for Kazakhstan or Uzbekistan, so their low end is the record. " +
+        "Missing imports: the mirror checks in Part 2 (EU leg: 2022 Kazakhstan has no import detail). The ceiling assumes that every missing shipment went on to Russia; some can stay in the country unrecorded, so the true value is under it. " +
+        "Uzbekistan's ceiling is large because its import records from China fell far below its pre-war ratio, which was over 100%: part of that can be a change in how origin is recorded."
+      );
+    }
+    // Range plot: one row a country and year, one log scale.
+    const box = document.getElementById("est-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 92 : 140, R = small ? 8 : 150, rowH = 22, top = 22;
+    const vals = rows.flatMap((r) => [r.recorded, r.low, r.high]).filter((v) => v > 0);
+    const lo = 10 ** Math.floor(Math.log10(Math.min(...vals))), hi = 10 ** Math.ceil(Math.log10(Math.max(...vals)));
+    const x = (v) => L + ((Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * (W - L - R);
+    const order = ["KG", "KZ", "UZ"];
+    const list = order.flatMap((c) => rows.filter((r) => r.country === c).sort((a, b) => a.year - b.year));
+    const H = top + list.length * rowH + order.length * 10 + 8;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "est-svg", role: "img", "aria-label": "Recorded exports to Russia and the estimated range, by country and year" });
+    for (let t = lo; t <= hi * 1.0001; t *= 10) {
+      el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 4, class: "uv-grid" }, svg);
+      const tx = el("text", { x: x(t), y: 12, "text-anchor": "middle", class: "uv-tick" }, svg);
+      tx.textContent = t >= 1e9 ? `$${t / 1e9}bn` : t >= 1e6 ? `$${t / 1e6}M` : `$${t / 1e3}k`;
+    }
+    let y = top, prev = null;
+    for (const r of list) {
+      if (r.country !== prev) { y += prev ? 10 : 0; prev = r.country; }
+      const cy = y + rowH / 2;
+      const lab = el("text", { x: 0, y: cy + 4, class: "uv-lbl" }, svg);
+      lab.textContent = `${N[r.country]} ${small ? String(r.year).slice(2) : r.year}`;
+      if (r.high != null) el("rect", { x: x(r.low), y: cy - 5, width: Math.max(1, x(r.high) - x(r.low)), height: 10, class: "est-range" }, svg);
+      if (r.kse_low != null) el("rect", { x: x(r.kse_low), y: cy - 5, width: Math.max(1, x(r.kse_high) - x(r.kse_low)), height: 10, class: "est-kse" }, svg);
+      const dot = el("circle", { cx: x(r.recorded), cy, r: 4.5, class: "est-rec", tabindex: 0 }, svg);
+      const tip = (px, py) => showTip(px, py, `${N[r.country]}, ${r.year}`, [
+        { color: css("--flow-ru"), value: usd(r.recorded), label: "recorded exports to Russia" },
+        ...(r.kse_low != null ? [{ color: css("--flow-ru"), value: `${usd(r.kse_low)}–${usd(r.kse_high)}`, label: "times 3–4 (Russian records)" }] : []),
+        { color: css("--ink-3"), value: `${usd(r.eu_gap)} + ${usd(r.china_gap)}`, label: "missing imports, EU + China legs" },
+        { color: css("--ink-3"), value: r.high != null ? `${usd(r.low)}–${usd(r.high)}` : "no ceiling", label: "range" },
+      ]);
+      dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+      dot.addEventListener("pointerleave", hideTip);
+      dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
+      dot.addEventListener("blur", hideTip);
+      if (!small) {
+        const v = el("text", { x: W - 2, y: cy + 4, "text-anchor": "end", class: "uv-val" }, svg);
+        v.textContent = r.high != null ? `${usd(r.low)}–${usd(r.high)}` : `${usd(r.low)}, no ceiling`;
+      }
+      y += rowH;
+    }
+    box.replaceChildren(svg);
+    // The table: every part, so each number can be checked.
+    const head = h("thead", {}, h("tr", {}, ["", "Year", "Recorded", "× 3–4 (Russian records)", "Missing imports, EU leg", "Missing imports, China leg", "Range", "Priced nearer EU goods"].map((t) => h("th", { text: t }))));
+    const body = list.map((r) => h("tr", {}, [
+      h("th", { scope: "row", text: N[r.country] }), h("td", { text: String(r.year) }), h("td", { text: usd(r.recorded) }),
+      h("td", { text: r.kse_low != null ? `${usd(r.kse_low)}–${usd(r.kse_high)}` : "no published factor" }),
+      h("td", { text: r.eu_gap == null ? "no data" : usd(r.eu_gap) }), h("td", { text: r.china_gap == null ? "no data" : usd(r.china_gap) }),
+      h("td", { class: "chg", text: r.high != null ? `${usd(r.low)}–${usd(r.high)}` : `${usd(r.low)}, no ceiling` }),
+      h("td", { text: r.eu_priced_share == null ? "too few weights" : `${Math.round(100 * r.eu_priced_share)}%` }),
+    ]));
+    document.getElementById("est-table").replaceChildren(head, h("tbody", {}, body));
+  }
+
   // ---------- sanctions events: three questions ----------
   const pctChange = (after, before) => {
     if (after == null || before == null) return "no data";
@@ -1976,6 +2069,7 @@
     if (D.mirrorCn) mirrorChina();
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
+    if (D.estimate) estimateStudy();
     if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
@@ -1986,7 +2080,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.estimate) estimateStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

@@ -464,3 +464,15 @@ table.xc a { color: var(--ink-2); }
 .part-label span { color: var(--ink-3); margin-right: 6px; }
 @media (max-width: 860px) { .toc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .toc { grid-template-columns: 1fr; } }
+
+/* ---------- estimate ---------- */
+.est-svg { display: block; overflow: visible; }
+.est-svg .est-range { fill: var(--ink-3); fill-opacity: 0.35; }
+.est-svg .est-kse { fill: var(--flow-ru); fill-opacity: 0.45; }
+.est-svg .est-rec { fill: var(--flow-ru); stroke: var(--paper); stroke-width: 1.5; }
+.est-svg .est-rec:focus-visible { outline: none; stroke: var(--ink); stroke-width: 2.5; }
+.est-key .k-rec::before { border-top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--flow-ru); }
+.est-key .k-kse::before { border-top: 0; width: 18px; height: 10px; background: var(--flow-ru); opacity: 0.45; }
+.est-key .k-gap::before { border-top: 0; width: 18px; height: 10px; background: var(--ink-3); opacity: 0.35; }
+#est-table td { white-space: nowrap; }
+#est-table thead th { white-space: normal; min-width: 0; }

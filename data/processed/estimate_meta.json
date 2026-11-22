@@ -1,0 +1,20 @@
+{
+  "kse": {
+    "low": 3.0,
+    "high": 4.0,
+    "measured": 3.8318520748696976,
+    "source": "https://sanctions.kse.ua/wp-content/uploads/2024/01/Challenges-of-Export-Controls-Enforcement.pdf",
+    "source_2026": "https://institute.kse.ua/news/official-trade-statistics-may-not-reflect-the-full-volume-of-imports-of-military-goods-into-russia-russian-chp-imports-tracker-for-the-third-quarter-of-2026/"
+  },
+  "years": [
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "names": {
+    "KZ": "Kazakhstan",
+    "KG": "Kyrgyzstan",
+    "UZ": "Uzbekistan"
+  }
+}

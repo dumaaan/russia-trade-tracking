@@ -6,7 +6,7 @@
 
 import argparse
 
-from . import ban, bns, china, comtrade, control, designations, events, excess, mirror_cn, unitvalue
+from . import ban, bns, china, comtrade, control, designations, estimate, events, excess, mirror_cn, unitvalue
 from .needs import declare_all
 from .build import build
 from .fetch import fetch_all
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     events.build()
     designations.fetch(args.refresh)
     designations.build()
+    estimate.build()
     china.fetch_all(args.refresh)
     china.build()
     mirror_cn.build()
