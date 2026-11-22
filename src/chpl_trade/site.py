@@ -129,6 +129,28 @@ def estimate_data():
             "cols": cols, "meta": json.loads(mpath.read_text())}
 
 
+def china_imports_by_code():
+    """Each route country's imports of the listed codes from China, as it records them (for the explorer).
+    Years with no product detail (Kazakhstan 2020-2022) are left out."""
+    from . import comtrade as ct
+    from .fetch import chpl_codes
+    o2n = {o: n for n, o in config.HS2017_EQUIVALENT.items()}
+    keep = set(chpl_codes())
+    rows = []
+    for iso, m49 in (("KZ", 398), ("KG", 417), ("UZ", 860)):
+        for y in config.YEARS:
+            recs = ct.records("A", "M", m49, 156, y)
+            if not any(r["cmdCode"] != "TOTAL" for r in recs):
+                continue
+            acc = {}
+            for r in recs:
+                k = o2n.get(r["cmdCode"], r["cmdCode"])
+                if k in keep:
+                    acc[k] = acc.get(k, 0.0) + r["primaryValue"]
+            rows += [[iso, y, k, _num(v / 1e6)] for k, v in acc.items()]
+    return rows
+
+
 def events_data():
     """Event windows (three questions), if the events module has run."""
     path = config.PROCESSED / "events.json"
@@ -188,6 +210,7 @@ def export():
         "unitValues": unit_value_data(),
         "designations": designations_data(),
         "estimate": estimate_data(),
+        "cnImports": china_imports_by_code(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"

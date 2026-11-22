@@ -52,7 +52,7 @@
   const state = {
     basket: "all", currency: "USD", prices: "real", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru",
-    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned", uvYear: YEARS[YEARS.length - 1],
+    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned", uvYear: YEARS[YEARS.length - 1], xpCode: "851762",
   };
 
   // ---------- data ----------
@@ -1688,6 +1688,144 @@
     document.getElementById("est-table").replaceChildren(head, h("tbody", {}, body));
   }
 
+
+  // ---------- code explorer: one code, the whole route ----------
+  function codeExplorer() {
+    const code = state.xpCode;
+    const NAME = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const order = ["KZ", "KG", "UZ"];
+    const usdM = (v) => (v == null ? "—" : v >= 1000 ? `$${(v / 1000).toFixed(2)}bn` : v >= 1 ? `$${v.toFixed(v >= 100 ? 0 : 1)}M` : v >= 0.001 ? `$${Math.round(v * 1000)}k` : v > 0 ? "<$1k" : "$0");
+    const meta = chplByCode[code] || {};
+    // annual series in $M, current US dollars
+    const fromCodes = (flow, iso) => {
+      const name = NAME[iso];
+      return YEARS.map((y) => {
+        if (!isAvail(flow, name, y)) return null;
+        let t = 0;
+        for (const r of D.codes) if (r[0] === flow && r[1] === name && r[2] === y && r[3] === code && r[4] != null) t += r[4];
+        return t;
+      });
+    };
+    const sup = (s, iso) => {
+      const miss = new Set((D.suppliers && D.suppliers.meta.missing) || []);
+      return YEARS.map((y) => {
+        if (miss.has(`${s}|${iso}|${y}`)) return null;
+        let t = 0;
+        for (const r of D.suppliers.rows) if (r[0] === s && r[1] === iso && r[2] === y && r[3] === code && r[4] != null) t += r[4];
+        return t;
+      });
+    };
+    const cnImp = (iso) => {
+      const have = new Set((D.cnImports || []).filter((r) => r[0] === iso).map((r) => r[1]));
+      return YEARS.map((y) => {
+        if (!have.has(y)) return null;
+        const r = D.cnImports.find((q) => q[0] === iso && q[1] === y && q[2] === code);
+        return r ? r[3] : 0;
+      });
+    };
+    const data = Object.fromEntries(order.map((iso) => [iso, {
+      eu: sup("eu", iso), cn: sup("cn", iso), hk: sup("hk", iso), ru: fromCodes("ru", iso), mi: fromCodes("mi", iso), cm: cnImp(iso),
+    }]));
+    const ly = YEARS.length - 1, yr = YEARS[ly];
+
+    // what the code is
+    const tier = meta.tier;
+    document.getElementById("xp-what").replaceChildren(
+      h("b", { text: `${fmtCode(code)} ${SHORT[code] || meta.description || ""}` }),
+      `. ${meta.description || ""}. ${TIER_NAMES[tier] || ""}${TIER_USE[tier] ? ` (${TIER_USE[tier].toLowerCase()})` : ""}.` +
+      (CODE_USE[code] ? ` ${CODE_USE[code]}.` : "") +
+      (D.art12f.includes(code) ? " Under the April 2026 EU ban on exports to Kyrgyzstan." : "") +
+      (D.excluded.includes(code) ? " Not in the 49-code basket: no comparable data before 2022." : ""),
+    );
+    // the finding: largest route to Russia, and the supply into it
+    {
+      const best = order.map((iso) => ({ iso, v: data[iso].ru[ly] })).filter((x) => x.v != null).sort((a, b) => b.v - a.v)[0];
+      const tot = (k) => order.reduce((t, iso) => t + (data[iso][k][ly] || 0), 0);
+      document.getElementById("xp-sub").textContent =
+        `${yr}: to the three countries, the EU shipped ${usdM(tot("eu"))}, China ${usdM(tot("cn"))} and Hong Kong ${usdM(tot("hk"))}; ` +
+        (best && best.v > 0
+          ? `they recorded ${usdM(tot("ru"))} of exports of this code to Russia, most from ${NAME[best.iso]} (${usdM(best.v)}).`
+          : "they recorded no exports of this code to Russia.");
+    }
+
+    // small multiples: EU, China, Hong Kong into each country, and the country's exports to Russia
+    const grid = document.getElementById("xp-grid");
+    const pos = order.flatMap((iso) => ["eu", "cn", "hk", "ru"].flatMap((k) => data[iso][k])).filter((v) => v != null && v > 0);
+    const dom = pos.length ? [Math.min(...pos) * 0.8, Math.max(...pos) * 1.25] : [0.01, 1];
+    grid.replaceChildren(...order.map((iso) => h("figure", { class: "sup-cell" }, [h("figcaption", { text: NAME[iso] }), h("div", { class: "chart sm" })])));
+    const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : t >= 1 ? `${t}M` : `${t * 1000}k`);
+    order.forEach((iso, i) => lineChart(grid.children[i].querySelector(".chart"), {
+      series: [
+        { label: `EU exports to ${NAME[iso]}`, endName: "from the EU", color: "--flow-eu", values: data[iso].eu },
+        { label: `China's exports to ${NAME[iso]}`, endName: "from China", color: "--text-primary", values: data[iso].cn, marker: "square" },
+        { label: `Hong Kong's exports to ${NAME[iso]}`, endName: "from Hong Kong", color: "--text-primary", values: data[iso].hk, dash: "4 3", tint: 0.55 },
+        { label: `${NAME[iso]} to Russia`, endName: "to Russia", color: "--flow-ru", values: data[iso].ru, gapNote: "no data" },
+      ],
+      fmt: usdM, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf, topTickFmt: (t) => `$${tkf(t)}`,
+      tickFilter: (t) => /^(0\.0*)?10*$/.test(String(t)),
+      aria: `${fmtCode(code)}, ${NAME[iso]}: exports from the EU, China and Hong Kong, and exports to Russia, US dollars`,
+    }));
+
+    // mirror ratios: pre-war and the latest year, EU leg and China leg
+    // A ratio needs a supplier value large enough to divide by: at least $100k a year (pre-war: on average).
+    const MINR = 0.1;
+    const pre = (num, den) => { let a = 0, b = 0, n = 0; for (const y of D.baselineYears) { const i = YEARS.indexOf(y); if (den[i] != null && num[i] != null) { a += num[i]; b += den[i]; n++; } } return n && b / n >= MINR ? (100 * a) / b : null; };
+    const at = (num, den, i) => (den[i] != null && den[i] >= MINR && num[i] != null ? (100 * num[i]) / den[i] : null);
+    const pct = (v) => (v == null ? "—" : v > 999 ? ">999%" : `${Math.round(v)}%`);
+    document.getElementById("xp-mirror").replaceChildren(
+      h("thead", {}, [
+        h("tr", {}, [h("th", { text: "" }), h("th", { colspan: 3, text: "From the EU: recorded imports ÷ EU exports" }), h("th", { colspan: 3, text: "From China: recorded imports ÷ China's exports" })]),
+        h("tr", {}, [h("th", { text: "" }), ...["Pre-war", "2023", String(yr), "Pre-war", "2023", String(yr)].map((t) => h("th", { text: t }))]),
+      ]),
+      h("tbody", {}, order.map((iso) => {
+        const d = data[iso], i23 = YEARS.indexOf(2023);
+        return h("tr", {}, [h("th", { scope: "row", text: NAME[iso] }),
+          ...[pre(d.mi, d.eu), at(d.mi, d.eu, i23), at(d.mi, d.eu, ly), pre(d.cm, d.cn), at(d.cm, d.cn, i23), at(d.cm, d.cn, ly)].map((v) => h("td", { text: pct(v) }))]);
+      })),
+    );
+
+    // price per kg, latest year with any weight
+    const U = (D.unitValues && D.unitValues.rows) || [];
+    const uvOf = (leg, iso, y) => { const r = U.find((q) => q[0] === leg && q[1] === iso && q[2] === y && q[3] === code); return r && r[5] ? { uv: r[4] / r[5], est: r[6], usd: r[4] } : null; };
+    const uvYear = [...YEARS].reverse().find((y) => order.some((iso) => uvOf("ru", iso, y))) || yr;
+    const uvf = (x) => (x == null ? "—" : `${x.uv >= 100 ? `$${Math.round(x.uv).toLocaleString("en-US")}` : `$${x.uv.toFixed(x.uv >= 10 ? 0 : 1)}`}${x.est ? "*" : ""}`);
+    document.getElementById("xp-uv-h").textContent = `Price per kg, ${uvYear} (*: the reporter estimated the weight)`;
+    document.getElementById("xp-uv").replaceChildren(
+      h("thead", {}, h("tr", {}, ["", "From the EU", "From China (China's records)", "From China (importer's records)", "To Russia", "To Russia is nearer"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, order.map((iso) => {
+        const e = uvOf("eu", iso, uvYear), c = uvOf("cn", iso, uvYear), m = uvOf("cm", iso, uvYear), r = uvOf("ru", iso, uvYear);
+        const near = !(r && e && c) ? "—" : r.est || e.est || c.est ? "not decided (estimated weight)"
+          : Math.abs(Math.log(r.uv / e.uv)) < Math.abs(Math.log(r.uv / c.uv)) ? "EU price" : "China price";
+        return h("tr", {}, [h("th", { scope: "row", text: NAME[iso] }), h("td", { text: uvf(e) }), h("td", { text: uvf(c) }), h("td", { text: uvf(m) }), h("td", { class: "chg", text: uvf(r) }), h("td", { text: near })]);
+      })),
+    );
+
+    // the April 2026 ban, for the two banned codes: monthly flows of this code, Kyrgyzstan and Kazakhstan
+    const banBox = document.getElementById("xp-ban");
+    if (D.ban && D.art12f.includes(code)) {
+      const B = D.ban, S = B.summary.series;
+      const rowsB = [];
+      for (const iso of ["KG", "KZ"]) for (const [f, lab, col] of [["eu", "From the EU", "--flow-eu"], ["cn", "From China", "--text-primary"], ["ru", "To Russia", "--flow-ru"]]) {
+        const m = B.monthly.filter((r) => r[0] === f && r[1] === iso && r[2] === code);
+        if (!m.length) continue;
+        const s = S[`${f}|${iso}|${code}`] || {};
+        const ch = s.year_ago_avg >= MIN_BASE_MONTH && s.after_avg != null ? `${s.after_avg >= s.year_ago_avg ? "+" : "−"}${Math.abs(Math.round(100 * (s.after_avg / s.year_ago_avg - 1)))}%` : s.after_avg != null && s.year_ago_avg != null ? `${s.after_avg - s.year_ago_avg >= 0 ? "+" : "−"}${moneyK(Math.abs(s.after_avg - s.year_ago_avg))}` : "—";
+        rowsB.push(h("tr", {}, [h("th", { scope: "row", text: `${NAME[iso]}: ${lab.replace(/^From/, "from").replace(/^To/, "to")}` }),
+          h("td", { class: "spark-cell" }, sparkline(m.map((r) => r[4]), { color: col, mark: m.map((r) => r[3]).indexOf(B.transition) })),
+          h("td", { text: s.year_ago_avg != null ? moneyK(s.year_ago_avg) : "—" }), h("td", { text: s.after_avg != null ? moneyK(s.after_avg) : "—" }), h("td", { class: "chg", text: ch })]));
+      }
+      banBox.replaceChildren(h("h3", { class: "ctl-group", text: "The April 2026 EU ban, this code only" }),
+        h("div", { class: "table-wrap" }, h("table", { class: "supertable" }, [
+          h("thead", {}, h("tr", {}, ["", "Months (line: the ban)", "Same months of 2025, a month", "After the ban, a month", "Change"].map((t) => h("th", { text: t })))),
+          h("tbody", {}, rowsB)])));
+    } else banBox.replaceChildren();
+
+    // the numbers
+    const head = ["Country", "Flow", ...YEARS.map(String)];
+    const L = { eu: "EU exports to the country", cn: "China's exports to the country", hk: "Hong Kong's exports to the country", mi: "Recorded imports from the EU", cm: "Recorded imports from China", ru: "Exports to Russia" };
+    table(document.getElementById("xp-table"), head, order.flatMap((iso) => Object.keys(L).map((k) => [NAME[iso], L[k], ...data[iso][k].map((v) => (v == null ? "no data" : usdM(v)))])));
+  }
+
   // ---------- sanctions events: three questions ----------
   const pctChange = (after, before) => {
     if (after == null || before == null) return "no data";
@@ -1927,7 +2065,7 @@
       for (const r of rows) {
         const b0 = usableBase(r.v), anyBase = rawBase(r.v) != null;
         const tr = h("tr", { tabindex: 0 }, [
-          h("td", { class: "code", text: fmtCode(r.code) }),
+          h("td", { class: "code" }, h("a", { href: "#explorer", class: "xp-link", "data-code": r.code, text: fmtCode(r.code), title: "Open in the code explorer" })),
           h("th", { scope: "row" }, [SHORT[r.code] || (chplByCode[r.code] || {}).description,
             D.art12f.includes(r.code) ? h("span", { class: "ban-key", text: "EU ban" }) : null,
             CODE_USE[r.code] ? h("span", { class: "use", text: CODE_USE[r.code] }) : null]),
@@ -2034,6 +2172,28 @@
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
   seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
+  {
+    // the explorer's code list: grouped by tier, short names
+    const sel = document.getElementById("xp-code");
+    if (sel) {
+      const byTier = {};
+      for (const r of D.chpl) if (!D.excluded.includes(r.hs6)) (byTier[r.tier] = byTier[r.tier] || []).push(r);
+      for (const t of Object.keys(TIER_NAMES)) {
+        if (!byTier[t]) continue;
+        const g = h("optgroup", { label: TIER_NAMES[t] });
+        for (const r of byTier[t]) g.appendChild(h("option", { value: r.hs6, text: `${fmtCode(r.hs6)} ${SHORT[r.hs6] || r.description}` }));
+        sel.appendChild(g);
+      }
+      sel.value = state.xpCode;
+      sel.addEventListener("change", () => { state.xpCode = sel.value; codeExplorer(); });
+      // a code in the goods table opens it here
+      document.addEventListener("click", (e) => {
+        const a = e.target.closest && e.target.closest("a.xp-link");
+        if (!a) return;
+        state.xpCode = a.dataset.code; sel.value = state.xpCode; codeExplorer();
+      });
+    }
+  }
   if (D.unitValues) seg(document.getElementById("uv-year"), [2021, 2022, 2023, 2024, 2025].map((y) => ({ value: y, label: String(y) })), () => state.uvYear, (v) => { state.uvYear = v; uvStudy(); });
   if (D.ban) seg(document.getElementById("ban-goods"), [{ value: "banned", label: "The two banned codes" }, { value: "other", label: "The other 47 codes" }], () => state.banGoods, (v) => { state.banGoods = v; banStudy(); });
   seg(document.getElementById("tiers-country"), countryOpts, () => state.tiersCountry, (v) => { state.tiersCountry = v; tiers(); });
@@ -2072,6 +2232,7 @@
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
     if (D.estimate) estimateStudy();
+    codeExplorer();
     if (D.eventStudy) eventStudy();
     if (D.ban) banStudy();
     if (D.control) controlStudy();
@@ -2082,7 +2243,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.estimate) estimateStudy(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

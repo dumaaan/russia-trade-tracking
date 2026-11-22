@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.17">
+  <link rel="stylesheet" href="style.css?v=1.18">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -40,6 +40,7 @@
     <div class="toc-part"><a class="toc-h" href="#part-tests">Part 3 · Tests</a><ul><li><a href="#control">Share of all trade</a></li><li><a href="#excess">Against similar goods</a></li><li><a href="#unitvalue">Price per kg</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#designations">Designations</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-estimate">Part 5 · Estimate</a><ul><li><a href="#estimate">How much reached Russia</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-explore">Part 6 · Explore</a><ul><li><a href="#explorer">Code explorer</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-check">Checks · Our numbers against published ones</a><ul><li><a href="#checks">Cross-checks</a></li></ul></div>
   </nav>
 </header>
@@ -319,6 +320,36 @@
     </div>
   </section>
 
+  <div class="part wrap" id="part-explore"><p class="part-label"><span>Part 6</span> One code, the whole route</p></div>
+
+  <section class="chapter chapter-wide wrap" id="explorer" aria-labelledby="xp-h">
+    <div class="ch-text">
+      <h2 id="xp-h">Code explorer</h2>
+      <label class="select xp-select">Code <select id="xp-code" aria-label="Choose a code"></select></label>
+      <p class="finding" id="xp-what"></p>
+      <p class="finding" id="xp-sub"></p>
+      <p class="aside">Every number on this panel is for one code, in current US dollars; the filters at the top do not
+        change it. China's and Hong Kong's exports are as they record them; recorded imports are as the route country
+        records them. A ratio of recorded imports to the supplier's exports far from its pre-war level means that
+        shipments are missing from the importer's records, or are recorded under another code or origin.</p>
+    </div>
+    <div class="ch-figure">
+      <p class="scope">One code · current US dollars · one log scale for the three countries · a year with no trade is a break in the line</p>
+      <p class="exc-key xp-key"><span class="k-eu">from the EU</span><span class="k-cn">from China</span><span class="k-hk">from Hong Kong</span><span class="k-ru">to Russia</span></p>
+      <div class="grid4" id="xp-grid"></div>
+      <h3 class="ctl-group" id="xp-mirror-h">Recorded imports against the supplier's exports</h3>
+      <div class="table-wrap"><table class="supertable" id="xp-mirror"></table></div>
+      <p class="aside">For one code, the two sides often record the same goods under different codes (for example
+        chips under 8542.31, 8542.39 or 8471), so a ratio far from 100% can be a difference in coding, not missing goods;
+        the totals for all codes in Part 2 are more reliable. No ratio where the supplier shipped under $100k a year.
+        Kazakhstan's pre-war ratio uses 2019 only (no import detail for 2020–2022).</p>
+      <h3 class="ctl-group" id="xp-uv-h">Price per kg</h3>
+      <div class="table-wrap"><table class="supertable" id="xp-uv"></table></div>
+      <div id="xp-ban"></div>
+      <details class="table-view"><summary>Show the numbers</summary><div id="xp-table"></div></details>
+    </div>
+  </section>
+
   <div class="part wrap" id="part-check"><p class="part-label"><span>Checks</span> Our numbers against published ones</p></div>
 
   <section class="chapter chapter-wide wrap" id="checks" aria-labelledby="xc-h">
@@ -342,7 +373,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.18"></script>
-<script src="app.js?v=1.37"></script>
+<script src="data.js?v=1.19"></script>
+<script src="app.js?v=1.40"></script>
 </body>
 </html>

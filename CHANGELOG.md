@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.14.0 — 2026-11-22
+
+### Added
+- **Part 6, code explorer:** any of the 49 codes on one panel, for Kazakhstan, Kyrgyzstan and
+  Uzbekistan: EU, China and Hong Kong supply and exports to Russia (2019–2025, one log scale), the
+  importers' records against the EU's and China's exports, price per kg on each leg, and for the
+  two banned codes the April 2026 ban by month. The codes in the goods table open it.
+  - Mirror ratios for one code: only where the supplier shipped at least $100k; over 999% shown
+    as ">999%"; a note that the two sides often record one good under different codes.
+  - "Nearer EU or China price" is not decided where a weight is estimated.
+  - Checked: the sums over all 49 codes match the chapter totals for 2025 (18 flows).
+- **Site data:** the route countries' imports from China by code (from the store, no new calls).
+
 ## 1.13.0 — 2026-11-22
 
 ### Fixed

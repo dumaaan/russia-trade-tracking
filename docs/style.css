@@ -476,3 +476,13 @@ table.xc a { color: var(--ink-2); }
 .est-key .k-gap::before { border-top: 0; width: 18px; height: 10px; background: var(--ink-3); opacity: 0.35; }
 #est-table td { white-space: nowrap; }
 #est-table thead th { white-space: normal; min-width: 0; }
+
+/* ---------- code explorer ---------- */
+.xp-select { display: inline-flex; gap: 8px; align-items: center; margin: 4px 0 10px; }
+.xp-select select { max-width: 100%; }
+.xp-key .k-eu::before { border-top-color: var(--flow-eu); }
+.xp-key .k-cn::before { border-top-color: var(--text-primary); }
+.xp-key .k-hk::before { border-top: 2px dashed var(--text-primary); opacity: 0.6; }
+.xp-key .k-ru::before { border-top-color: var(--flow-ru); }
+a.xp-link { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 2px; }
+a.xp-link:hover { text-decoration-color: var(--ink); }
