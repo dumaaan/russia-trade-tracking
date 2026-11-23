@@ -2,6 +2,40 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.20.0 — 2026-11-23
+
+### Changed after a full design review (Tufte principles)
+- **One test for every enforcement step (Part 4, new chart):** blacklist waves, EU/US/UK steps aimed at
+  one country (including the April 2026 ban) and the governments' own statements and measures all get
+  the same test as the designation-wave study: sales to Russia in the 6 months after against the 6
+  before, net of the other two countries, against all months without a blacklisting. The page computes
+  it from the monthly flows; it gives exactly the Python study's result for all 31 waves. Steps that
+  hit all three countries, steps before September 2022 and steps with under 3 months after are left
+  out and named. The responses table now uses this test, not the raw before/after change (which gave
+  +542% after a statement in April 2022, mostly the invasion).
+- **Hero map:** Hong Kong is drawn as a band (in 2023 it shipped the three countries more than the
+  EU). The key-numbers table uses one notation (×) and says it stays on the latest year; the note
+  under it is one sentence and a small table.
+- **Overview:** the supplier panels come first in Part 1 and add each country's exports to Russia.
+- **EU member states:** a bar of the latest year on one scale beside each own-scale sparkline; states
+  under $1M a year are one row.
+- **Both legs, one point a year:** three small scatterplots on one scale, every year labelled.
+- **Mirror checks:** the EU and China lines are in one panel per country, with both pre-war levels;
+  the figures are in a table.
+- **Share of all trade:** one supertable for route and comparison countries, on one scale.
+- **Against similar goods:** each panel plots battlefield goods' growth divided by other goods'
+  growth (×1 = alike); the summary is a dot plot, the table is folded.
+- **Price index:** small multiples on a log scale; "without bearings" lines only where they differ.
+- **Estimate:** a linear dollar scale (on the log scale, a $0.8M–$198M range looked wider than
+  $229M–$869M); Russia's records of Kyrgyz sellers (Jan–Oct 2023) on the same chart.
+- **Encodings:** a dash no longer marks a country (Uzbekistan has a triangle marker, Hong Kong a
+  lighter tint); the US list is black, not purple next to the EU's blue; response marks are two shapes
+  (said, did), not five colours; case marks lose the dashed source ring (the table has it); the
+  "in weapons" badge is neutral.
+- **Prose:** figures moved from ledes and readouts into small tables (key numbers, mirror, ban,
+  estimate, suppliers, member states).
+- **Phones:** the responses table shows one card a row; the price chart keeps short names.
+
 ## 1.19.0 — 2026-11-23
 
 ### Added
