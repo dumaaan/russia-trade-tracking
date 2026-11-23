@@ -186,6 +186,36 @@ def hs10_data():
                       _num(r.usd), _num(r.tonnes), _num(r.units)] for r in g.itertuples()]}
 
 
+def members_data():
+    """EU exports of the listed goods by member state and route country, a year (totals, $M)."""
+    path = config.PROCESSED / "eu_members.csv"
+    if not path.exists():
+        return None
+    from .members import BORDER, MEMBERS
+    d = pd.read_csv(path, dtype={"hs6": str})
+    g = d.groupby(["dest", "member", "year"], as_index=False).usd.sum()
+    # the three largest codes of each member state, route country and year (for the tooltips)
+    top = (d.sort_values("usd", ascending=False).groupby(["dest", "member", "year"]).head(3)
+           .sort_values(["dest", "member", "year", "usd"], ascending=[True, True, True, False]))
+    ipath = config.PROCESSED / "eu_members_imports.csv"
+    imp = pd.read_csv(ipath) if ipath.exists() else pd.DataFrame(columns=["dest", "member", "year", "usd"])
+    return {"names": MEMBERS, "border": sorted(BORDER),
+            "rows": [[r.dest, r.member, int(r.year), _num(r.usd / 1e6)] for r in g.itertuples()],
+            "top": [[r.dest, r.member, int(r.year), r.hs6, _num(r.usd / 1e6)] for r in top.itertuples()],
+            "imports": [[r.dest, r.member, int(r.year), _num(r.usd / 1e6)] for r in imp.itertuples()]}
+
+
+def cases_data():
+    """EU enforcement cases that name a route country (curated: data/cases.csv)."""
+    path = config.DATA / "cases.csv"
+    if not path.exists():
+        return None
+    d = pd.read_csv(path).fillna("")
+    cols = ["case", "date", "date_kind", "country", "stage", "authority", "route", "also_named", "goods", "value",
+            "outcome", "source", "source_type", "primary"]
+    return [[getattr(r, c) for c in cols] for r in d.itertuples()]
+
+
 def designation_effect_data():
     path = config.PROCESSED / "designation_effect.json"
     return json.loads(path.read_text()) if path.exists() else None
@@ -255,6 +285,8 @@ def export():
         "weapons": weapons_data(),
         "hs10": hs10_data(),
         "designationEffect": designation_effect_data(),
+        "members": members_data(),
+        "cases": cases_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"
@@ -263,12 +295,14 @@ def export():
     # Download files.
     dl = DOCS / "data"
     dl.mkdir(exist_ok=True)
-    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv", "estimate.csv", "bns_kz_hs10.csv"]:
+    for name in ["trade_totals.csv", "trade_by_code.csv", "comparison.csv", "availability.csv", "ban_monthly.csv", "control.csv", "suppliers.csv", "excess.csv", "events_monthly.csv", "bns_kz_monthly.csv", "mirror_cn.csv", "unit_values.csv", "unit_value_index.csv", "designations.csv", "estimate.csv", "bns_kz_hs10.csv", "eu_members.csv", "eu_members_imports.csv"]:
         if (config.PROCESSED / name).exists():
             shutil.copy(config.PROCESSED / name, dl / name)
     shutil.copy(config.CHPL_CSV, dl / "chpl_hs_codes.csv")
     if (config.DATA / "responses.csv").exists():
         shutil.copy(config.DATA / "responses.csv", dl / "government_responses.csv")
+    if (config.DATA / "cases.csv").exists():
+        shutil.copy(config.DATA / "cases.csv", dl / "eu_enforcement_cases.csv")
     if (config.DATA / "weapons.csv").exists():
         shutil.copy(config.DATA / "weapons.csv", dl / "weapon_parts_by_code.csv")
     return out

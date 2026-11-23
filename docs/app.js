@@ -52,7 +52,7 @@
   const state = {
     basket: "all", currency: "USD", prices: "real", baseline: "avg",
     flowsCountry: "Kazakhstan", goodsCountry: "Kazakhstan", goodsFlow: "ru",
-    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned", uvYear: YEARS[YEARS.length - 1], xpCode: "851762",
+    routeYear: YEARS[YEARS.length - 1], tiersCountry: "Kazakhstan", banGoods: "banned", uvYear: YEARS[YEARS.length - 1], xpCode: "851762", memDest: "all",
   };
 
   // ---------- data ----------
@@ -2088,6 +2088,251 @@
   }
 
 
+  // ---------- EU member states: who ships the goods ----------
+  // Comext by member state. The 27 add up to the EU-27 line used everywhere else. Current US dollars.
+  function membersStudy() {
+    const M = D.members;
+    if (!M) return;
+    const NAMES = M.names, BORDER = new Set(M.border);
+    const ROUTE = { all: "the three countries", KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const dest = state.memDest;
+    const inDest = (d) => dest === "all" || d === dest;
+    const val = {}; // member|year -> $M
+    for (const [d, m, y, v] of M.rows) if (inDest(d) && v != null) val[`${m}|${y}`] = (val[`${m}|${y}`] || 0) + v;
+    const members = Object.keys(NAMES);
+    const get = (m, y) => val[`${m}|${y}`] || 0;
+    const preYears = [2019, 2020, 2021];
+    const pre = (m) => preYears.reduce((a, y) => a + get(m, y), 0) / preYears.length;
+    const total = (y) => members.reduce((a, m) => a + get(m, y), 0);
+    const last = Math.max(...M.rows.map((r) => r[2]));
+    const peak = YEARS.filter((y) => y >= 2022).reduce((a, y) => (total(y) > total(a) ? y : a), 2022);
+    const usd = (v) => (v == null ? "—" : v >= 1000 ? `$${(v / 1000).toFixed(2)}bn` : v >= 1 ? `$${v.toFixed(v >= 100 ? 0 : 1)}M` : v >= 0.001 ? `$${Math.round(v * 1000)}k` : "$0");
+    const sum = (set, f) => members.filter((m) => set(m)).reduce((a, m) => a + f(m), 0);
+    const PN = (m) => (m === "NL" ? "the Netherlands" : NAMES[m]); // name inside a sentence
+    const usd1 = (v) => (v >= 100 ? `$${v.toFixed(1)}M` : usd(v)); // one more digit where two values are close
+    const listAnd = (a) => (a.length <= 1 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+
+    // text, computed
+    const bPre = sum((m) => BORDER.has(m), pre), bPeak = sum((m) => BORDER.has(m), (m) => get(m, peak));
+    const rPre = sum((m) => !BORDER.has(m), pre), rPeak = sum((m) => !BORDER.has(m), (m) => get(m, peak));
+    const bLast = sum((m) => BORDER.has(m), (m) => get(m, last)), rLast = sum((m) => !BORDER.has(m), (m) => get(m, last));
+    const nRest = members.length - BORDER.size;
+    // "fell by about 40% by 2024 and again by 2025", not the same words twice
+    const after = (a, b) => (last === peak ? "" : grew(b / a) === grew(a / bPre) ? ` and again by ${last}` : ` and ${grew(b / a)} by ${last}`);
+    const to = dest === "all" ? "" : ` to ${ROUTE[dest]}`;
+    document.getElementById("mem-h").textContent =
+      `Exports${to} from the EU's border states ${grew(bPeak / bPre)} by ${peak}${after(bPeak, bLast)}`;
+    const byLast = [...members].sort((a, b) => get(b, last) - get(a, last));
+    const risers = members.filter((m) => get(m, peak) >= 5 && pre(m) > 0).sort((a, b) => get(b, peak) / pre(b) - get(a, peak) / pre(a)).slice(0, 3);
+    document.getElementById("mem-sub").textContent =
+      `Over the same years, exports from the other ${nRest} member states ${grew(rPeak / rPre)}${last !== peak ? ` and then ${grew(rLast / rPeak)}` : ""}. ` +
+      `${capW(PN(byLast[0]))} and ${PN(byLast[1])} shipped the most in ${last}: ${usd1(get(byLast[0], last))} and ${usd1(get(byLast[1], last))}. ` +
+      (risers.length
+        ? `Of the states that shipped at least $5M in ${peak}, ${PN(risers[0])} grew fastest, from ${usd(pre(risers[0]))} a year before the war to ${usd(get(risers[0], peak))}` +
+          (risers.length > 1 ? `; ${listAnd(risers.slice(1).map(PN))} came next.` : ".")
+        : "");
+    // why the importers' records by member state are not compared: they follow the country of origin
+    {
+      const I = {};
+      for (const [d, m, y, v] of M.imports || []) if (d === "KZ") I[`${m}|${y}`] = v;
+      const ky = Math.max(...(M.imports || []).filter((r) => r[0] === "KZ").map((r) => r[2]));
+      const ex = {};
+      for (const [d, m, y, v] of M.rows) if (d === "KZ" && y === ky) ex[m] = v;
+      const diff = members.filter((m) => ex[m] != null && I[`${m}|${ky}`] != null).map((m) => ({ m, e: ex[m], i: I[`${m}|${ky}`] }));
+      const less = diff.sort((a, b) => (b.e - b.i) - (a.e - a.i))[0], more = [...diff].sort((a, b) => (b.i - b.e) - (a.i - a.e))[0];
+      document.getElementById("mem-origin").textContent = less && more && isFinite(ky)
+        ? `The importers' own records cannot be checked state by state. They file goods under the country that made them; the EU files them under the state that shipped them. In ${ky} Kazakhstan recorded ${usd(less.i)} from ${PN(less.m)}, which shipped ${usd(less.e)}, and ${usd(more.i)} from ${PN(more.m)}, which shipped ${usd(more.e)}. Part 2 compares the two records for the EU as a whole, where it does not matter which state shipped the goods.`
+        : "";
+    }
+
+    // A supertable with sparklines: one row a member state, grouped (totals, border states, the rest) and
+    // ordered to tell the story. Each sparkline is the full 2019–2025 series on its own linear scale from
+    // zero, so its shape is honest within the row; the numbers beside it give the size.
+    const box = document.getElementById("mem-plot");
+    const SW = 132, SH = 28, pad = 3;
+    const fx = (v) => (v >= 10 ? `×${v.toFixed(0)}` : `×${v.toFixed(1)}`);
+    const pct = (v) => { const p = Math.round(100 * (v - 1)); return p === 0 ? "0%" : `${p > 0 ? "+" : "−"}${Math.abs(p)}%`; };
+    const series = (f) => YEARS.map((yy) => f(yy));
+    const rowOf = (label, f, border, note) => {
+      const s = series(f);
+      const p0 = preYears.reduce((a, yy) => a + f(yy), 0) / preYears.length;
+      const pk = YEARS.filter((yy) => yy >= 2022).reduce((a, yy) => (f(yy) > f(a) ? yy : a), 2022);
+      return { label, s, pre: p0, pk, pkv: f(pk), lastv: f(last), border, note };
+    };
+    const spark = (r) => {
+      const max = Math.max(...r.s, 1e-9);
+      const X = (i) => pad + (i * (SW - 2 * pad)) / (YEARS.length - 1);
+      const Y = (v) => SH - pad - (v / max) * (SH - 2 * pad);
+      const svg = el("svg", { width: SW, height: SH, viewBox: `0 0 ${SW} ${SH}`, class: "mem-spark", role: "img",
+        "aria-label": `${r.label}: ${YEARS.map((yy, i) => `${yy} ${usd(r.s[i])}`).join(", ")}` });
+      const b1 = X(preYears.length - 1) + (X(1) - X(0)) / 2;
+      el("rect", { x: 0, y: 0, width: b1, height: SH, class: "mem-pre" }, svg); // the pre-war years
+      const col = r.border ? css("--c-kg") : css("--ink-2");
+      el("polyline", { points: r.s.map((v, i) => `${X(i)},${Y(v)}`).join(" "), fill: "none", stroke: col, "stroke-width": 1.5, "stroke-linejoin": "round" }, svg);
+      const ip = YEARS.indexOf(r.pk), il = YEARS.length - 1;
+      el("circle", { cx: X(ip), cy: Y(r.s[ip]), r: 2.4, fill: col }, svg);
+      if (il !== ip) el("circle", { cx: X(il), cy: Y(r.s[il]), r: 1.8, fill: css("--ink-3") }, svg);
+      const hit = el("rect", { x: 0, y: 0, width: SW, height: SH, fill: "transparent", tabindex: 0 }, svg);
+      const tip = (px, py, i) => showTip(px, py, `${r.label} to ${ROUTE[dest]}`, [{ color: col, value: usd(r.s[i]), label: String(YEARS[i]) }], r.note || "");
+      hit.addEventListener("pointermove", (e) => { const q = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(il, Math.round(((e.clientX - q.left) / q.width * SW - pad) / ((SW - 2 * pad) / il)))); tip(e.clientX, e.clientY, i); });
+      hit.addEventListener("pointerleave", hideTip);
+      hit.addEventListener("focus", () => { const q = svg.getBoundingClientRect(); tip(q.right, q.top, ip); });
+      hit.addEventListener("blur", hideTip);
+      return svg;
+    };
+    const topNote = (m) => {
+      const agg = {};
+      for (const r of M.top) if (inDest(r[0]) && r[1] === m && r[2] === peak) agg[r[3]] = (agg[r[3]] || 0) + r[4];
+      const t = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      return t.length ? `Largest codes in ${peak}: ` + t.map(([c, v]) => `${fmtCode(c)} ${(chplByCode[c] || {}).description || ""} (${usd(v)})`).join("; ") : "";
+    };
+    const nCases = {};
+    for (const r of D.cases || []) (nCases[r[3]] = nCases[r[3]] || new Set()).add(r[0]);
+    const tr = (r, cls) => h("tr", cls ? { class: cls } : {}, [
+      h("th", { scope: "row", class: "lbl", text: r.label }),
+      h("td", { class: "spark-cell" }, spark(r)),
+      h("td", { text: usd(r.pre) }),
+      h("td", { text: `${usd(r.pkv)} (${r.pk})` }),
+      h("td", { text: usd(r.lastv) }),
+      h("td", { class: "chg", text: r.pre >= 0.05 ? fx(r.pkv / r.pre) : "from near zero" }),
+      h("td", { class: "chg", text: r.pk === last ? "at the peak" : r.pkv > 0 ? pct(r.lastv / r.pkv) : "—" }),
+      h("td", r.cases ? { text: String(r.cases) } : { class: "muted", text: r.cases == null ? "" : "none" }),
+    ]);
+    const group = (t) => h("tr", { class: "group" }, h("th", { colspan: 8, scope: "rowgroup", text: t }));
+    const state1 = (m) => Object.assign(rowOf(NAMES[m], (yy) => get(m, yy), BORDER.has(m), topNote(m)), { cases: nCases[m] ? nCases[m].size : 0 });
+    const borderRows = members.filter((m) => BORDER.has(m)).map(state1).sort((a, b) => b.pkv / Math.max(b.pre, 1e-9) - a.pkv / Math.max(a.pre, 1e-9));
+    const otherRows = members.filter((m) => !BORDER.has(m)).map(state1).sort((a, b) => b.lastv - a.lastv);
+    const bTot = rowOf(`The ${NUMW[BORDER.size] || BORDER.size} border states`, (yy) => sum((m) => BORDER.has(m), (m) => get(m, yy)), true);
+    const oTot = rowOf(`The other ${nRest}`, (yy) => sum((m) => !BORDER.has(m), (m) => get(m, yy)), false);
+    const head = h("thead", {}, h("tr", {}, ["", "2019–2025", "2019–21 average", "Peak (year)", String(last), "Rise to the peak", `Change since the peak`, "Cases (Part 4)"].map((t) => h("th", { scope: "col", text: t }))));
+    const t = h("table", { class: "supertable mem-table" }, [head, h("tbody", {}, [
+      group("Totals"), tr(bTot, "mem-total"), tr(oTot, "mem-total"),
+      group("Border with Russia or Belarus"), ...borderRows.map((r) => tr(r)),
+      group(`Other member states, largest in ${last} first`), ...otherRows.map((r) => tr(r)),
+    ])]);
+    box.replaceChildren(h("div", { class: "table-wrap" }, t));
+
+    // the numbers: every member state, every year
+    const yHead = ["Member state", ...YEARS.map(String)];
+    const yRows = [...members].sort((a, b) => get(b, last) - get(a, last)).map((m) => [NAMES[m] + (BORDER.has(m) ? " (border)" : ""), ...YEARS.map((yy) => usd(get(m, yy)))]);
+    yRows.push(["All 27 (EU-27)", ...YEARS.map((yy) => usd(total(yy)))]);
+    table(document.getElementById("mem-table"), yHead, yRows);
+  }
+
+
+  // ---------- EU enforcement cases that name the route ----------
+  const CASE_STAGE = {
+    investigation: { label: "investigation", g: "open" }, arrest: { label: "arrest", g: "open" },
+    charge: { label: "charged", g: "charged" }, "sent to prosecutor": { label: "sent to prosecutor", g: "charged" },
+    conviction: { label: "conviction", g: "decided" }, fine: { label: "fine", g: "decided" },
+  };
+  function casesStudy() {
+    const C = D.cases;
+    if (!C) return;
+    const EU = { AT: "Austria", BE: "Belgium", BG: "Bulgaria", CZ: "Czechia", DE: "Germany", EE: "Estonia", FI: "Finland", FR: "France", LT: "Lithuania", LV: "Latvia", NL: "Netherlands", PL: "Poland", SE: "Sweden", ...((D.members || {}).names || {}) };
+    const RN = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
+    const items = C.map((r) => ({ id: r[0], date: r[1], dk: r[2], c: r[3], stage: r[4], who: r[5], route: r[6].split(";"), also: r[7], goods: r[8], value: r[9], outcome: r[10], src: r[11], srcType: r[12], primary: r[13] === "yes" }))
+      .sort((a, b) => (a.date < b.date ? -1 : 1));
+    items.forEach((it, i) => { it.n = i + 1; });
+    const fmtD = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    const listW = (a) => (a.length <= 1 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+    const PN = (c) => (c === "NL" ? "the Netherlands" : EU[c] || c); // name inside a sentence
+    const cap = (n) => capW(n <= 12 ? NUMW[n] : String(n));
+
+    // text, computed
+    const cases = [...new Set(items.map((x) => x.id))];
+    const named = (iso) => cases.filter((id) => items.some((x) => x.id === id && x.route.includes(iso))).length;
+    const decided = items.filter((x) => CASE_STAGE[x.stage] && CASE_STAGE[x.stage].g === "decided");
+    const convicted = items.filter((x) => x.stage === "conviction");
+    const convCountries = [...new Set(convicted.map((x) => x.c))];
+    const w = (n) => (n <= 12 ? NUMW[n] : String(n));
+    const nKZ = named("KZ"), nKG = named("KG"), nUZ = named("UZ");
+    document.getElementById("case-h").textContent = nKZ >= nKG && nKZ >= nUZ
+      ? `Kazakhstan appears in ${w(nKZ)} of the ${w(cases.length)} EU cases that name the route`
+      : `${cap(cases.length)} EU cases name the route through Central Asia`;
+    const convCases = new Set(convicted.map((x) => x.id));
+    const fined = decided.filter((x) => x.stage === "fine");
+    const fineCases = new Set(fined.map((x) => x.id).filter((id) => !convCases.has(id)));
+    const open = cases.filter((id) => !convCases.has(id) && !fineCases.has(id)).length;
+    let sub = `Kyrgyzstan appears in ${w(nKG)}, Uzbekistan in ${w(nUZ)}. ` +
+      `Courts in ${listW(convCountries.map(PN))} have convicted in ${w(convCases.size)} cases` +
+      (fineCases.size ? `; ${listW([...new Set(fined.map((x) => PN(x.c)))])} fined a company` : "") +
+      `; ${w(open)} ${open === 1 ? "is" : "are"} still open.`;
+    if (D.members) {
+      const last = Math.max(...D.members.rows.map((r) => r[2]));
+      const tot = {}; for (const [, m, y, v] of D.members.rows) if (y === last && v != null) tot[m] = (tot[m] || 0) + v;
+      const top5 = Object.keys(tot).sort((a, b) => tot[b] - tot[a]).slice(0, 5);
+      const withCase = new Set(items.map((x) => x.c));
+      const no = top5.filter((m) => !withCase.has(m));
+      if (no.length) sub += ` ${capW(listW(no.map(PN)))}, ${no.length === 1 ? "one" : w(no.length)} of the five largest shippers in ${last}, ${no.length === 1 ? "has" : "have"} no case here.`;
+    }
+    document.getElementById("case-sub").textContent = sub;
+
+    // timeline: one row an EU country, numbered marks, a thin line joins the steps of one case
+    const box = document.getElementById("case-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 30 : 100, R = 14, rowH = 40, top = 14;
+    const countries = [...new Set(items.map((x) => x.c))];
+    const t0 = Date.UTC(+items[0].date.slice(0, 4), 0, 1);
+    const lastD = new Date(items[items.length - 1].date + "T00:00:00Z");
+    const t1 = Date.UTC(lastD.getUTCFullYear() + 1, 0, 1);
+    const x = (d) => L + ((Date.parse(d + "T00:00:00Z") - t0) / (t1 - t0)) * (W - L - R);
+    const H = top + countries.length * rowH + 20;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "case-svg", role: "img", "aria-label": `${items.length} enforcement steps in ${countries.length} EU countries, by date` });
+    for (let yy = new Date(t0).getUTCFullYear(); yy <= new Date(t1).getUTCFullYear(); yy++) {
+      const xx = x(`${yy}-01-01`);
+      el("line", { x1: xx, x2: xx, y1: top - 4, y2: H - 16, class: "uv-grid" }, svg);
+      if (yy < new Date(t1).getUTCFullYear()) { const t = el("text", { x: xx + 3, y: H - 3, class: "uv-tick" }, svg); t.textContent = String(yy); }
+    }
+    countries.forEach((c, k) => {
+      const cy = top + k * rowH + rowH / 2;
+      const lab = el("text", { x: 0, y: cy + 4, class: "uv-lbl" }, svg); lab.textContent = small ? c : EU[c] || c;
+      el("line", { x1: L, x2: W - R, y1: cy, y2: cy, class: "case-row" }, svg);
+      const mine = items.filter((it) => it.c === c);
+      for (const id of new Set(mine.map((it) => it.id))) {
+        const steps = mine.filter((it) => it.id === id);
+        if (steps.length > 1) el("line", { x1: x(steps[0].date), x2: x(steps[steps.length - 1].date), y1: cy, y2: cy, class: "case-link" }, svg);
+      }
+      const placed = [];
+      for (const it of mine) {
+        const cx = x(it.date);
+        let dy = 0; while (placed.some((p) => Math.abs(p.cx - cx) < 24 && p.dy === dy)) dy += 1;
+        placed.push({ cx, dy });
+        const cyy = cy - dy * 24;
+        const g0 = (CASE_STAGE[it.stage] || CASE_STAGE.investigation).g;
+        const g = el("g", { tabindex: 0, class: "resp-mark" }, svg);
+        const fill = g0 === "decided" ? css("--ink") : g0 === "charged" ? css("--ink-3") : css("--paper");
+        if (!it.primary) el("circle", { cx, cy: cyy, r: 11.5, fill: "none", stroke: css("--ink-2"), "stroke-width": 1, "stroke-dasharray": "2 2" }, g);
+        el("circle", { cx, cy: cyy, r: 8, fill, stroke: g0 === "open" ? css("--ink-2") : fill, "stroke-width": 1.6 }, g);
+        const t = el("text", { x: cx, y: cyy + 3.5, "text-anchor": "middle", class: "resp-num", fill: g0 === "open" ? css("--ink") : css("--paper") }, g);
+        t.textContent = String(it.n);
+        const tip = (px, py) => showTip(px, py, `${it.n}. ${EU[it.c]}, ${fmtD(it.date)}${it.dk === "first reported" ? " (first report)" : ""}`,
+          [{ color: fill === css("--paper") ? css("--ink-2") : fill, value: (CASE_STAGE[it.stage] || {}).label || it.stage, label: `${it.goods}; route: ${it.route.map((r) => RN[r]).join(", ")}` }], it.outcome);
+        g.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+        g.addEventListener("pointerleave", hideTip);
+        g.addEventListener("focus", () => { const q = g.getBoundingClientRect(); tip(q.left, q.top); });
+        g.addEventListener("blur", hideTip);
+      }
+    });
+    box.replaceChildren(svg);
+
+    // the table
+    const head = h("thead", {}, h("tr", {}, ["#", "Date", "EU country", "Step", "Route named", "Goods", "Value", "Outcome", "Source"].map((t) => h("th", { text: t }))));
+    const body = items.map((it) => h("tr", {}, [
+      h("td", { text: String(it.n) }),
+      h("td", { text: fmtD(it.date) + (it.dk === "first reported" ? " (first report)" : "") }),
+      h("td", { class: "lbl", text: EU[it.c] || it.c }),
+      h("td", { class: "lbl", text: (CASE_STAGE[it.stage] || {}).label || it.stage }),
+      h("td", { class: "lbl", text: it.route.map((r) => RN[r]).join(", ") + (it.also ? `; also ${it.also}` : "") }),
+      h("td", { class: "lbl", text: it.goods }),
+      h("td", { text: it.value }),
+      h("td", { class: "lbl resp-what", text: `${it.who}. ${it.outcome}` }),
+      h("td", { class: "lbl" }, [h("a", { href: it.src, target: "_blank", rel: "noopener", text: it.srcType }), it.primary ? "" : " (secondary)"]),
+    ]));
+    document.getElementById("case-table").replaceChildren(head, h("tbody", {}, body));
+  }
+
+
   // ---------- do designations work? waves against all other months ----------
   function designationEffect() {
     const X = D.designationEffect, N = X.names;
@@ -2566,6 +2811,7 @@
   }
   if (D.unitValues) seg(document.getElementById("uv-year"), [2021, 2022, 2023, 2024, 2025].map((y) => ({ value: y, label: String(y) })), () => state.uvYear, (v) => { state.uvYear = v; uvStudy(); });
   if (D.ban) seg(document.getElementById("ban-goods"), [{ value: "banned", label: "The two banned codes" }, { value: "other", label: "The other 47 codes" }], () => state.banGoods, (v) => { state.banGoods = v; banStudy(); });
+  if (D.members) seg(document.getElementById("mem-dest"), [{ value: "all", label: "All three" }, { value: "KZ", label: "Kazakhstan" }, { value: "KG", label: "Kyrgyzstan" }, { value: "UZ", label: "Uzbekistan" }], () => state.memDest, (v) => { state.memDest = v; membersStudy(); });
   seg(document.getElementById("tiers-country"), countryOpts, () => state.tiersCountry, (v) => { state.tiersCountry = v; tiers(); });
   seg(document.getElementById("goods-country"), countryOpts, () => state.goodsCountry, (v) => { state.goodsCountry = v; goods(); });
   seg(document.getElementById("goods-flow"), [{ value: "eu", label: FLOW.eu.short }, { value: "mi", label: "Recorded imports" }, { value: "ru", label: FLOW.ru.short }], () => state.goodsFlow, (v) => { state.goodsFlow = v; goods(); });
@@ -2604,6 +2850,8 @@
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
     if (D.responses) responsesStudy();
+    if (D.cases) casesStudy();
+    if (D.members) membersStudy();
     if (D.designationEffect) designationEffect();
     if (D.estimate) estimateStudy();
     codeExplorer();
@@ -2617,7 +2865,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.designationEffect) designationEffect(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.cases) casesStudy(); if (D.members) membersStudy(); if (D.designationEffect) designationEffect(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

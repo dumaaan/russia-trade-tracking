@@ -2,6 +2,28 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.19.0 — 2026-11-23
+
+### Added
+- **Which EU countries ship the goods (Part 1):** EU exports of the listed goods to each route
+  country by member state, from Eurostat Comext (one query a route country, no Comtrade calls). The
+  27 member states add up to the EU-27 totals (a test checks this). A table with sparklines gives
+  every member state's full 2019–2025 series, grouped into totals, the five border states and the
+  other 22, with the pre-war average, the peak, the latest year, the rise to the peak, the change
+  since the peak and the number of court cases beside each line. Shipments from the five member states
+  on the border with Russia or Belarus (Estonia, Finland, Latvia, Lithuania, Poland) nearly
+  quadrupled from the pre-war average to 2023 and then fell by more than half by 2025; shipments
+  from the rest of the EU doubled and then held steady. The route countries' own records by member
+  state are not compared, because importers record the country of origin and the EU the member
+  state that ships; the chapter says why, with the numbers.
+- **EU court cases that name the route (Part 4):** a curated record (`data/cases.csv`) of 12
+  enforcement steps in 10 cases in seven member states (arrests, charges, convictions, fines and
+  investigations) where the authorities name Kazakhstan, Kyrgyzstan or Uzbekistan as the way to
+  Russia. Each row gives the source and whether we read the authority's or court's own page (4
+  steps) or a news report or law-firm summary (8 steps). A timeline and a table show them; the
+  chapter compares the case countries with the largest shippers.
+- Download files: `eu_members.csv`, `eu_members_imports.csv`, `eu_enforcement_cases.csv`.
+
 ## 1.18.1 — 2026-11-23
 
 ### Fixed

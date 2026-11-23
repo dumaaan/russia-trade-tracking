@@ -47,6 +47,29 @@ class TotalsAgree(unittest.TestCase):
                 b = sup[(sup.dest == iso) & (sup.year == y)].usd.sum()
                 self.assertAlmostEqual(a, b, delta=1e3 + 1e-6 * max(a, b), msg=f"EU -> {iso} {y}")
 
+    def test_member_states_add_up_to_eu27(self):
+        """The 27 member states' exports (Comext by reporter) equal the EU-27 supplier table."""
+        m = pd.read_csv(P / "eu_members.csv", dtype={"hs6": str})
+        self.assertEqual(m.member.nunique(), 27)
+        sup = pd.read_csv(P / "suppliers.csv", dtype={"code": str})
+        sup = sup[(sup.supplier == "eu") & sup.dest.isin(NAMES.keys())]
+        a = m.groupby(["dest", "year"]).usd.sum()
+        b = sup.groupby(["dest", "year"]).usd.sum()
+        for k in b.index:
+            self.assertAlmostEqual(a.get(k, 0.0), b[k], delta=1e3 + 1e-6 * b[k], msg=str(k))
+
+    def test_member_imports_match_mirror(self):
+        """The importers' records by member state add up to the recorded imports from the EU-27."""
+        i = pd.read_csv(P / "eu_members_imports.csv").groupby(["dest", "year"]).usd.sum()
+        codes = pd.read_csv(P / "trade_by_code.csv", dtype={"hs6": str})
+        codes = codes[codes.in_basket & codes.flow.str.startswith("Country imports from EU-27")]
+        for iso, name in NAMES.items():
+            for y in range(2019, 2026):
+                if (iso, y) not in i.index:
+                    continue
+                b = codes[(codes.country == name) & (codes.year == y)].usd.sum()
+                self.assertAlmostEqual(i[(iso, y)], b, delta=1e3 + 1e-3 * b, msg=f"{iso} {y}")
+
     def test_recorded_exports_same_in_estimate(self):
         est = pd.read_csv(P / "estimate.csv")
         comp = pd.read_csv(P / "comparison.csv")
@@ -147,6 +170,18 @@ class CuratedAndBureauData(unittest.TestCase):
         self.assertTrue(r.source.str.startswith("https://").all())
         self.assertTrue(pd.to_datetime(r.date, errors="coerce").notna().all())
 
+    def test_cases_are_well_formed(self):
+        c = pd.read_csv(ROOT / "data" / "cases.csv")
+        self.assertTrue(c.stage.isin(["investigation", "arrest", "charge", "sent to prosecutor", "conviction", "fine"]).all())
+        self.assertTrue(c.date_kind.isin(["event", "first reported"]).all())
+        self.assertTrue(c.primary.isin(["yes", "no"]).all())
+        self.assertTrue(c.source.str.startswith("https://").all())
+        self.assertTrue(pd.to_datetime(c.date, errors="coerce").notna().all())
+        for r in c.route:
+            self.assertTrue(set(r.split(";")) <= {"KZ", "KG", "UZ"}, r)
+        # each case has one EU country
+        self.assertTrue((c.groupby("case").country.nunique() == 1).all())
+
     def test_weapon_parts_are_listed_codes(self):
         w = pd.read_csv(ROOT / "data" / "weapons.csv", dtype={"hs6": str})
         listed = set(pd.read_csv(ROOT / "data" / "chpl_hs_codes.csv", dtype={"hs6": str}).hs6)
@@ -157,7 +192,7 @@ class SiteDataIsWhole(unittest.TestCase):
     def test_sections_present(self):
         d = site_data()
         for key in ("codes", "suppliers", "control", "ban", "excess", "eventStudy", "mirrorCn", "unitValues",
-                    "designations", "estimate", "cnImports", "responses", "weapons", "hs10", "designationEffect"):
+                    "designations", "estimate", "cnImports", "responses", "weapons", "hs10", "designationEffect", "members", "cases"):
             self.assertIn(key, d)
             self.assertTrue(d[key], key)
 
