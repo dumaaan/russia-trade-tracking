@@ -18,12 +18,10 @@
 <header class="hero">
   <div class="wrap">
     <h1>The Central Asian detour</h1>
-    <p class="dek">
-      Battlefield goods are the 50 types (customs codes) of electronics, bearings and machine tools that
-      Western governments found in Russian weapons in Ukraine. The map follows them from the EU and from
-      China through Kazakhstan, Kyrgyzstan and Uzbekistan into Russia. The site uses 49 of the
-      50 codes: the code for light sensors has no comparable data before 2022.
-    </p>
+    <p class="dek">Western governments have found 50 kinds of electronics, bearings and machine tools inside Russian
+      weapons in Ukraine. This site follows those battlefield goods on a detour: out of the EU and China, into
+      Kazakhstan, Kyrgyzstan and Uzbekistan, and from there into Russia. It tracks 49 of the 50 customs codes;
+      light sensors have no comparable data before 2022.</p>
     <p class="data-dates" id="data-dates"></p>
   </div>
   <figure class="route wrap" aria-labelledby="route-caption">
@@ -36,9 +34,9 @@
   <div class="wrap"><div class="summary" id="summary"></div><p class="summary-note" id="summary-note"></p></div>
   <nav class="toc wrap" aria-label="Contents">
     <div class="toc-part"><a class="toc-h" href="#part-moved">Part 1 · What moved</a><ul><li><a href="#legs">Both legs</a></li><li><a href="#suppliers">Suppliers</a></li><li><a href="#comparison">Kazakhstan, Kyrgyzstan, Uzbekistan</a></li><li><a href="#tiers">Tier by tier</a></li><li><a href="#goods">Code by code</a></li></ul></div>
-    <div class="toc-part"><a class="toc-h" href="#part-records">Part 2 · How good the records are</a><ul><li><a href="#mirror">Mirror checks</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-records">Part 2 · How reliable the records are</a><ul><li><a href="#mirror">Mirror checks</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-tests">Part 3 · Tests</a><ul><li><a href="#control">Share of all trade</a></li><li><a href="#excess">Against similar goods</a></li><li><a href="#unitvalue">Price per kg</a></li></ul></div>
-    <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#responses">Government responses</a></li><li><a href="#designations">Designations</a></li><li><a href="#deseffect">Do designations work?</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#responses">Government responses</a></li><li><a href="#designations">Designations</a></li><li><a href="#deseffect">After blacklisting</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-estimate">Part 5 · Estimate</a><ul><li><a href="#estimate">How much reached Russia</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-explore">Part 6 · Explore</a><ul><li><a href="#explorer">Code explorer</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-check">Checks · Our numbers against published ones</a><ul><li><a href="#checks">Cross-checks</a></li></ul></div>
@@ -101,11 +99,9 @@
       </div>
       <div class="scatter-row">
         <figure class="scatter-fig"><figcaption>Both legs, one point a year<span>exports to Russia against EU exports, log scales</span></figcaption><div class="chart" id="cmp-ratio"></div></figure>
-        <p class="aside">
-          Each point is one year: across, what the EU sold the country; up, what the country sold
-          Russia. A point on the dotted line means the two are equal. China and other countries also
-          supply these goods, so the distance from the line is not a re-export share.
-        </p>
+        <p class="aside">Each dot is a year. The further right, the more the EU sold the country; the higher, the more the
+          country sold Russia. On the dotted line the two are equal. China sells these goods too, so the distance
+          from the line is not a re-export rate.</p>
       </div>
       <details class="table-view"><summary>Show the numbers</summary><div id="cmp-table"></div></details>
     </div>
@@ -121,7 +117,7 @@
       <p class="scope" id="scope-tiers"></p>
       <div class="legend" id="tiers-legend"></div>
       <div class="grid3 tiers" id="tiers-grid"></div>
-      <p class="aside">All six charts share one log scale: ×1 is the pre-war level of that tier, and the same height means the same growth in every chart.</p>
+      <p class="aside">All six charts share one scale, starting from each tier's pre-war level. Same height, same growth.</p>
     </div>
   </section>
 
@@ -141,21 +137,18 @@
     </div>
   </section>
 
-  <div class="part wrap" id="part-records"><p class="part-label"><span>Part 2</span> How good the records are</p></div>
+  <div class="part wrap" id="part-records"><p class="part-label"><span>Part 2</span> How reliable the records are</p></div>
 
   <section class="chapter wrap" id="mirror" aria-labelledby="mirror-h">
     <div class="ch-text">
-      <h2 id="mirror-h">Part of the EU's shipments never appear in the importers' records</h2>
-      <p class="finding">
-        Each line divides what the country records as imports from the EU by what the EU records as
-        exports to it. Below 100%, part of the shipments is missing from the country's records.
-      </p>
-      <p class="aside">
-        Some gap is normal: goods arrive in another year, importers record the country of origin, and
-        import values include freight. So each year is compared with the country's own pre-war ratio.
-        The excess gap is the part above that level. Kazakhstan gives no product detail for imports
-        by partner for 2020–2022, so its pre-war ratio uses 2019 only.
-      </p>
+      <h2 id="mirror-h">Goods leave the EU and vanish from the books</h2>
+      <p class="finding">When goods leave the EU, the EU counts them. When they arrive, the importer should count them
+        too. These lines show how much of the EU's tally turns up on the other side. Below 100%, goods have gone
+        missing from the books.</p>
+      <p class="aside">Some slippage is normal: a December shipment lands in January, importers file goods by country
+        of origin, and import prices include freight. So each country is measured against its own pre-war record,
+        and only the gap beyond that counts. Kazakhstan's pre-war record is 2019 alone, because it published no import
+        detail by partner for 2020–2022.</p>
     </div>
     <div class="ch-figure">
       <p class="scope" id="scope-mirror"></p>
@@ -163,11 +156,9 @@
       <div class="chart" id="mirror-chart"></div>
       <p class="readout" id="mirror-summary"></p>
       <details class="table-view"><summary>Show the numbers</summary><div id="mirror-table"></div></details>
-      <h3 class="ctl-group" id="mcn-h">The same check for China</h3>
-      <p class="aside">Imports from China as each country records them, divided by China's exports to it as China
-        records them. Kazakhstan gives no product detail for imports from China for 2020–2022. Importers record the
-        country of origin, so Chinese goods re-exported by Hong Kong count as imports from China: this can put a ratio
-        above 100%.</p>
+      <h3 class="ctl-group" id="mcn-h">Checked against China</h3>
+      <p class="aside">The same test with China as the supplier. Kazakhstan's data for 2020–2022 are missing here too.
+        Chinese goods shipped through Hong Kong are filed as imports from China, which can push a ratio above 100%.</p>
       <div class="legend" id="mcn-legend"></div>
       <div class="chart" id="mcn-chart"></div>
       <p class="readout" id="mcn-summary"></p>
@@ -179,9 +170,9 @@
 
   <section class="chapter chapter-wide wrap" id="control" aria-labelledby="ctl-h">
     <div class="ch-text">
-      <h2 id="ctl-h">Listed goods as a share of all trade</h2>
-      <p class="finding">Each line tracks listed battlefield goods as a share of total trade value—on the left, EU exports to the country; on the right, the country's exports to Russia.</p>
-      <p class="finding">A flat line means these goods are keeping pace with overall trade. A rising line means they are outpacing it. All eight charts share one scale.</p>
+      <h2 id="ctl-h">Battlefield goods as a share of all trade</h2>
+      <p class="finding">If Central Asia were simply trading more with everyone, battlefield goods would hold a steady share of the total. These lines track that share: EU sales to each country on the left, the country's sales to Russia on the right.</p>
+      <p class="finding">A flat line means the goods kept pace with trade as a whole. A rising one means they pulled ahead. All eight charts share a scale.</p>
     </div>
     <div class="ch-figure">
       <p class="scope" id="scope-ctl"></p>
@@ -194,17 +185,16 @@
 
   <section class="chapter chapter-wide wrap" id="excess" aria-labelledby="exc-h">
     <div class="ch-text">
-      <h2 id="exc-h">Did listed goods grow faster than similar goods?</h2>
+      <h2 id="exc-h">Battlefield goods against their closest relatives</h2>
       <p class="finding" id="exc-sub"></p>
-      <p class="finding">Each chart compares the listed goods with the other goods of the same customs chapters:
-        machines (84), electronics (85) and instruments (90). The lines are times the pre-war level,
-        on one log scale for all charts. Where the coloured lines are above the grey line, the listed goods grew faster.</p>
-      <p class="aside">Many of the other goods are also under EU export bans to Russia, so this compares priority goods
-        with other technical goods, not banned goods with free goods. Bearings (8482) are most of Kazakhstan's pre-war
-        listed exports to Russia, so the results are given with and without them. Georgia, Azerbaijan and Mongolia
-        export too little of the listed goods to Russia for a comparison; for them, only the EU leg is shown.
-        Aircraft (88) are not in the control: one aircraft sale can be $100–500M. Three route countries are too few
-        to prove an EAEU effect; the table shows the difference, not its cause.</p>
+      <p class="finding">A tougher test: compare battlefield goods with their closest relatives, the rest of the
+        machines (84), electronics (85) and instruments (90) in the customs book. Where a coloured line climbs above
+        the grey one, battlefield goods were growing faster.</p>
+      <p class="aside">Two caveats. Many of the comparison goods are also banned for export to Russia, so this pits
+        priority goods against other technical goods, not banned goods against legal ones. And three countries are too
+        few to prove that the customs union is the cause. Bearings (8482) were the bulk of Kazakhstan's pre-war sales to
+        Russia, so every result appears with and without them. Georgia, Azerbaijan and Mongolia sell too little to
+        Russia to test and show only the EU side. Aircraft (chapter 88) are left out: one plane can be worth $100–500M.</p>
     </div>
     <div class="ch-figure">
       <p class="scope" id="scope-exc"></p>
@@ -219,17 +209,18 @@
 
   <section class="chapter chapter-wide wrap" id="unitvalue" aria-labelledby="uv-h">
     <div class="ch-text">
-      <h2 id="uv-h">Price per kilogram</h2>
+      <h2 id="uv-h">What a kilogram costs</h2>
       <p class="finding" id="uv-sub"></p>
-      <p class="finding">Each row is one code: its price per kg from the EU, from China, and to Russia, on one log scale.
-        A price to Russia near the EU price fits EU-made goods; near the China price, Chinese or other cheaper goods.</p>
-      <p class="aside">One customs code holds cheap and dear goods, so the price points to an origin but does not
-        prove it. Hollow dots: the reporter estimated the weight. Uzbekistan estimates or leaves out most weights,
-        so it has few or no rows. Codes under $100k a year to Russia are left out.</p>
+      <p class="finding">Price works like a fingerprint. For each customs code, compare what a kilogram costs from the EU,
+        from China and on its way to Russia. If the Russia price sits near the EU's, the goods look European; near
+        China's, they look Chinese or otherwise cheap.</p>
+      <p class="aside">A fingerprint, not proof: one code can cover cheap and expensive products. Hollow dots mark weights
+        the reporting country estimated. Uzbekistan estimates or skips most weights, so it has few rows or none. Codes
+        under $100k a year to Russia are not shown.</p>
       <div class="seg" role="radiogroup" aria-label="Year" id="uv-year"></div>
     </div>
     <div class="ch-figure">
-      <p class="scope">The largest listed codes to Russia · current US dollars per kg · the filters at the top do not change this</p>
+      <p class="scope">The largest listed codes to Russia · current US dollars per kg · filters do not apply</p>
       <p class="exc-key uv-key"><span class="k-eu">from the EU</span><span class="k-cn">from China</span><span class="k-ru">to Russia</span></p>
       <div id="uv-plot"></div>
       <h3 class="ctl-group">Price index: the value to Russia ÷ the same kilograms at the supplier's price</h3>
@@ -244,16 +235,15 @@
     <div class="ch-text">
       <h2 id="resp-h">What the governments said and did</h2>
       <p class="finding" id="resp-sub"></p>
-      <p class="finding">Each number is one dated statement or measure of the government, the central bank or the banks
-        of Kazakhstan, Kyrgyzstan or Uzbekistan, on the country's monthly exports of the listed goods to Russia. The
-        table gives the source of each, and how these exports changed in the 6 months after it against the 6 months
-        before (at least 3 months after).</p>
-      <p class="aside">Kinds: a promise (the country will not be a route around sanctions), an own measure, a step by the
-        banks, a statement that plays the sanctions down, and an objection to them. Sources are news reports of the
-        official statements; one measure is known only from a report of Ukrainian intelligence and is marked so. The record
-        is a selection from news reports, not a complete list, so "first" means first in this record. Numbers run country
-        by country, not by date. A
-        change after a statement does not show that the statement caused it.</p>
+      <p class="finding">Every numbered mark is something a government, central bank or bank in Kazakhstan, Kyrgyzstan
+        or Uzbekistan said or did about sanctions. It sits on the line of that country's monthly sales of battlefield
+        goods to Russia. The table gives the source and how sales moved in the six months that followed, compared with
+        the six before, where at least three months of data exist.</p>
+      <p class="aside">Marks fall into five kinds: promises not to become a route around sanctions, steps the country took
+        itself, steps by its banks, statements playing the sanctions down, and objections to them. The sources are news
+        reports of official statements; one measure rests only on Ukrainian intelligence and is marked as such. The
+        record is a sample, not a full list, so "first" means first in this record. Marks are numbered country by
+        country. A move in sales after a statement does not mean the statement caused it.</p>
     </div>
     <div class="ch-figure">
       <p class="scope">Kazakhstan, Kyrgyzstan and Uzbekistan · from January 2022 · listed exports to Russia in current US dollars, each row on its own scale</p>
@@ -265,21 +255,20 @@
 
   <section class="chapter chapter-wide wrap" id="designations" aria-labelledby="des-h">
     <div class="ch-text">
-      <h2 id="des-h">Sanctions designations next to the flows</h2>
+      <h2 id="des-h">Blacklists and trade</h2>
       <p class="finding" id="des-sub"></p>
-      <p class="finding">Bars: each country's listed exports to Russia, a month, on the row's own scale. Dots: one
-        organisation in the country, designated in that month, coloured by the list that designated it.</p>
-      <p class="aside">Source: OpenSanctions (CC BY-NC 4.0): US Treasury (OFAC), US trade list with the BIS Entity
-        List, EU financial sanctions, UK sanctions list. Organisations only, under Russia-related programmes (not, for
-        example, terrorism or Global Magnitsky listings), and only where at least half of the countries listed for
-        the organisation are Kazakhstan, Kyrgyzstan or Uzbekistan: a Russian bank with a branch in Kazakhstan is left
-        out. The list below gives any other country. The OFAC file has no designation date;
-        there the date is the day OpenSanctions first saw the entry (hollow dots), within a few days of known
-        designations. The EU list of companies under export controls (Annex IV) is not in the EU file, so EU
-        listings are fewer than in fact.</p>
+      <p class="finding">The bars are each country's monthly sales of battlefield goods to Russia. Each dot is a company
+        or bank there that the US, the UK or the EU blacklisted that month, coloured by who listed it.</p>
+      <p class="aside">Source: OpenSanctions (CC BY-NC 4.0), drawing on the US Treasury (OFAC), the US trade list with
+        the BIS Entity List, EU financial sanctions and the UK list. Only Russia-related listings count, so terrorism and
+        Global Magnitsky cases drop out. An organisation counts only if at least half the countries on its entry are
+        Kazakhstan, Kyrgyzstan or Uzbekistan, which keeps out, say, a Russian bank with a Kazakh branch. Any other
+        countries appear in the list below. OFAC's file has no listing date, so OFAC dots (hollow) use the day
+        OpenSanctions first saw the entry; where we can check, that falls within a few days. The EU file lacks Annex IV,
+        the EU's list of companies under export controls, so EU listings are undercounted.</p>
     </div>
     <div class="ch-figure">
-      <p class="scope">Organisations in Kazakhstan, Kyrgyzstan and Uzbekistan · from 24 February 2022 · the filters at the top do not change this</p>
+      <p class="scope">Organisations in Kazakhstan, Kyrgyzstan and Uzbekistan · from 24 February 2022 · filters do not apply</p>
       <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span></p>
       <div id="des-plot"></div>
       <details class="table-view"><summary>Show the list</summary><div id="des-table"></div></details>
@@ -288,21 +277,21 @@
 
   <section class="chapter chapter-wide wrap" id="deseffect" aria-labelledby="dx-h">
     <div class="ch-text">
-      <h2 id="dx-h">Do designations work?</h2>
+      <h2 id="dx-h">What blacklisting did to trade</h2>
       <p class="finding" id="dx-sub"></p>
       <p class="finding" id="dx-pay"></p>
-      <p class="finding">Each coloured dot is one month in which organisations of the country were designated (a wave). Its
-        place is the change in the country's listed exports to Russia in the 6 months after, against the 6 months before,
-        minus the same change for the other two countries. Grey ticks are all other months of the same country, measured
-        the same way: a wave far to the left of most ticks is an unusual fall.</p>
+      <p class="finding">When a country gets a batch of new listings in one month, call it a wave. Each coloured dot shows
+        what came next: the change in the country's sales to Russia over the following six months, compared with the six
+        before and net of its two neighbours. The grey ticks run the same test on every other month. A dot far to the
+        left of the ticks is a fall out of the ordinary.</p>
       <p class="aside" id="dx-note"></p>
-      <p class="aside">Payment channels are banks, payment and processing firms, brokers, crypto exchanges and crypto or
-        stablecoin issuers, by name; all other organisations are trading and other firms. Sber Vostok (Kazakhstan) counts
-        as a payment channel by its Sberbank-group name only. A wave with at least one payment channel counts as a
+      <p class="aside">Payment channels, judged by name, are banks, payment and processing firms, brokers, crypto
+        exchanges and crypto or stablecoin issuers. Everything else counts as trading and other firms. Sber Vostok
+        (Kazakhstan) is a payment channel on its Sberbank-group name alone. One payment channel makes a wave a
         payment-channel wave.</p>
     </div>
     <div class="ch-figure">
-      <p class="scope">From September 2022 · listed exports to Russia, recorded by the exporting country · the filters at the top do not change this</p>
+      <p class="scope">From September 2022 · listed exports to Russia, recorded by the exporting country · filters do not apply</p>
       <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span><span class="k-ring">payment channel in the wave</span><span class="k-grey">other months</span></p>
       <div id="dx-plot"></div>
       <div class="table-wrap"><table class="supertable" id="dx-table"></table></div>
@@ -313,16 +302,16 @@
     <div class="ch-text">
       <h2 id="ev-h">Sanctions events, 2023–2026</h2>
       <p class="finding" id="ev-sub"></p>
-      <p class="finding">For each event: the average month in the 6 months after it against the 6 months before it
-        (the event month is left out). Three questions: did the listed goods fall; did trade move to the
-        other codes of the same HS4 headings; did it move to other countries.</p>
-      <p class="aside">The comparison is the other two route countries for an event aimed at one country. For an event
-        that applied to all three, it is EU exports to Türkiye, the UAE, Georgia and Azerbaijan. Below $50k a month
-        before, the change is in dollars. Other things change in the same months, so a change after an event does not
-        prove that the event caused it. Kazakhstan 2024: its statistics bureau; Comtrade has only January and February.</p>
+      <p class="finding">Each sanctions event gets the same test: average monthly sales over the six months after it,
+        against the six before, skipping the month itself. Then three checks: did battlefield goods fall, did trade slip
+        into neighbouring codes under the same HS4 heading, and did it move to other countries.</p>
+      <p class="aside">An event aimed at one country is measured against the other two. One that hit all three is
+        measured against EU sales to Türkiye, the UAE, Georgia and Azerbaijan. Flows under $50k a month beforehand are
+        shown as dollar changes. Plenty else happens in the same months, so a fall after an event is not proof the event
+        caused it. Kazakhstan's 2024 figures come from its statistics bureau; Comtrade has only January and February.</p>
     </div>
     <div class="ch-figure">
-      <p class="scope">All 49 codes · current US dollars · the filters at the top do not change this table</p>
+      <p class="scope">All 49 codes · current US dollars · filters do not apply</p>
       <div class="table-wrap"><table class="supertable" id="ev-table"></table></div>
     </div>
   </section>
@@ -330,12 +319,10 @@
   <section class="chapter chapter-wide wrap" id="ban" aria-labelledby="ban-h">
     <div class="ch-text">
       <h2 id="ban-h">The April 2026 EU ban on Kyrgyzstan</h2>
-      <p class="finding">
-        On 23 April 2026 the EU banned exports to Kyrgyzstan of machining centres (8457.10) and data
-        transmission equipment (8517.62). Averages a month: April 2025 to March 2026 before the ban,
-        May 2026 onwards after it. Each small chart is one row's months, on its own scale. Values in
-        current US dollars; the filters at the top do not change this table.
-      </p>
+      <p class="finding">On 23 April 2026 the EU banned sales of machining centres (8457.10) and data transmission
+        equipment (8517.62) to Kyrgyzstan. The table compares monthly averages from April 2025 to March 2026 with those
+        since May 2026. Each sparkline is one row on its own scale. Figures are in current US dollars; the filters at the
+        top do not apply.</p>
       <p class="finding" id="ban-did"></p>
       <p class="finding" id="ban-nb"></p>
       <p class="finding" id="ban-uv"></p>
@@ -353,16 +340,16 @@
     <div class="ch-text">
       <h2 id="est-h">How much reached Russia through each country</h2>
       <p class="finding" id="est-sub"></p>
-      <p class="finding">Two measures, kept apart. Through the country: goods that physically passed through it. The low end
-        is the country's own record of exports to Russia. The high end adds the shipments that reached the country but
-        are missing from its import records, above its pre-war gap, on the EU leg and the China leg: if all of them
-        went on to Russia, this is the ceiling. Sold by the country's companies: Russia's own customs records by country
-        of seller, which include goods shipped from other countries.</p>
+      <p class="finding">There are two ways to answer, and they are kept apart. The first counts goods that physically
+        passed through each country. The low end is what the country reports exporting to Russia. The high end adds every
+        EU and Chinese shipment that arrived but vanished from the import books, beyond the usual pre-war gap: if all of
+        it went on to Russia, that is the ceiling. The second counts what the country's companies sold, using Russia's
+        own customs records by seller, which include goods shipped from elsewhere.</p>
       <p class="finding" id="est-sellers"></p>
       <p class="aside" id="est-note"></p>
     </div>
     <div class="ch-figure">
-      <p class="scope">The 49 codes · current US dollars · the filters at the top do not change this</p>
+      <p class="scope">All 49 codes · current US dollars · filters do not apply</p>
       <p class="exc-key est-key"><span class="k-rec">recorded</span><span class="k-gap">plus missing imports (ceiling)</span></p>
       <div id="est-plot"></div>
       <div class="table-wrap"><table class="supertable" id="est-table"></table></div>
@@ -378,10 +365,10 @@
       <p class="finding" id="xp-what"></p>
       <div class="xp-weapons" id="xp-weapons"></div>
       <p class="finding" id="xp-sub"></p>
-      <p class="aside">Every number on this panel is for one code, in current US dollars; the filters at the top do not
-        change it. China's and Hong Kong's exports are as they record them; recorded imports are as the route country
-        records them. A ratio of recorded imports to the supplier's exports far from its pre-war level means that
-        shipments are missing from the importer's records, or are recorded under another code or origin.</p>
+      <p class="aside">Everything here is for one code, in current US dollars, with the filters switched off. China's
+        and Hong Kong's exports are their own figures; recorded imports are the route country's. When recorded imports
+        drift far from their pre-war ratio to the supplier's exports, goods are either vanishing from the importer's
+        books or being filed under another code or origin.</p>
     </div>
     <div class="ch-figure">
       <p class="scope">One code · current US dollars · one log scale for the three countries · a year with no trade is a break in the line</p>
@@ -389,10 +376,10 @@
       <div class="grid4" id="xp-grid"></div>
       <h3 class="ctl-group" id="xp-mirror-h">Recorded imports against the supplier's exports</h3>
       <div class="table-wrap"><table class="supertable" id="xp-mirror"></table></div>
-      <p class="aside">For one code, the two sides often record the same goods under different codes (for example
-        chips under 8542.31, 8542.39 or 8471), so a ratio far from 100% can be a difference in coding, not missing goods;
-        the totals for all codes in Part 2 are more reliable. No ratio where the supplier shipped under $100k a year.
-        Kazakhstan's pre-war ratio uses 2019 only (no import detail for 2020–2022).</p>
+      <p class="aside">At single-code level the two sides often file the same goods differently: chips can land under
+        8542.31, 8542.39 or 8471. So a ratio far from 100% may be a coding mismatch rather than missing goods, and the
+        all-code totals in Part 2 are the safer guide. No ratio is shown where the supplier shipped under $100k a year.
+        Kazakhstan's pre-war ratio rests on 2019 alone.</p>
       <h3 class="ctl-group" id="xp-uv-h">Price per kg</h3>
       <div class="table-wrap"><table class="supertable" id="xp-uv"></table></div>
       <div id="xp-ban"></div>
@@ -405,8 +392,8 @@
 
   <section class="chapter chapter-wide wrap" id="checks" aria-labelledby="xc-h">
     <div class="ch-text">
-      <h2 id="xc-h">Our numbers match published trade data where they measure the same thing</h2>
-      <p class="finding">Our figures next to published ones. Ours always use all 49 codes in current US dollars; the filters at the top do not change this table.</p>
+      <h2 id="xc-h">Where we measure the same thing as others, our numbers agree</h2>
+      <p class="finding">We set our figures beside published ones. Ours always cover all 49 codes in current US dollars, whatever the filters say.</p>
     </div>
     <div class="ch-figure">
       <div class="table-wrap"><table class="xc" id="xc-table"></table></div>
@@ -425,6 +412,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.28"></script>
-<script src="app.js?v=1.55"></script>
+<script src="app.js?v=1.59"></script>
 </body>
 </html>
