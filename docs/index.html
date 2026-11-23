@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.21">
+  <link rel="stylesheet" href="style.css?v=1.22">
 </head>
 <body>
 <a class="skip" href="#legs">Skip to the charts</a>
@@ -290,15 +290,20 @@
     <div class="ch-text">
       <h2 id="dx-h">Do designations work?</h2>
       <p class="finding" id="dx-sub"></p>
+      <p class="finding" id="dx-pay"></p>
       <p class="finding">Each coloured dot is one month in which organisations of the country were designated (a wave). Its
         place is the change in the country's listed exports to Russia in the 6 months after, against the 6 months before,
         minus the same change for the other two countries. Grey ticks are all other months of the same country, measured
         the same way: a wave far to the left of most ticks is an unusual fall.</p>
       <p class="aside" id="dx-note"></p>
+      <p class="aside">Payment channels are banks, payment and processing firms, brokers, crypto exchanges and crypto or
+        stablecoin issuers, by name; all other organisations are trading and other firms. Sber Vostok (Kazakhstan) counts
+        as a payment channel by its Sberbank-group name only. A wave with at least one payment channel counts as a
+        payment-channel wave.</p>
     </div>
     <div class="ch-figure">
       <p class="scope">From September 2022 · listed exports to Russia, recorded by the exporting country · the filters at the top do not change this</p>
-      <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span><span class="k-grey">other months</span></p>
+      <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span><span class="k-ring">payment channel in the wave</span><span class="k-grey">other months</span></p>
       <div id="dx-plot"></div>
       <div class="table-wrap"><table class="supertable" id="dx-table"></table></div>
     </div>
@@ -419,7 +424,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
-<script src="data.js?v=1.27"></script>
-<script src="app.js?v=1.54"></script>
+<script src="data.js?v=1.28"></script>
+<script src="app.js?v=1.55"></script>
 </body>
 </html>

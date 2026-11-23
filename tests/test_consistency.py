@@ -131,6 +131,15 @@ class CuratedAndBureauData(unittest.TestCase):
             self.assertTrue(0 <= w["share_as_low"] <= 1)
             self.assertAlmostEqual(w["effect_pct"], 100 * (math.exp(w["effect"]) - 1), delta=1e-6)
 
+    def test_payment_channels_are_classified(self):
+        x = json.loads((P / "designation_effect.json").read_text())
+        names = " | ".join(x["payment_names"]).lower()
+        for must in ("keremet", "capital bank", "grinex", "tengricoin"):
+            self.assertIn(must, names)
+        self.assertNotIn("gazprom neft", names)
+        n = sum(1 for w in x["waves"] if w["payment"])
+        self.assertEqual(n, x["by_type"]["payment"]["all"]["n"])
+
     def test_responses_are_well_formed(self):
         r = pd.read_csv(ROOT / "data" / "responses.csv")
         self.assertTrue(r.country.isin(["KZ", "KG", "UZ"]).all())

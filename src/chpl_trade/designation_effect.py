@@ -13,6 +13,11 @@ effect as low as the wave's, or lower, says how unusual the wave is (a simple pe
 Windows of nearby waves overlap, so the waves are not independent; a month with less than $50k a
 month before is left out (too small for a ratio).
 
+Payment channels against trading firms: each organisation is a payment channel (bank, payment or
+processing firm, broker, crypto exchange, crypto or stablecoin issuer) or a trading and other firm
+(trader, logistics, energy, industry), by the name list below. A wave is a payment-channel wave if at
+least one of its organisations is a payment channel.
+
 Output: data/processed/designation_effect.json.
 """
 
@@ -27,6 +32,22 @@ ROUTE = ["KZ", "KG", "UZ"]
 NAMES = {"KZ": "Kazakhstan", "KG": "Kyrgyzstan", "UZ": "Uzbekistan"}
 WINDOW, MIN_AFTER, MIN_BASE = 6, 3, 50_000
 START = "2022-09"  # the 6 months before are all after the invasion (no pre-war boom in the window)
+
+
+# Payment channels, by name (lower case). Each line is one organisation or one group of entries.
+PAYMENT = [
+    "keremet bank", "rosinbank", "capital bank of central asia", "eurasian savings bank",  # banks (Kyrgyzstan)
+    "bank vtb kazakhstan",                                                                  # bank (Kazakhstan)
+    "sber vostok",                     # Kazakhstan; a payment channel by its Sberbank-group name only
+    "grinex", "old vector", "олд вектор",                                                   # crypto exchange, A7A5 network
+    "tengricoin", "тенгрикоин",        # crypto firm (Kyrgyzstan)
+    "virtual assets issuer", "tokenspot", "tsunami payments", "processing kg", "state brokerage company",
+]
+
+
+def is_payment(name):
+    n = str(name).lower()
+    return any(k in n for k in PAYMENT)
 
 
 def _shift(m, k):
@@ -72,6 +93,7 @@ def build():
     fl = _flows()
     d = pd.read_csv(config.PROCESSED / "designations.csv")
     d["group"] = d["list"].map(lambda s: "US" if s.startswith("US") else s)
+    d["payment"] = d["name"].map(is_payment)
     months = sorted({m for s in fl.values() for m in s})
     waves, base = [], {}
     for c in ROUTE:
@@ -87,7 +109,8 @@ def build():
             if m in wave_months:
                 w = dc[dc.month == m]
                 waves.append({"country": c, "month": m, "n": int(len(w)), "lists": sorted(set(w.group)),
-                              "names": sorted(set(w.name))[:6], **e})
+                              "names": sorted(set(w.name))[:6], "payment": bool(w.payment.any()),
+                              "n_payment": int(w.payment.sum()), **e})
             else:
                 base[c].append({"month": m, **e})
     # how unusual is each wave: the share of the country's other months with an effect as low or lower
@@ -110,6 +133,13 @@ def build():
         "base": {c: {"n": len(base[c]), "effects_pct": sorted(pct(x["effect"]) for x in base[c])} for c in ROUTE},
         "by_country": {c: {"waves": summary([w for w in waves if w["country"] == c]), "other_months": summary(base[c])} for c in ROUTE},
         "by_list": {g: summary([w for w in waves if g in w["lists"]]) for g in ("US", "UK", "EU")},
+        "by_type": {
+            "payment": {"all": summary([w for w in waves if w["payment"]]),
+                        **{c: summary([w for w in waves if w["payment"] and w["country"] == c]) for c in ROUTE}},
+            "trade": {"all": summary([w for w in waves if not w["payment"]]),
+                      **{c: summary([w for w in waves if not w["payment"] and w["country"] == c]) for c in ROUTE}},
+        },
+        "payment_names": sorted(set(d[d.payment].name)),
         "all": {"waves": summary(waves), "other_months": summary([x for c in ROUTE for x in base[c]])},
         "names": NAMES,
     }
@@ -122,6 +152,8 @@ if __name__ == "__main__":
     for c in ROUTE:
         print(c, o["by_country"][c])
     print("by list", o["by_list"])
+    print("by type", json.dumps(o["by_type"], indent=1))
+    print("payment names", o["payment_names"])
     print("all", o["all"])
     for w in o["waves"]:
         print(f"  {w['country']} {w['month']} n={w['n']} {w['lists']} effect {w['effect_pct']:+.0f}% (own {w['own_pct']:+.0f}%, others {w['others_pct']:+.0f}%) share as low {w['share_as_low']:.2f}")

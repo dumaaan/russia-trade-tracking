@@ -2028,6 +2028,14 @@
         `Kyrgyzstan ${sg(kgW)} (other months ${sg(kgO)}). ` +
         (strong.length ? `Waves lower than at least 90% of the country's other months: ` +
           strong.map((w) => `${N[w.country]}, ${fmtM(w.month)} (${w.lists.join(" and ")}, ${sg(w.effect_pct)})`).join("; ") + "." : "");
+      // Payment channels against trading firms, Kyrgyzstan (where nearly all payment-channel waves are).
+      const T = X.by_type, kgP = T && T.payment.KG, kgT = T && T.trade.KG;
+      const pw = X.waves.filter((w) => w.country === "KG" && w.payment).sort((a, b) => (a.month < b.month ? -1 : 1));
+      document.getElementById("dx-pay").textContent = kgP && kgT
+        ? `Payment channels against trading firms, Kyrgyzstan: after waves that designated a bank, payment firm or crypto firm, the median change was ${sg(kgP.median_effect_pct)} (${kgP.n} waves); after waves of trading and other firms only, ${sg(kgT.median_effect_pct)} (${kgT.n}). ` +
+          `By wave: ` + pw.map((w) => `${fmtM(w.month)} ${sg(w.effect_pct)}`).join(", ") + `. ` +
+          `Single bank designations were not followed by falls; the two falls followed the August and October 2025 actions against the whole A7A5 network (a bank, a crypto exchange, the stablecoin firm and its issuer, under several lists). Their windows overlap, so they are one episode, not two tests.`
+        : "";
       document.getElementById("dx-note").textContent =
         `Waves close in time share months, so they are not independent tests, and other events fall in the same windows (for example the EU ban in April 2026). ` +
         `Uzbekistan's exports to Russia fell in most months, so its waves cannot be told apart from the trend. A month with under $${X.min_base / 1000}k a month before is left out. ` +
@@ -2061,8 +2069,10 @@
       const ws = X.waves.filter((w) => w.country === c);
       ws.forEach((w, j) => {
         const g = w.lists.includes("EU") ? "EU" : w.lists.includes("UK") ? "UK" : "US", col = css(COL[g]);
-        const dot = el("circle", { cx: x(w.effect_pct), cy: cy + ((j % 3) - 1) * 6, r: 5, fill: col, stroke: css("--paper"), "stroke-width": 1, tabindex: 0, class: "dx-dot" }, svg);
-        const tip = (px, py) => showTip(px, py, `${N[c]}, ${fmtM(w.month)}: ${w.n} organisation${w.n > 1 ? "s" : ""} (${w.lists.join(", ")})`, [
+        const cyw = cy + ((j % 3) - 1) * 6;
+        if (w.payment) el("circle", { cx: x(w.effect_pct), cy: cyw, r: 8.5, fill: "none", stroke: css("--ink"), "stroke-width": 1.4 }, svg);
+        const dot = el("circle", { cx: x(w.effect_pct), cy: cyw, r: 5, fill: col, stroke: css("--paper"), "stroke-width": 1, tabindex: 0, class: "dx-dot" }, svg);
+        const tip = (px, py) => showTip(px, py, `${N[c]}, ${fmtM(w.month)}: ${w.n} organisation${w.n > 1 ? "s" : ""} (${w.lists.join(", ")})${w.payment ? `, ${w.n_payment} payment channel${w.n_payment > 1 ? "s" : ""}` : ""}`, [
           { color: col, value: sg(w.effect_pct), label: `against the other two countries (own ${sg(w.own_pct)}, others ${sg(w.others_pct)})` },
           { color: css("--ink-3"), value: `${Math.round(100 * w.share_as_low)}%`, label: "of other months as low or lower" },
         ], w.names.join("; "));
@@ -2081,6 +2091,11 @@
       h("thead", {}, h("tr", {}, ["", "Waves", "Median after a wave", "Median, other months", "Waves with a fall"].map((t) => h("th", { text: t })))),
       h("tbody", {}, [
         ...order.map((c) => row(N[c], X.by_country[c].waves, X.by_country[c].other_months)),
+        h("tr", { class: "group" }, h("th", { colspan: 5, scope: "rowgroup", text: "By type of organisation" })),
+        row("Payment channels, Kyrgyzstan", X.by_type.payment.KG, X.by_country.KG.other_months),
+        row("Trading and other firms, Kyrgyzstan", X.by_type.trade.KG, X.by_country.KG.other_months),
+        row("Payment channels, all three", X.by_type.payment.all, X.all.other_months),
+        row("Trading and other firms, all three", X.by_type.trade.all, X.all.other_months),
         h("tr", { class: "group" }, h("th", { colspan: 5, scope: "rowgroup", text: "By the list that designated (all three countries)" })),
         ...["US", "UK", "EU"].map((g) => row(g, X.by_list[g], X.all.other_months)),
       ]),

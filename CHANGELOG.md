@@ -2,6 +2,17 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.18.0 — 2026-11-23
+
+### Added
+- **Payment channels against trading firms:** the designation-wave study now splits the
+  organisations into payment channels (banks, payment and processing firms, brokers, crypto
+  exchanges and issuers, by name) and trading and other firms. In Kyrgyzstan, waves with a payment
+  channel: median +52% (5 waves); trading firms only: +21% (9). Single bank designations (Keremet
+  Bank, Rosinbank) were not followed by falls; the two falls (−65% each) followed the August and
+  October 2025 actions against the whole A7A5 network under several lists, which overlap and count
+  as one episode. Payment-channel waves are ringed in the chart; a test checks the classification.
+
 ## 1.17.0 — 2026-11-23
 
 ### Added

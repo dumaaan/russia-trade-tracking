@@ -516,3 +516,4 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
 .dx-svg .dx-zero { stroke: var(--ink-2); stroke-width: 1; }
 .dx-svg .dx-dot:focus-visible { outline: none; stroke: var(--ink); stroke-width: 2.5; }
 .des-key .k-grey::before { border-top: 0; width: 2px; height: 12px; background: var(--ink-3); border-radius: 0; }
+.des-key .k-ring::before { border-top: 0; width: 11px; height: 11px; border-radius: 50%; border: 1.4px solid var(--ink); background: none; }
