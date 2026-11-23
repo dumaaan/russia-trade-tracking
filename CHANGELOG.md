@@ -2,6 +2,23 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.17.0 — 2026-11-23
+
+### Added
+- **Do designations work? (Part 4):** 31 months with designations of the country's organisations
+  (waves), from September 2022, each compared with all other months of the same country: the change
+  in listed exports to Russia in the 6 months after against the 6 months before, minus the other two
+  countries' change. Kazakhstan: median −29% after a wave against +23% in other months; Kyrgyzstan:
+  +29% against +12%, but −65% after August and October 2025.
+- **English names** for the 100 ten-digit lines in the code explorer (our translation of the
+  bureau's Russian text, which shows on hover); data/hs10_en.csv.
+- **Tests:** two more (17 in all).
+
+### Fixed
+- **Weapons link:** page numbers are now the report's printed pages (they were one too low).
+- **Government responses:** statements are given as "Says…", not as facts; the headline says
+  "in this record"; the text says the record is a selection and how the numbers run.
+
 ## 1.16.0 — 2026-11-22
 
 ### Added

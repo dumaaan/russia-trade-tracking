@@ -179,9 +179,16 @@ def hs10_data():
     d["year"] = d["month"].str[:4].astype(int)
     last = d["month"].max()
     g = d.groupby(["partner", "year", "hs6", "hs10", "name", "unit"], dropna=False, as_index=False)[["usd", "tonnes", "units"]].sum(min_count=1)
-    return {"last": last,
+    en_path = config.DATA / "hs10_en.csv"  # our English names for the lines (curated)
+    en = dict(pd.read_csv(en_path, dtype={"hs10": str}).values) if en_path.exists() else {}
+    return {"last": last, "en": {k: en[k] for k in d["hs10"].unique() if k in en},
             "rows": [[r.partner, int(r.year), r.hs6, r.hs10, r.name, r.unit if isinstance(r.unit, str) else "",
                       _num(r.usd), _num(r.tonnes), _num(r.units)] for r in g.itertuples()]}
+
+
+def designation_effect_data():
+    path = config.PROCESSED / "designation_effect.json"
+    return json.loads(path.read_text()) if path.exists() else None
 
 
 def events_data():
@@ -247,6 +254,7 @@ def export():
         "responses": responses_data(),
         "weapons": weapons_data(),
         "hs10": hs10_data(),
+        "designationEffect": designation_effect_data(),
     }
     DOCS.mkdir(exist_ok=True)
     out = DOCS / "data.js"

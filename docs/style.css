@@ -508,3 +508,11 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
 /* ---------- 10-digit lines ---------- */
 #xp-hs10 td.xp-ru { min-width: 260px; font-size: 13px; }
 #xp-hs10 thead th { white-space: normal; }
+
+/* ---------- do designations work? ---------- */
+.dx-svg { display: block; overflow: visible; }
+.dx-svg .dx-tick { stroke: var(--ink-3); stroke-opacity: 0.45; stroke-width: 1; }
+.dx-svg .dx-med { stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: 2 2; }
+.dx-svg .dx-zero { stroke: var(--ink-2); stroke-width: 1; }
+.dx-svg .dx-dot:focus-visible { outline: none; stroke: var(--ink); stroke-width: 2.5; }
+.des-key .k-grey::before { border-top: 0; width: 2px; height: 12px; background: var(--ink-3); border-radius: 0; }

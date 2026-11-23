@@ -1759,7 +1759,7 @@
         W.length
           ? h("ul", { class: "xp-wlist" }, W.map((r) => h("li", {}, [h("b", { text: r[1] }), `: ${r[2]} (${String(r[3]).includes(";") ? `pp. ${String(r[3]).replace(/;\s*/g, ", ")}` : `p. ${r[3]}`})` + (r[4] ? `; ${r[4]}` : "") + "."])))
           : h("p", { class: "aside", text: "The IISS/CAR report names no part of this code. The EU lists every code as found in, or critical to, Russian weapon systems used in Ukraine." }),
-        h("p", { class: "aside" }, ["Source: ", src, ". The report names part types, not customs codes; the link from a part to a code is ours, and some parts fit more than one code. In CAR's sample, more than 25% of Shahed-136 parts and about 40% of Kh-69 parts are in tier 1, and under 10% of all parts are outside the list (p. 10)."]),
+        h("p", { class: "aside" }, ["Source: ", src, ". The report names part types, not customs codes; the link from a part to a code is ours, and some parts fit more than one code. In CAR's sample, more than 25% of Shahed-136 parts and about 40% of Kh-69 parts are in tier 1, and under 10% of all parts are outside the list (p. 11; page numbers as printed in the report)."]),
       );
     }
     // the finding: largest route to Russia, and the supply into it
@@ -1863,15 +1863,15 @@
           const cells = years.map((y) => { const r = rows10.find((q) => q[3] === l && q[1] === y); return h("td", { text: r ? k(r[6]) : "—" }); });
           const r = rows10.find((q) => q[3] === l && q[1] === lastY);
           const perKg = r && r[7] ? r[6] / (r[7] * 1000) : null;
-          return h("tr", {}, [h("td", { class: "code", text: `${l.slice(0, 4)}.${l.slice(4, 6)}.${l.slice(6)}` }), h("td", { class: "lbl xp-ru", text: any[4] }),
+          return h("tr", {}, [h("td", { class: "code", text: `${l.slice(0, 4)}.${l.slice(4, 6)}.${l.slice(6)}` }), h("td", { class: "lbl xp-ru", text: (T.en && T.en[l]) || any[4], title: `The bureau's text: ${any[4]}` }),
             ...cells, h("td", { class: "chg", text: perKg == null ? "—" : `$${perKg >= 100 ? Math.round(perKg).toLocaleString("en-US") : perKg.toFixed(1)}` })]);
         });
         box.replaceChildren(
           h("h3", { class: "ctl-group", text: "Inside this code: Kazakhstan's exports to Russia by 10-digit line" }),
           h("div", { class: "table-wrap" }, h("table", { class: "supertable" }, [
-            h("thead", {}, h("tr", {}, ["Line", "Goods (the bureau's text, in Russian)", ...years.map((y) => (y === lastY ? lastLab : String(y))), `Per kg, ${lastY}`].map((t) => h("th", { text: t })))),
+            h("thead", {}, h("tr", {}, ["Line", "Goods", ...years.map((y) => (y === lastY ? lastLab : String(y))), `Per kg, ${lastY}`].map((t) => h("th", { text: t })))),
             h("tbody", {}, body)])),
-          h("p", { class: "aside", text: `Source: Kazakhstan's Bureau of National Statistics, trade with EAEU countries by 10-digit code (company reports, form 1-TS). ${lines.length > 10 ? `The 10 largest of ${lines.length} lines. ` : ""}No 10-digit data are published here for Kyrgyzstan or Uzbekistan.` }),
+          h("p", { class: "aside", text: `Source: Kazakhstan's Bureau of National Statistics, trade with EAEU countries by 10-digit code (company reports, form 1-TS). The English names are our short translation of the bureau's Russian text (hover a name to see it). ${lines.length > 10 ? `The 10 largest of ${lines.length} lines. ` : ""}No 10-digit data are published here for Kyrgyzstan or Uzbekistan.` }),
         );
       }
     }
@@ -1919,13 +1919,13 @@
       const kgO = items.filter((x) => x.c === "KG" && (x.kind === "objection" || x.kind === "plays down"));
       const yr = (d) => d.slice(0, 4);
       document.getElementById("resp-h").textContent = kz.length && kgM.length
-        ? `Kazakhstan promised from ${yr(kz[0].date)} not to be a route around sanctions; Kyrgyzstan's first own measure came in ${yr(kgM[0].date)}`
+        ? `Kazakhstan promised from ${yr(kz[0].date)} not to be a route around sanctions; in this record, Kyrgyzstan's first own restrictive measure came in ${yr(kgM[0].date)}`
         : "What the governments said and did";
       const firstKzMeasure = items.find((x) => x.c === "KZ" && x.kind === "measure");
       document.getElementById("resp-sub").textContent = [
         kz.length ? `Kazakhstan: ${kz.length} public promises, ${fmtD(kz[0].date)} to ${fmtD(kz[kz.length - 1].date)}.` : "",
         firstKzMeasure && firstKzMeasure.chg.v != null ? `After its goods-tracking system was announced (${fmtD(firstKzMeasure.date)}), its listed exports to Russia changed ${firstKzMeasure.chg.text} in 6 months.` : "",
-        kgO.length ? `Kyrgyzstan: ${kgO.length} statements that play down or reject the sanctions on its banks before its first own measure (${fmtD(kgM[0].date)}).` : "",
+        kgO.length ? `Kyrgyzstan: ${kgO.length} statements that play down or reject the sanctions on its banks before its first own restrictive measure in this record (${fmtD(kgM[0].date)}).` : "",
       ].filter(Boolean).join(" ");
     }
     // timeline: one row a country, bars = monthly exports to Russia, numbered markers above
@@ -2002,6 +2002,89 @@
       }
     }
     document.getElementById("resp-table").replaceChildren(head, h("tbody", {}, body));
+  }
+
+
+  // ---------- do designations work? waves against all other months ----------
+  function designationEffect() {
+    const X = D.designationEffect, N = X.names;
+    const order = ["KZ", "KG", "UZ"];
+    const COL = { US: "--c-kg", UK: "--c-kz", EU: "--flow-eu" };
+    const sg = (v) => (v == null ? "—" : `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}%`);
+    const fmtM = (m) => monthName(m);
+    // headline and text from the data
+    {
+      const bc = X.by_country;
+      const word = (w, o) => (w == null || o == null ? null : w < o - 10 ? "fell more" : w > o + 10 ? "did not fall more" : "changed as in other months");
+      const kz = bc.KZ, kg = bc.KG;
+      const kzW = kz.waves && kz.waves.median_effect_pct, kzO = kz.other_months && kz.other_months.median_effect_pct;
+      const kgW = kg.waves && kg.waves.median_effect_pct, kgO = kg.other_months && kg.other_months.median_effect_pct;
+      const strong = X.waves.filter((w) => w.share_as_low != null && w.share_as_low <= 0.1).sort((a, b) => a.effect_pct - b.effect_pct);
+      document.getElementById("dx-h").textContent = kzW != null && kgW != null
+        ? `After designation waves, Kazakhstan's exports to Russia ${word(kzW, kzO)} than its neighbours'; Kyrgyzstan's mostly ${word(kgW, kgO) === "fell more" ? "fell more too" : "did not"}`
+        : "Do designations work?";
+      document.getElementById("dx-sub").textContent =
+        `Median change against the other two countries, 6 months after a wave: Kazakhstan ${sg(kzW)} (other months ${sg(kzO)}), ` +
+        `Kyrgyzstan ${sg(kgW)} (other months ${sg(kgO)}). ` +
+        (strong.length ? `Waves lower than at least 90% of the country's other months: ` +
+          strong.map((w) => `${N[w.country]}, ${fmtM(w.month)} (${w.lists.join(" and ")}, ${sg(w.effect_pct)})`).join("; ") + "." : "");
+      document.getElementById("dx-note").textContent =
+        `Waves close in time share months, so they are not independent tests, and other events fall in the same windows (for example the EU ban in April 2026). ` +
+        `Uzbekistan's exports to Russia fell in most months, so its waves cannot be told apart from the trend. A month with under $${X.min_base / 1000}k a month before is left out. ` +
+        `Exports to Russia are the exporting country's records, which are a lower limit; designations come from Part 4's list.`;
+    }
+    // the plot: one row a country, on a log scale of (1 + change)
+    const box = document.getElementById("dx-plot");
+    const W = box.clientWidth || 700, small = W < 560;
+    const L = small ? 70 : 110, R = 10, rowH = 46, top = 22;
+    const all = order.flatMap((c) => [...X.base[c].effects_pct, ...X.waves.filter((w) => w.country === c).map((w) => w.effect_pct)]);
+    const lv = (p) => Math.log10(1 + p / 100);
+    const lo = Math.min(-1, Math.floor(Math.min(...all.map(lv)) * 2) / 2), hi = Math.max(0.5, Math.ceil(Math.max(...all.map(lv)) * 2) / 2);
+    const x = (p) => L + ((lv(p) - lo) / (hi - lo)) * (W - L - R);
+    const H = top + order.length * rowH + 8;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "dx-svg", role: "img", "aria-label": "Change in exports to Russia after designation waves and in all other months, by country" });
+    // Labels in order of importance (0% first); a label closer than 56 px to one already placed is left out.
+    const placed = [];
+    for (const t of [0, -50, 100, -90, 300]) {
+      if (lv(t) < lo || lv(t) > hi) continue;
+      el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 4, class: t === 0 ? "dx-zero" : "uv-grid" }, svg);
+      if (placed.some((p) => Math.abs(p - x(t)) < 56)) continue;
+      const tx = el("text", { x: x(t), y: 12, "text-anchor": "middle", class: "uv-tick" }, svg); tx.textContent = t === 0 ? "0%" : sg(t);
+      placed.push(x(t));
+    }
+    order.forEach((c, k) => {
+      const cy = top + k * rowH + rowH / 2;
+      const lab = el("text", { x: 0, y: cy + 4, class: "uv-lbl" }, svg); lab.textContent = N[c];
+      for (const p of X.base[c].effects_pct) el("line", { x1: x(p), x2: x(p), y1: cy - 9, y2: cy + 9, class: "dx-tick" }, svg);
+      const med = X.by_country[c].other_months && X.by_country[c].other_months.median_effect_pct;
+      if (med != null) el("line", { x1: x(med), x2: x(med), y1: cy - 15, y2: cy + 15, class: "dx-med" }, svg);
+      const ws = X.waves.filter((w) => w.country === c);
+      ws.forEach((w, j) => {
+        const g = w.lists.includes("EU") ? "EU" : w.lists.includes("UK") ? "UK" : "US", col = css(COL[g]);
+        const dot = el("circle", { cx: x(w.effect_pct), cy: cy + ((j % 3) - 1) * 6, r: 5, fill: col, stroke: css("--paper"), "stroke-width": 1, tabindex: 0, class: "dx-dot" }, svg);
+        const tip = (px, py) => showTip(px, py, `${N[c]}, ${fmtM(w.month)}: ${w.n} organisation${w.n > 1 ? "s" : ""} (${w.lists.join(", ")})`, [
+          { color: col, value: sg(w.effect_pct), label: `against the other two countries (own ${sg(w.own_pct)}, others ${sg(w.others_pct)})` },
+          { color: css("--ink-3"), value: `${Math.round(100 * w.share_as_low)}%`, label: "of other months as low or lower" },
+        ], w.names.join("; "));
+        dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+        dot.addEventListener("pointerleave", hideTip);
+        dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
+        dot.addEventListener("blur", hideTip);
+      });
+    });
+    box.replaceChildren(svg);
+    // the table
+    const row = (label, w, o) => h("tr", {}, [h("th", { scope: "row", text: label }), h("td", { text: w ? String(w.n) : "0" }),
+      h("td", { class: "chg", text: w ? sg(w.median_effect_pct) : "—" }), h("td", { text: o ? sg(o.median_effect_pct) : "—" }),
+      h("td", { text: w ? `${Math.round(100 * w.share_negative)}%` : "—" })]);
+    document.getElementById("dx-table").replaceChildren(
+      h("thead", {}, h("tr", {}, ["", "Waves", "Median after a wave", "Median, other months", "Waves with a fall"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, [
+        ...order.map((c) => row(N[c], X.by_country[c].waves, X.by_country[c].other_months)),
+        h("tr", { class: "group" }, h("th", { colspan: 5, scope: "rowgroup", text: "By the list that designated (all three countries)" })),
+        ...["US", "UK", "EU"].map((g) => row(g, X.by_list[g], X.all.other_months)),
+      ]),
+    );
   }
 
   // ---------- sanctions events: three questions ----------
@@ -2415,6 +2498,7 @@
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
     if (D.responses) responsesStudy();
+    if (D.designationEffect) designationEffect();
     if (D.estimate) estimateStudy();
     codeExplorer();
     if (D.eventStudy) eventStudy();
@@ -2427,7 +2511,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.designationEffect) designationEffect(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

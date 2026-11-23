@@ -1,13 +1,13 @@
 hs6,part,weapons,page,note
-854231,"microprocessors, FPGAs","Russian missiles and drones (CAR sample, February 2022 to April 2025)",6,"FPGAs can also be coded 8542.39"
-854239,"voltage regulators, FPGAs and other integrated circuits","Russian missiles and drones (CAR sample)",6,"the code depends on the chip type"
-854233,amplifiers,"Russian missiles and drones (CAR sample)",6,
-852691,satellite-navigation (GNSS) modules and receivers,"Russian missiles and drones; SN-99 receivers in Kh-59 and Kh-101 cruise missiles",6; 12,
-852910,antennas,"Russian missiles and drones",4; 6,"small antennas: 'long viewed as low-risk' by export-control regimes"
-850440,DC-to-DC converter,"Shahed-136 drone (air-data unit, made January 2023)",8,
-854129,MOSFET transistors,"Kh-69 cruise missile (on-board computer and thermal-vision camera; 39 MOSFETs, 77% made in Russia)",7,"small transistors are 8541.21"
-854121,MOSFET transistors,"Kh-69 cruise missile (on-board computer and thermal-vision camera)",7,"larger transistors are 8541.29"
-854160,quartz oscillators (Morion),"9M723 Iskander-M and Kinzhal ballistic missiles; Kh-101 cruise missile",12,
-852589,thermal-vision camera,"Kh-69 cruise missile",7,
-901420,inertial measurement units,"Russian missiles and drones",4; 6,"can also be coded 9014.80"
-901480,inertial measurement units,"Russian missiles and drones",4; 6,"can also be coded 9014.20"
+854231,"microprocessors, FPGAs","Russian missiles and drones (CAR sample, February 2022 to April 2025)",7,FPGAs can also be coded 8542.39
+854239,"voltage regulators, FPGAs and other integrated circuits",Russian missiles and drones (CAR sample),7,the code depends on the chip type
+854233,amplifiers,Russian missiles and drones (CAR sample),7,
+852691,satellite-navigation (GNSS) modules and receivers,Russian missiles and drones; SN-99 receivers in Kh-59 and Kh-101 cruise missiles,7; 13,
+852910,antennas,Russian missiles and drones,5; 7,small antennas: 'long viewed as low-risk' by export-control regimes
+850440,DC-to-DC converter,"Shahed-136 drone (air-data unit, made January 2023)",9,
+854129,MOSFET transistors,"Kh-69 cruise missile (on-board computer and thermal-vision camera; 39 MOSFETs, 77% made in Russia)",8,small transistors are 8541.21
+854121,MOSFET transistors,Kh-69 cruise missile (on-board computer and thermal-vision camera),8,larger transistors are 8541.29
+854160,quartz oscillators (Morion),9M723 Iskander-M and Kinzhal ballistic missiles; Kh-101 cruise missile,13,
+852589,thermal-vision camera,Kh-69 cruise missile,8,
+901420,inertial measurement units,Russian missiles and drones,5; 7,can also be coded 9014.80
+901480,inertial measurement units,Russian missiles and drones,5; 7,can also be coded 9014.20

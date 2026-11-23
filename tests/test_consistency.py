@@ -118,6 +118,19 @@ class CuratedAndBureauData(unittest.TestCase):
         b = comp[(comp.country == "Kazakhstan") & (comp.year == 2025)].exports_to_ru_usd.iloc[0]
         self.assertLess(abs(a - b) / b, 0.02, f"{a} against {b}")
 
+    def test_every_hs10_line_has_an_english_name(self):
+        t10 = pd.read_csv(P / "bns_kz_hs10.csv", dtype={"hs10": str})
+        en = pd.read_csv(ROOT / "data" / "hs10_en.csv", dtype={"hs10": str})
+        self.assertFalse(set(t10.hs10) - set(en.hs10), "lines without an English name")
+
+    def test_designation_effect_is_sound(self):
+        x = json.loads((P / "designation_effect.json").read_text())
+        self.assertGreater(len(x["waves"]), 10)
+        for w in x["waves"]:
+            self.assertGreaterEqual(w["month"], x["start"])
+            self.assertTrue(0 <= w["share_as_low"] <= 1)
+            self.assertAlmostEqual(w["effect_pct"], 100 * (math.exp(w["effect"]) - 1), delta=1e-6)
+
     def test_responses_are_well_formed(self):
         r = pd.read_csv(ROOT / "data" / "responses.csv")
         self.assertTrue(r.country.isin(["KZ", "KG", "UZ"]).all())
@@ -135,7 +148,7 @@ class SiteDataIsWhole(unittest.TestCase):
     def test_sections_present(self):
         d = site_data()
         for key in ("codes", "suppliers", "control", "ban", "excess", "eventStudy", "mirrorCn", "unitValues",
-                    "designations", "estimate", "cnImports", "responses", "weapons", "hs10"):
+                    "designations", "estimate", "cnImports", "responses", "weapons", "hs10", "designationEffect"):
             self.assertIn(key, d)
             self.assertTrue(d[key], key)
 
