@@ -432,10 +432,11 @@ table.xc a { color: var(--ink-2); }
 .uv-key .k-ru::before { border-top: 0; width: 11px; height: 11px; border-radius: 50%; background: var(--flow-ru); }
 .uv-block { margin-bottom: 10px; }
 .uv-svg { display: block; overflow: visible; }
-.uv-svg .uv-grid { stroke: var(--rule); stroke-width: 0.75; }
-.uv-svg .uv-tick { font-size: 11px; fill: var(--ink-3); }
-.uv-svg .uv-lbl { font-size: 12.5px; fill: var(--ink-2); }
-.uv-svg .uv-val { font-size: 12.5px; font-weight: 600; fill: var(--ink); font-stretch: 87.5%; }
+/* shared by the price, estimate and designation-effect plots */
+:is(.uv-svg, .est-svg, .dx-svg) .uv-grid { stroke: var(--rule); stroke-width: 0.75; }
+:is(.uv-svg, .est-svg, .dx-svg) .uv-tick { font-size: 11px; fill: var(--ink-3); }
+:is(.uv-svg, .est-svg, .dx-svg) .uv-lbl { font-size: 12.5px; fill: var(--ink-2); }
+:is(.uv-svg, .est-svg, .dx-svg) .uv-val { font-size: 12.5px; font-weight: 600; fill: var(--ink); font-stretch: 87.5%; }
 .uv-svg .uv-span { stroke: var(--ink-3); stroke-width: 1; stroke-opacity: 0.6; }
 .uv-svg .uv-dot:focus-visible { outline: none; stroke-width: 3; }
 #uv-table td.lbl { text-align: left; white-space: normal; font-stretch: 100%; font-weight: 500; }
@@ -517,3 +518,4 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
 .dx-svg .dx-dot:focus-visible { outline: none; stroke: var(--ink); stroke-width: 2.5; }
 .des-key .k-grey::before { border-top: 0; width: 2px; height: 12px; background: var(--ink-3); border-radius: 0; }
 .des-key .k-ring::before { border-top: 0; width: 11px; height: 11px; border-radius: 50%; border: 1.4px solid var(--ink); background: none; }
+.des-scale { margin: -4px 0 2px; font-size: 12px; color: var(--ink-3); }

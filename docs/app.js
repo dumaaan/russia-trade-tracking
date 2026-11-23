@@ -202,8 +202,10 @@
         if (v >= min * 0.999 && v <= max * 1.001) out.push(v);
       }
     }
-    return out.length > 8 ? out.filter((v) => /^1/.test(String(v))) : out;
+    return out.length > 8 ? out.filter(isPow10) : out;
   }
+  // 0.01, 0.1, 1, 10, 100 ... (a string test such as /^1/ misses 0.1 and below)
+  function isPow10(v) { const l = Math.log10(v); return Math.abs(l - Math.round(l)) < 1e-9; }
 
   function showTip(x, y, title, rows, note) {
     tip.replaceChildren(h("div", { class: "t", text: title }));
@@ -902,7 +904,7 @@
     const l0 = Math.log10(lo), l1 = Math.log10(hi);
     const sx = (v) => m.left + ((Math.log10(v) - l0) / (l1 - l0)) * iw;
     const sy = (v) => m.top + ih - ((Math.log10(v) - l0) / (l1 - l0)) * ih;
-    const ticks = logTicks(lo, hi).filter((t) => /^1/.test(String(t)) || logTicks(lo, hi).length <= 5);
+    const ticks = logTicks(lo, hi).filter((t) => isPow10(t) || logTicks(lo, hi).length <= 5);
     const tf = (t) => `${cur()}${t >= 1 ? t.toLocaleString("en-US") : t}M`;
     for (const t of ticks) {
       el("line", { x1: m.left, x2: m.left + iw, y1: sy(t), y2: sy(t), stroke: css("--grid") }, svg);
@@ -1152,7 +1154,7 @@
     // gap between the two lines is the China/EU ratio, readable for small and large countries alike.
     const pos = rows.flatMap((r) => [...r.eu, ...r.cn, ...r.hk]).filter((v) => v != null && v > 0);
     const dom = [Math.min(...pos) * 0.8, Math.max(...pos) * 1.25];
-    const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : String(t));
+    const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : t >= 1 ? `${t}M` : `${Math.round(t * 1000)}k`);
     grid.replaceChildren(...rows.map((r) => h("figure", { class: "sup-cell" }, [
       h("figcaption", { text: r.name }),
       h("div", { class: "chart sm" }),
@@ -1164,7 +1166,7 @@
         { label: `Hong Kong's exports to ${r.name}`, endName: "from Hong Kong", color: "--text-primary", values: r.hk, dash: "4 3", tint: 0.55 },
       ],
       fmt: fmtMoney, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf,
-      tickFilter: (t) => /^(0\.0*)?10*$/.test(String(t)), // powers of ten only (10, 100, $1bn): fewer labels than data points
+      tickFilter: isPow10, // powers of ten only ($1M, 10M, 100M, 1bn): fewer labels than data points
       topTickFmt: (t) => `${cur()}${t >= 1000 ? `${t / 1000}bn` : `${t}M`}`,
       aria: `${r.name}: exports of the listed goods from the EU, from China and from Hong Kong, ${state.currency} million`,
     }));
@@ -1858,7 +1860,7 @@
     const pos = order.flatMap((iso) => ["eu", "cn", "hk", "ru"].flatMap((k) => data[iso][k])).filter((v) => v != null && v > 0);
     const dom = pos.length ? [Math.min(...pos) * 0.8, Math.max(...pos) * 1.25] : [0.01, 1];
     grid.replaceChildren(...order.map((iso) => h("figure", { class: "sup-cell" }, [h("figcaption", { text: NAME[iso] }), h("div", { class: "chart sm" })])));
-    const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : t >= 1 ? `${t}M` : `${t * 1000}k`);
+    const tkf = (t) => (t >= 1000 ? `${t / 1000}bn` : t >= 1 ? `${t}M` : `${Math.round(t * 1000)}k`);
     order.forEach((iso, i) => lineChart(grid.children[i].querySelector(".chart"), {
       series: [
         { label: `EU exports to ${NAME[iso]}`, endName: "from the EU", color: "--flow-eu", values: data[iso].eu },
@@ -1867,7 +1869,7 @@
         { label: `${NAME[iso]} to Russia`, endName: "to Russia", color: "--flow-ru", values: data[iso].ru, gapNote: "no data" },
       ],
       fmt: usdM, endNames: true, log: true, domain: dom, gapAtFoot: true, tickFmt: tkf, topTickFmt: (t) => `$${tkf(t)}`,
-      tickFilter: (t) => /^(0\.0*)?10*$/.test(String(t)),
+      tickFilter: isPow10,
       aria: `${fmtCode(code)}, ${NAME[iso]}: exports from the EU, China and Hong Kong, and exports to Russia, US dollars`,
     }));
 
@@ -2063,7 +2065,8 @@
         g.addEventListener("blur", hideTip);
       }
       el("line", { x1: L, x2: W - Rm, y1: yb, y2: yb, stroke: css("--axis"), "stroke-width": 0.75 }, svg);
-      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: NAMES[c] }), svg]));
+      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: NAMES[c] }),
+        h("p", { class: "des-scale", text: `bars: listed exports to Russia, tallest ${moneyK(max)} a month` }), svg]));
     }
     box.replaceChildren(...kids);
     // the table
@@ -2133,12 +2136,12 @@
     const x = (p) => L + ((lv(p) - lo) / (hi - lo)) * (W - L - R);
     const H = top + order.length * rowH + 8;
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "dx-svg", role: "img", "aria-label": "Change in exports to Russia after designation waves and in all other months, by country" });
-    // Labels in order of importance (0% first); a label closer than 56 px to one already placed is left out.
+    // Labels in order of importance (0% first); a label closer than 56 px (38 on phones) to one already placed is left out.
     const placed = [];
     for (const t of [0, -50, 100, -90, 300]) {
       if (lv(t) < lo || lv(t) > hi) continue;
       el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 4, class: t === 0 ? "dx-zero" : "uv-grid" }, svg);
-      if (placed.some((p) => Math.abs(p - x(t)) < 56)) continue;
+      if (placed.some((p) => Math.abs(p - x(t)) < (small ? 38 : 56))) continue;
       const tx = el("text", { x: x(t), y: 12, "text-anchor": "middle", class: "uv-tick" }, svg); tx.textContent = t === 0 ? "0%" : sg(t);
       placed.push(x(t));
     }

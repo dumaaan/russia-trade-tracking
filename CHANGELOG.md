@@ -2,6 +2,18 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.18.1 — 2026-11-23
+
+### Fixed
+- **Chart labels:** the estimate range plot and the designation-effect strip used label and
+  gridline styles that applied only to the price plot, so their labels were black on the dark
+  background and their gridlines did not show. All three plots now share the styles.
+- **Log-scale axes:** labels below 1 (0.1, 0.01) were dropped on wide scales, so the code explorer's
+  axis stopped at $1M while some values were near $1k. The axis now labels every power of ten.
+- **Supplier charts:** the axis read "$1bn, 100, 10, 1"; it now reads "$1bn, 100M, 10M, 1M".
+- **Government responses:** each country's bars now state their scale (the tallest month).
+- **Designation-effect strip on phones:** more scale labels fit (−90%, 0%, +300%).
+
 ## 1.18.0 — 2026-11-23
 
 ### Added
