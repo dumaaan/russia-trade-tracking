@@ -588,3 +588,24 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
   #resp-table tr:not(.group) td:nth-child(7) { grid-column: 3; grid-row: 1; text-align: right; }
   #resp-table tr.group, #resp-table tr.group th { display: block; }
 }
+
+/* did enforcement change trade: one monthly line a country, steps marked under it */
+.tl-scale { margin: 0 0 6px; font-size: 13px; color: var(--ink-3); }
+.tl-block { margin: 18px 0 0; }
+.tl-block figcaption { font-size: 15px; font-weight: 700; }
+.tl-block figcaption span { display: inline; font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 14px; }
+.tl-main figcaption { font-size: 17px; }
+.tl-svg { display: block; overflow: visible; }
+.tl-svg text { font-stretch: 87.5%; }
+.tl-svg .tl-line { fill: none; stroke: var(--flow-ru); stroke-width: 2.25; stroke-linejoin: round; }
+.tl-svg .tl-grid { stroke: var(--grid); }
+.tl-svg .tl-base { stroke: var(--axis); }
+.tl-svg .tl-year { stroke: var(--grid); }
+.tl-svg .tl-tick { font-size: 11.5px; fill: var(--ink-3); }
+.tl-svg .tl-row { font-size: 11.5px; fill: var(--ink-2); }
+.tl-svg .tl-step { fill: var(--ink-2); }
+.tl-svg .tl-step:focus-visible { outline: none; fill: var(--flow-ru); }
+.tl-svg .tl-ep { fill: var(--flow-ru); fill-opacity: 0.1; }
+.tl-svg .tl-ann { font-size: 13px; font-weight: 650; fill: var(--ink); }
+.tl-svg .tl-ann2 { font-size: 12.5px; fill: var(--ink-2); }
+.tl-svg .tl-peak { fill: var(--flow-ru); }

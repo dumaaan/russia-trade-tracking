@@ -1785,54 +1785,7 @@
         `${and(order.map((c, i) => `${NAMES[c]} ${i ? "" : "has "}${count[c]}`))}. ` +
         (phr.length ? `Since 2023, ${and(phr)}.` : "");
     }
-    const box = document.getElementById("des-plot");
-    const W = box.clientWidth || 700, small = W < 560;
-    const L = small ? 0 : 92, R = 6, barH = 46, gap = 3;
-    const x0 = (i) => L + (i / all.length) * (W - L - R), bw = (W - L - R) / all.length;
-    const dotR = Math.max(1.8, Math.min(4, bw / 2 - 0.4)); // dots of neighbouring months must not touch
-    const kids = [];
-    for (const c of order) {
-      const f = Object.fromEntries((flows[c] || []).map((x) => [x[0], x[1]]));
-      const rows = S.rows.filter((r) => r[1] === c);
-      const byM = {};
-      for (const r of rows) (byM[r[2].slice(0, 7)] = byM[r[2].slice(0, 7)] || []).push(r);
-      const stack = Math.max(1, ...Object.values(byM).map((v) => v.length));
-      const H = 16 + barH + 8 + stack * (dotR * 2 + gap) + 18;
-      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "des-svg", role: "img",
-        "aria-label": `${NAMES[c]}: monthly listed exports to Russia and ${rows.length} designated organisations` });
-      const vals = all.map((m) => f[m]).filter((v) => v != null);
-      const max = Math.max(...vals, 1);
-      const yb = 16 + barH;
-      if (!small) { const t = el("text", { x: 0, y: 16 + barH / 2, class: "des-lbl" }, svg); t.textContent = "to Russia"; const t2 = el("text", { x: 0, y: yb + 8 + dotR + 4, class: "des-lbl" }, svg); t2.textContent = "designated"; }
-      const mt = el("text", { x: L, y: 11, class: "des-tick" }, svg); mt.textContent = `max ${moneyK(max)} a month`;
-      all.forEach((m, i) => {
-        const v = f[m];
-        if (v == null) {
-          if (m <= last) el("line", { x1: x0(i) + 1, x2: x0(i) + bw - 1, y1: yb - 0.5, y2: yb - 0.5, stroke: css("--text-muted"), "stroke-dasharray": "1 1.5" }, svg);
-        } else {
-          const hh = (v / max) * barH;
-          const b = el("rect", { x: x0(i) + 0.5, y: yb - hh, width: Math.max(bw - 1, 0.8), height: hh, fill: css("--flow-ru"), "fill-opacity": 0.85 }, svg);
-          b.addEventListener("pointermove", (e) => showTip(e.clientX, e.clientY, monthName(m), [{ color: css("--flow-ru"), value: moneyK(v), label: `${NAMES[c]} to Russia, listed goods` }]));
-          b.addEventListener("pointerleave", hideTip);
-        }
-        if (m.endsWith("-01")) {
-          el("line", { x1: x0(i), x2: x0(i), y1: 14, y2: H - 14, class: "des-year" }, svg);
-          const yt = el("text", { x: x0(i) + 2, y: H - 3, class: "des-tick" }, svg); yt.textContent = m.slice(0, 4);
-        }
-        (byM[m] || []).forEach((r, k) => {
-          const g = group(r[0]), col = css(COL[g]);
-          const dot = el("circle", { cx: x0(i) + bw / 2, cy: yb + 8 + dotR + k * (dotR * 2 + gap), r: dotR, fill: r[4] ? css("--paper") : col, stroke: col, "stroke-width": 1.6, tabindex: 0, class: "des-dot" }, svg);
-          const tip = (cx, cy) => showTip(cx, cy, r[3], [{ color: col, value: fmtD(r[2]), label: `${r[0]}${r[4] ? " (date first seen by OpenSanctions)" : ""}` }]);
-          dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
-          dot.addEventListener("pointerleave", hideTip);
-          dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
-          dot.addEventListener("blur", hideTip);
-        });
-      });
-      el("line", { x1: L, x2: W - R, y1: yb, y2: yb, stroke: css("--axis"), "stroke-width": 0.75 }, svg);
-      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: `${NAMES[c]} · ${rows.length} organisations` }), svg]));
-    }
-    box.replaceChildren(...kids);
+    // The monthly chart with every listing on it is in enforcementTimeline (Part 4 opener); here only the list.
     table(document.getElementById("des-table"), ["Date", "Country", "List", "Organisation", "Also listed with"],
       S.rows.map((r) => [r[2] + (r[4] ? " (first seen)" : ""), NAMES[r[1]], r[0], r[3], r[5] || ""]));
   }
@@ -2203,65 +2156,7 @@
         kgO.length ? `Kyrgyzstan, meanwhile, played down or rejected the sanctions on its banks ${timesW(kgO.length)} before its first step on ${fmtD(kgM[0].date)}.` : "",
       ].filter(Boolean).join(" ");
     }
-    // timeline: one row a country, bars = monthly exports to Russia, numbered markers above
-    const box = document.getElementById("resp-plot");
-    const W = box.clientWidth || 700, small = W < 560;
-    const L = small ? 0 : 92, Rm = 6, barH = 42;
-    const months = [...new Set(order.flatMap((c) => (FL[c] || []).map((x) => x[0])))].sort().filter((m) => m >= "2022-01");
-    const last = items.map((x) => x.date.slice(0, 7)).reduce((a, b) => (a > b ? a : b), months[months.length - 1]);
-    const all = []; for (let m = months[0]; m <= last; m = shift(m, 1)) all.push(m);
-    const bw = (W - L - Rm) / all.length, x0 = (i) => L + i * bw;
-    const kids = [];
-    for (const c of order) {
-      const f = Object.fromEntries((FL[c] || []).map((x) => [x[0], x[1]]));
-      const mine = items.filter((x) => x.c === c);
-      const max = Math.max(...Object.values(f).filter((v) => v != null), 1);
-      // A marker that would touch the one before it goes one level higher (markers are 16 px wide).
-      const levels = [];
-      for (const it of mine) {
-        const i = all.indexOf(it.date.slice(0, 7));
-        const cx = x0(i) + bw / 2;
-        let lv = 0;
-        while (levels.some((q) => q.lv === lv && Math.abs(q.cx - cx) < 17)) lv++;
-        levels.push({ cx, lv });
-        it.lv = lv;
-      }
-      const top = 12 + 17 * Math.max(0, ...levels.map((q) => q.lv));
-      const H = top + 18 + barH + 18;
-      const yb = top + 18 + barH;
-      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "des-svg", role: "img",
-        "aria-label": `${NAMES[c]}: monthly listed exports to Russia and ${mine.length} government statements or measures` });
-      if (!small) { const t = el("text", { x: 0, y: yb - barH / 2, class: "des-lbl" }, svg); t.textContent = "to Russia"; }
-      all.forEach((m, i) => {
-        const v = f[m];
-        if (v != null) { const hh = (v / max) * barH; el("rect", { x: x0(i) + 0.5, y: yb - hh, width: Math.max(bw - 1, 0.8), height: hh, fill: css("--flow-ru"), "fill-opacity": 0.35 }, svg); }
-        if (m.endsWith("-01")) {
-          el("line", { x1: x0(i), x2: x0(i), y1: yb - barH - 4, y2: H - 14, class: "des-year" }, svg);
-          const yt = el("text", { x: x0(i) + 2, y: H - 3, class: "des-tick" }, svg); yt.textContent = m.slice(0, 4);
-        }
-      });
-      // markers, at the level found above
-      for (const it of mine) {
-        const i = all.indexOf(it.date.slice(0, 7));
-        if (i < 0) continue;
-        const cx = x0(i) + bw / 2, cy = top - 17 * it.lv;
-        const K = RESP_KIND[it.kind] || RESP_KIND.measure, col = css(K.col);
-        el("line", { x1: cx, x2: cx, y1: cy + 6, y2: yb, stroke: col, "stroke-width": 1, "stroke-dasharray": it.checked === "yes" ? null : "2 2" }, svg);
-        const g = el("g", { tabindex: 0, class: "resp-mark" }, svg);
-        el("circle", { cx, cy, r: 8, fill: K.hollow ? css("--paper") : col, stroke: col, "stroke-width": 1.6, "stroke-dasharray": it.checked === "yes" ? null : "2 2" }, g);
-        const t = el("text", { x: cx, y: cy + 3.5, "text-anchor": "middle", class: "resp-num", fill: K.hollow ? css("--ink") : css("--paper") }, g);
-        t.textContent = String(it.n);
-        const tip = (px, py) => showTip(px, py, `${it.n}. ${fmtD(it.date)}, ${it.actor}`, [{ color: col, value: K.label, label: it.what }]);
-        g.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
-        g.addEventListener("pointerleave", hideTip);
-        g.addEventListener("focus", () => { const q = g.getBoundingClientRect(); tip(q.left, q.top); });
-        g.addEventListener("blur", hideTip);
-      }
-      el("line", { x1: L, x2: W - Rm, y1: yb, y2: yb, stroke: css("--axis"), "stroke-width": 0.75 }, svg);
-      kids.push(h("div", { class: "des-block" }, [h("h3", { class: "ctl-group", text: NAMES[c] }),
-        h("p", { class: "des-scale", text: `bars: listed exports to Russia, tallest ${moneyK(max)} a month` }), svg]));
-    }
-    box.replaceChildren(...kids);
+    // The monthly chart with every step on it is in enforcementTimeline (Part 4 opener); here only the table.
     // the table
     const head = h("thead", {}, h("tr", {}, ["#", "Date", "", "Who", "What", "Source", "Exports to Russia, 6 months after, net of the other two"].map((t) => h("th", { text: t }))));
     const body = [];
@@ -2583,7 +2478,7 @@
         `Uzbekistan's sales to Russia fell in most months, so its waves are lost in the trend. Months with under $${X.min_base / 1000}k a month beforehand are dropped. ` +
         `Sales to Russia are the exporter's own records, so they are a floor; the listings are those shown above.`;
     }
-    // The strip of waves is now the first row of each country in the common chart (enforcementStrip).
+    // The strip of waves is now the first row of each country in the Part 4 opener (enforcementTimeline).
     // the table
     const row = (label, w, o) => h("tr", {}, [h("th", { scope: "row", text: label }), h("td", { text: w ? String(w.n) : "0" }),
       h("td", { class: "chg", text: w ? sg(w.median_effect_pct) : "—" }), h("td", { text: o ? sg(o.median_effect_pct) : "—" }),
@@ -2604,96 +2499,165 @@
   }
 
 
-  // ---------- one test for every enforcement step: a strip a kind of step, a block a country ----------
-  function enforcementStrip() {
-    const X = D.designationEffect, E = D.eventStudy, R = D.responses;
+  // ---------- did enforcement change trade? one monthly line a country, every step marked under it ----------
+  // A plain reader sees a line and dates. Kyrgyzstan, where something happened, is drawn large; Kazakhstan
+  // and Uzbekistan small, in the same design. The neighbour-comparison test is a folded table for experts.
+  function enforcementTimeline() {
+    const X = D.designationEffect, E = D.eventStudy, R = D.responses, DS = D.designations;
     const box = document.getElementById("enf-plot");
-    if (!X || !box) return;
-    const N = X.names, order = ["KZ", "KG", "UZ"], START = X.start;
-    const COL = { US: "--text-primary", UK: "--c-kz", EU: "--flow-eu" };
+    if (!X || !DS || !box) return;
+    const N = X.names, START = X.start;
+    const FL = DS.flows;
+    const mi = (m) => { const [y, mo] = m.split("-").map(Number); return y * 12 + mo; };
+    const mn = (m) => monthName(m);
     const fmtD = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-    const SAID = new Set(["promise", "plays down", "objection"]);
-    const steps = [], left = [];
-    for (const w of X.waves) steps.push({ c: w.country, kind: "wave", m: w.month, pct: w.effect_pct, own: w.own_pct, others: w.others_pct,
-      label: `${w.n} organisation${w.n > 1 ? "s" : ""} blacklisted (${w.lists.join(", ")})`, list: w.lists.includes("EU") ? "EU" : w.lists.includes("UK") ? "UK" : "US", payment: w.payment });
-    for (const e of (E ? E.events : [])) {
-      if (!e.focus) continue; // a step that hit all three cannot be netted against the other two
-      const r = e.month >= START ? netEffect(e.focus, e.month) : { reason: "before Sept 2022" };
-      if (r.reason) { left.push(`${e.label} (${r.reason})`); continue; }
-      steps.push({ c: e.focus, kind: "event", m: e.month, pct: r.pct, own: r.own, others: r.others, label: e.label, date: e.date });
+    const usdK = (v) => (v == null ? "—" : v >= 1e6 ? `$${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M` : `$${Math.round(v / 1e3)}k`);
+    // 3-month average of monthly sales to Russia
+    const avg3 = {};
+    for (const c of ["KZ", "KG", "UZ"]) {
+      const f = Object.fromEntries((FL[c] || []).map((x) => [x[0], x[1]]));
+      const ms = Object.keys(f).sort();
+      avg3[c] = ms.map((m) => { const v = [shiftM(m, -2), shiftM(m, -1), m].map((k) => f[k]); return [m, v.some((q) => q == null) ? null : (v[0] + v[1] + v[2]) / 3]; }).filter((x) => x[0] >= "2022-01");
     }
-    for (const x of (R || [])) {
-      const [c, date, kind, actor] = x;
-      const m = date.slice(0, 7);
-      const r = m >= START ? netEffect(c, m) : { reason: "before Sept 2022" };
-      if (r.reason) { left.push(`${N[c]}, ${fmtD(date)}, ${kind} (${r.reason})`); continue; }
-      steps.push({ c, kind: SAID.has(kind) ? "said" : "did", m, pct: r.pct, own: r.own, others: r.others, label: `${actor}: ${kind}`, date });
+    // every step, by country: Western sanctions (listings, packages, bans) and the country's own government and banks
+    const steps = { KZ: [], KG: [], UZ: [] };
+    const byMonth = {};
+    for (const r of DS.rows) { const k = `${r[1]}|${r[2].slice(0, 7)}`; (byMonth[k] = byMonth[k] || []).push(r); }
+    for (const [k, rs] of Object.entries(byMonth)) {
+      const [c, m] = k.split("|");
+      if (!steps[c]) continue;
+      const lists = [...new Set(rs.map((r) => (r[0].startsWith("US") ? "US" : r[0])))].join(", ");
+      steps[c].push({ west: true, m, what: `${lists} blacklist ${rs.length} organisation${rs.length > 1 ? "s" : ""}`, detail: rs.map((r) => r[3]).slice(0, 4).join("; ") });
     }
-    // how unusual: below the tenth percentile of the country's months without a blacklisting
-    const p10 = {};
-    for (const c of order) { const b = [...X.base[c].effects_pct].sort((a, q) => a - q); p10[c] = b.length ? b[Math.floor(0.1 * (b.length - 1))] : null; }
-    const unusual = steps.filter((s) => p10[s.c] != null && s.pct <= p10[s.c]);
-    const KINDN = { wave: "blacklistings", event: "EU, US or UK steps aimed at one country", said: "government statements", did: "government or bank measures" };
-    document.getElementById("enf-h").textContent =
-      `${capW(unusual.length <= 12 ? NUMW[unusual.length] : String(unusual.length))} of ${steps.length} enforcement steps were followed by a fall deeper than in nine out of ten ordinary months`;
-    {
-      const by = {};
-      for (const s of unusual) by[s.kind] = (by[s.kind] || 0) + 1;
-      const parts = Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n <= 12 ? NUMW[n] : n} ${n === 1 ? KINDN[k].replace(/s( |$)/, "$1") : KINDN[k]}`);
-      const byC = order.map((c) => [c, unusual.filter((s) => s.c === c).length]).filter(([, n]) => n);
-      document.getElementById("enf-sub").textContent = unusual.length
-        ? `They were ${parts.join(", ").replace(/, ([^,]*)$/, " and $1")}, in ${byC.map(([c, n]) => `${N[c]} (${n})`).join(", ").replace(/, ([^,]*)$/, " and $1")}. Most steps were followed by nothing unusual.`
-        : "None of the steps was followed by an unusual fall.";
+    for (const e of (E ? E.events : [])) for (const c of (e.focus ? [e.focus] : ["KZ", "KG", "UZ"])) {
+      if (!steps[c]) continue;
+      const own = e.focus === c && (e.id === "kz-checks" || e.id === "kg-suspend");
+      steps[c].push({ west: !own, m: e.month, what: e.label, detail: fmtD(e.date), id: e.id });
     }
-    document.getElementById("enf-note").textContent =
-      `Left out: steps that hit all three countries (they cannot be measured against the other two; the sanctions-events table below compares them with EU sales to other neighbours), steps before September 2022 (their six months before include the invasion), and steps with under three months of data after. ` +
-      (left.length ? `Not shown for these reasons: ${left.join("; ")}. ` : "") +
-      `Windows of nearby steps overlap, so they are not independent tests, and a fall after a step does not prove the step caused it.`;
+    for (const x of (R || [])) if (steps[x[0]]) steps[x[0]].push({ west: false, m: x[1].slice(0, 7), what: `${x[3]}: ${x[2]}`, detail: x[4] });
 
+    // the expert test (net of the other two countries) for steps it can measure, and the episode it finds
+    const band = {};
+    for (const c of ["KZ", "KG", "UZ"]) { const b = [...X.base[c].effects_pct].sort((p, q) => p - q); band[c] = { lo: b[Math.floor(0.1 * (b.length - 1))], hi: b[Math.floor(0.9 * (b.length - 1))] }; }
+    const tested = [];
+    for (const c of ["KZ", "KG", "UZ"]) for (const s of steps[c]) {
+      if (s.m < START) continue;
+      const allThree = s.id && !E.events.find((e) => e.id === s.id).focus;
+      if (allThree) continue;
+      const r = netEffect(c, s.m);
+      if (r.reason) continue;
+      s.net = r.pct; s.odd = r.pct <= band[c].lo;
+      tested.push({ c, ...s });
+    }
+    const odd = tested.filter((s) => s.odd).sort((p, q) => mi(p.m) - mi(q.m));
+    const episodes = [];
+    for (const s of odd) { const l = episodes[episodes.length - 1]; if (l && l.c === s.c && mi(s.m) - mi(l.end) <= 3) { l.n++; l.end = s.m; l.a7 = l.a7 || s.id === "a7a5"; } else episodes.push({ c: s.c, start: s.m, end: s.m, n: 1, a7: s.id === "a7a5" }); }
+    const ep = episodes.filter((e) => e.n >= 3).sort((p, q) => q.n - p.n)[0];
+
+    // the story, from the line
+    const series = (c) => avg3[c].filter((x) => x[1] != null);
+    let story = null;
+    if (ep) {
+      const S = series(ep.c);
+      const pre = S.filter((x) => mi(x[0]) >= mi(ep.start) - 12 && mi(x[0]) <= mi(ep.start));
+      const peak = pre.reduce((p, q) => (q[1] > p[1] ? q : p), pre[0]);
+      const after = S.filter((x) => mi(x[0]) >= mi(ep.end) && mi(x[0]) <= mi(ep.end) + 5);
+      const low = after.reduce((t, x) => t + x[1], 0) / after.length;
+      const last = S[S.length - 1];
+      story = { peak, low, last, fall: 1 - low / peak[1], back: last[1] / peak[1] };
+    }
+    const fallW = (f) => (f >= 0.7 && f < 0.8 ? "about three quarters" : f >= 0.6 && f < 0.7 ? "about two thirds" : `about ${round10(100 * f)}%`);
+    const kzS = series("KZ").filter((x) => x[0] >= "2024-01"), uzS = series("UZ").filter((x) => x[0] >= "2024-01").map((x) => x[1]).sort((p, q) => p - q);
+    const kzMin = Math.min(...kzS.map((x) => x[1])), kzMax = Math.max(...kzS.map((x) => x[1]));
+    const uzMed = uzS.length ? uzS[Math.floor(uzS.length / 2)] : null;
+    const epName = ep && ep.a7 ? "the 2025 crackdown on the A7A5 payment network" : ep ? `the steps of ${mn(ep.start)}–${mn(ep.end)}` : "";
+    document.getElementById("enf-h").textContent = story
+      ? `Kyrgyzstan's sales to Russia fell by ${fallW(story.fall)} during ${epName}`
+      : "No enforcement step moved the flow of battlefield goods to Russia for long";
+    document.getElementById("enf-sub").textContent = story
+      ? `The fall began in ${new Date(story.peak[0] + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })}${mi(story.peak[0]) < mi(ep.start) ? ", before the first step" : ""}. By ${new Date(story.last[0] + "-01T00:00:00Z").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })} sales had come back to about ${round10(100 * story.back)}% of the peak. ` +
+        `Kazakhstan's sales, about ten times larger, stayed between ${usdK(kzMin)} and ${usdK(kzMax)} a month through every step since 2024. Uzbekistan's are too small and irregular to read.`
+      : "";
+    // ten times larger: say what the data say
+    if (story) {
+      const kgLast = story.last[1], kzLast = kzS.length ? kzS[kzS.length - 1][1] : null;
+      if (kzLast && kgLast) document.getElementById("enf-sub").textContent = document.getElementById("enf-sub").textContent.replace("about ten times larger", `about ${Math.round(kzLast / kgLast) <= 12 ? NUMW[Math.round(kzLast / kgLast)] : Math.round(kzLast / kgLast)} times larger`);
+    }
+
+    // drawing: one block a country
     const W = box.clientWidth || 700, small = W < 560;
-    const L = small ? 92 : 210, Rm = 10, rowH = 30, headH = 22, top = 22;
-    const ROWS = [["wave", "Blacklist waves"], ["event", "EU, US, UK steps"], ["did", "Government did"], ["said", "Government said"]];
-    const blocks = order.map((c) => ({ c, rows: ROWS.filter(([k]) => steps.some((s) => s.c === c && s.kind === k)) }));
-    const all = [...order.flatMap((c) => X.base[c].effects_pct), ...steps.map((s) => s.pct)];
-    const lv = (p) => Math.log10(1 + p / 100);
-    const lo = Math.min(-1, Math.floor(Math.min(...all.map(lv)) * 2) / 2), hi = Math.max(0.5, Math.ceil(Math.max(...all.map(lv)) * 2) / 2);
-    const x = (p) => L + ((lv(p) - lo) / (hi - lo)) * (W - L - Rm);
-    const H = top + blocks.reduce((t, b) => t + headH + b.rows.length * rowH, 0) + 10;
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "dx-svg", role: "img", "aria-label": "Change in exports to Russia after each enforcement step, net of the other two countries, against months without a blacklisting" });
-    const placed = [];
-    for (const t of [0, -50, 100, -90, 300]) {
-      if (lv(t) < lo || lv(t) > hi) continue;
-      el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 4, class: t === 0 ? "dx-zero" : "uv-grid" }, svg);
-      if (placed.some((p) => Math.abs(p - x(t)) < (small ? 38 : 56))) continue;
-      const tx = el("text", { x: x(t), y: 12, "text-anchor": "middle", class: "uv-tick" }, svg); tx.textContent = t === 0 ? "0%" : sgnPct(t);
-      placed.push(x(t));
-    }
-    let y = top;
-    for (const b of blocks) {
-      const hd = el("text", { x: 0, y: y + 15, class: "enf-country" }, svg); hd.textContent = N[b.c];
-      y += headH;
-      for (const [k, name] of b.rows) {
-        const cy = y + rowH / 2;
-        const lab = el("text", { x: small ? 0 : 12, y: cy + 4, class: "uv-lbl" }, svg); lab.textContent = name;
-        for (const p of X.base[b.c].effects_pct) el("line", { x1: x(p), x2: x(p), y1: cy - 7, y2: cy + 7, class: "dx-tick" }, svg);
-        const mine = steps.filter((s) => s.c === b.c && s.kind === k);
-        mine.forEach((s, j) => {
-          const cyw = cy + ((j % 3) - 1) * 4;
-          const col = k === "wave" ? css(COL[s.list]) : css("--ink");
-          if (k === "wave" && s.payment) el("circle", { cx: x(s.pct), cy: cyw, r: 8, fill: "none", stroke: css("--ink"), "stroke-width": 1.3 }, svg);
-          const dot = el("circle", { cx: x(s.pct), cy: cyw, r: 4.6, fill: k === "said" ? css("--paper") : col, stroke: k === "said" ? col : css("--paper"), "stroke-width": k === "said" ? 1.6 : 1, tabindex: 0, class: "dx-dot" }, svg);
-          const tip = (px, py) => showTip(px, py, `${N[s.c]}, ${s.date ? fmtD(s.date) : monthName(s.m)}`, [
-            { color: col, value: sgnPct(s.pct), label: `net of the other two (own ${sgnPct(s.own)}, theirs ${sgnPct(s.others)})` },
-          ], s.label);
-          dot.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
-          dot.addEventListener("pointerleave", hideTip);
-          dot.addEventListener("focus", () => { const q = dot.getBoundingClientRect(); tip(q.left, q.top); });
-          dot.addEventListener("blur", hideTip);
-        });
-        y += rowH;
+    const L = small ? 46 : 64, Rm = small ? 8 : 16;
+    const allM = []; for (let m = "2022-01"; m <= [...Object.values(steps).flat().map((s) => s.m), ...Object.values(avg3).flat().map((x) => x[0])].reduce((p, q) => (q > p ? q : p)); m = shiftM(m, 1)) allM.push(m);
+    const x = (m) => L + ((mi(m) - mi(allM[0])) / (allM.length - 1)) * (W - L - Rm);
+    const blocks = [["KG", small ? 190 : 240], ["KZ", small ? 90 : 110], ["UZ", small ? 90 : 110]];
+    const kids = [];
+    for (const [c, ph] of blocks) {
+      const S = avg3[c];
+      const vmax = Math.max(...S.map((q) => q[1] || 0), 1);
+      const ticks = niceTicks(vmax / 1e6, c === "KG" ? 4 : 2).map((t) => t * 1e6);
+      const ymax = ticks[ticks.length - 1];
+      const top = c === "KG" ? 34 : 12, rowGap = 18;
+      const yb = top + ph;
+      const H = yb + 22 + 2 * rowGap + 6;
+      const y = (v) => yb - (v / ymax) * ph;
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "tl-svg", role: "img",
+        "aria-label": `${N[c]}: sales of battlefield goods to Russia, 3-month average, with enforcement steps marked` });
+      // the episode, shaded across the plot and the step rows
+      if (ep && ep.c === c) {
+        el("rect", { x: x(ep.start) - 2, y: top - 4, width: x(ep.end) - x(ep.start) + 4, height: H - top - 2, class: "tl-ep" }, svg);
+        const t = el("text", { x: x(ep.start) - 6, y: top - 12, "text-anchor": "end", class: "tl-ann" }, svg);
+        t.textContent = ep.a7 ? (small ? `A7A5 crackdown, ${mn(ep.start).split(" ")[0]}–${mn(ep.end)}` : `${mn(ep.start).split(" ")[0]}–${mn(ep.end)}: US, UK and EU go after the A7A5 payment network`) : `${mn(ep.start)}–${mn(ep.end)}: ${ep.n} steps`;
       }
+      for (const t of ticks) {
+        el("line", { x1: L, x2: W - Rm, y1: y(t), y2: y(t), class: t === 0 ? "tl-base" : "tl-grid" }, svg);
+        const lab = el("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end", class: "tl-tick" }, svg);
+        lab.textContent = t === 0 ? "0" : usdK(t);
+      }
+      allM.forEach((m) => {
+        if (!m.endsWith("-01")) return;
+        el("line", { x1: x(m), x2: x(m), y1: top, y2: H - 4, class: "tl-year" }, svg);
+        const t = el("text", { x: x(m) + 3, y: yb + 14, class: "tl-tick" }, svg); t.textContent = m.slice(0, 4);
+      });
+      // the line
+      let d = "", pen = false;
+      for (const [m, v] of S) { if (v == null) { pen = false; continue; } d += `${pen ? "L" : "M"}${x(m).toFixed(1)},${y(v).toFixed(1)}`; pen = true; }
+      el("path", { d, class: "tl-line" }, svg);
+      // the peak before the episode, named on the line
+      if (story && ep.c === c) {
+        const [pm, pv] = story.peak;
+        el("circle", { cx: x(pm), cy: y(pv), r: 3.5, class: "tl-peak" }, svg);
+        const t = el("text", { x: x(pm) - 8, y: y(pv) + (small ? -6 : 4), "text-anchor": "end", class: "tl-ann2" }, svg);
+        t.textContent = small ? `peak, ${mn(pm)}` : `peak ${mn(pm)}${mi(pm) < mi(ep.start) ? ": the fall starts before the first step" : ""}`;
+      }
+      // the step rows
+      const rows = [[true, small ? "Sanctions" : "US, UK, EU steps"], [false, small ? "Own govt" : "Own government, banks"]];
+      rows.forEach(([west, label], k) => {
+        const ry = yb + 22 + k * rowGap + 8;
+        const lab = el("text", { x: L - 6, y: ry + 4, "text-anchor": "end", class: "tl-row" }, svg); lab.textContent = label;
+        for (const s of steps[c].filter((q) => q.west === west)) {
+          if (s.m < allM[0]) continue;
+          const mk = el("rect", { x: x(s.m) - 1.5, y: ry - 6, width: 3, height: 12, class: `tl-step${s.odd ? " odd" : ""}`, tabindex: 0 }, svg);
+          const tip = (px, py) => showTip(px, py, `${N[c]}, ${mn(s.m)}`, [{ color: css(west ? "--ink" : "--ink-3"), value: west ? "sanctions" : "own step", label: s.what }], s.detail);
+          mk.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
+          mk.addEventListener("pointerleave", hideTip);
+          mk.addEventListener("focus", () => { const q = mk.getBoundingClientRect(); tip(q.left, q.top); });
+          mk.addEventListener("blur", hideTip);
+        }
+      });
+      const cap = c === "KG" ? "" : c === "KZ" ? `stayed between ${usdK(kzMin)} and ${usdK(kzMax)} a month through every step since 2024` : uzMed != null ? `too small and irregular to read: half the months since 2024 under ${usdK(uzMed)}` : "";
+      kids.push(h("figure", { class: `tl-block${c === "KG" ? " tl-main" : ""}` }, [
+        h("figcaption", {}, [N[c], cap ? h("span", { text: cap }) : null]), svg]));
     }
-    box.replaceChildren(svg);
+    box.replaceChildren(h("p", { class: "tl-scale", text: "Sales of battlefield goods to Russia, US dollars a month (3-month average) · each country on its own scale" }), ...kids);
+
+    // the test, folded, for experts
+    const tb = document.getElementById("enf-test");
+    if (tb) tb.replaceChildren(h("thead", {}, h("tr", {}, ["Month", "Country", "Step", "Change against neighbours, 6 months", "Usual range"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, tested.sort((p, q) => mi(p.m) - mi(q.m)).map((s) => h("tr", {}, [
+        h("td", { text: mn(s.m) }), h("td", { text: N[s.c] }), h("td", { class: "lbl", text: s.what }),
+        h("td", { class: s.odd ? "chg" : "", text: sgnPct(s.net) + (s.odd ? " (below)" : "") }),
+        h("td", { text: `${sgnPct(band[s.c].lo)} to ${sgnPct(band[s.c].hi)}` }),
+      ]))));
   }
 
   // ---------- sanctions events: three questions ----------
@@ -3126,7 +3090,7 @@
     if (D.cases) casesStudy();
     if (D.members) membersStudy();
     if (D.designationEffect) designationEffect();
-    enforcementStrip();
+    enforcementTimeline();
     if (D.estimate) estimateStudy();
     codeExplorer();
     if (D.eventStudy) eventStudy();
@@ -3139,7 +3103,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.cases) casesStudy(); if (D.members) membersStudy(); if (D.designationEffect) designationEffect(); enforcementStrip(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.cases) casesStudy(); if (D.members) membersStudy(); if (D.designationEffect) designationEffect(); enforcementTimeline(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

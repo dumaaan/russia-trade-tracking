@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.30">
+  <link rel="stylesheet" href="style.css?v=1.33">
 </head>
 <body>
 <a class="skip" href="#suppliers">Skip to the charts</a>
@@ -36,7 +36,7 @@
     <div class="toc-part"><a class="toc-h" href="#part-moved">Part 1 · What moved</a><ul><li><a href="#suppliers">Overview: in and out</a></li><li><a href="#legs">Both legs</a></li><li><a href="#members">EU member states</a></li><li><a href="#comparison">Kazakhstan, Kyrgyzstan, Uzbekistan</a></li><li><a href="#tiers">Tier by tier</a></li><li><a href="#goods">Code by code</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-records">Part 2 · How reliable the records are</a><ul><li><a href="#mirror">Mirror checks</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-tests">Part 3 · Tests</a><ul><li><a href="#control">Share of all trade</a></li><li><a href="#excess">Against similar goods</a></li><li><a href="#unitvalue">Price per kg</a></li></ul></div>
-    <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#enforce">One test for every step</a></li><li><a href="#responses">Government responses</a></li><li><a href="#cases">EU cases</a></li><li><a href="#designations">Designations</a></li><li><a href="#deseffect">After blacklisting</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
+    <div class="toc-part"><a class="toc-h" href="#part-enforcement">Part 4 · Enforcement</a><ul><li><a href="#enforce">Did enforcement change trade?</a></li><li><a href="#responses">Government responses</a></li><li><a href="#cases">EU cases</a></li><li><a href="#designations">Designations</a></li><li><a href="#deseffect">After blacklisting</a></li><li><a href="#events">Sanctions events</a></li><li><a href="#ban">April 2026 ban</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-estimate">Part 5 · Estimate</a><ul><li><a href="#estimate">How much reached Russia</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-explore">Part 6 · Explore</a><ul><li><a href="#explorer">Code explorer</a></li></ul></div>
     <div class="toc-part"><a class="toc-h" href="#part-check">Checks · Our numbers against published ones</a><ul><li><a href="#checks">Cross-checks</a></li></ul></div>
@@ -253,17 +253,22 @@
 
   <section class="chapter chapter-wide wrap" id="enforce" aria-labelledby="enf-h">
     <div class="ch-text">
-      <h2 id="enf-h">One test for every enforcement step</h2>
+      <h2 id="enf-h">Did enforcement change trade?</h2>
       <p class="finding" id="enf-sub"></p>
-      <p class="finding">Every step gets the same test: the country's sales of battlefield goods to Russia over the six
-        months after the step, against the six months before, net of the other two countries. The grey ticks run the same
-        test on every month without a blacklisting. A dot far to the left of the ticks is a fall out of the ordinary.</p>
-      <p class="aside" id="enf-note"></p>
+      <p class="finding">The line is each country's monthly sales of battlefield goods to Russia. Under it, each mark is
+        one step: a US, UK or EU blacklisting or sanctions package, or something the country's own government or banks
+        did or said. Hover over a mark to see what it was.</p>
     </div>
     <div class="ch-figure">
-      <p class="scope">From September 2022 · listed exports to Russia, recorded by the exporting country · filters do not apply</p>
-      <p class="exc-key des-key"><span class="k-us">US list</span><span class="k-uk">UK list</span><span class="k-eu">EU list</span><span class="k-ring">payment channel in the wave</span><span class="k-did">other step taken</span><span class="k-said">statement</span><span class="k-grey">months without a blacklisting</span></p>
       <div id="enf-plot"></div>
+      <details class="table-view"><summary>The test behind the headline</summary>
+        <p class="aside">For each step aimed at one country, we compare its sales in the six months after with the six
+          before, against the same change for the other two countries, and set that against the usual range in months
+          without a blacklisting. Steps close together share months, so a cluster of steps is one fall, not several.
+          Steps that hit all three countries at once, steps before September 2022 and steps less than three months old
+          cannot be tested this way. A fall after a step does not prove the step caused it.</p>
+        <div class="table-wrap"><table class="supertable" id="enf-test"></table></div>
+      </details>
     </div>
   </section>
 
@@ -271,21 +276,16 @@
     <div class="ch-text">
       <h2 id="resp-h">What the governments said and did</h2>
       <p class="finding" id="resp-sub"></p>
-      <p class="finding">Every numbered mark is something a government, central bank or bank in Kazakhstan, Kyrgyzstan
-        or Uzbekistan said or did about sanctions. It sits on the line of that country's monthly sales of battlefield
-        goods to Russia. The table gives the source and the common test from the chart above: sales in the six months
-        that followed against the six before, net of the other two countries.</p>
-      <p class="aside">Hollow marks are things said: promises not to become a route around sanctions, statements playing
-        the sanctions down, and objections to them. Filled marks are things done: steps the country took itself, and steps
-        by its banks. The sources are news
+      <p class="finding">Every row is something a government, central bank or bank in Kazakhstan, Kyrgyzstan or
+        Uzbekistan said or did about sanctions; each one is a mark on the "own government, banks" row of the chart that
+        opens Part 4. The last column is the test behind that chart: sales in the six months that followed against the
+        six before, net of the other two countries.</p>
+      <p class="aside">The sources are news
         reports of official statements; one measure rests only on Ukrainian intelligence and is marked as such. The
-        record is a sample, not a full list, so "first" means first in this record. Marks are numbered country by
-        country. A move in sales after a statement does not mean the statement caused it.</p>
+        record is a sample, not a full list, so "first" means first in this record. A move in sales after a statement does not mean the statement caused it.</p>
     </div>
     <div class="ch-figure">
       <p class="scope">Kazakhstan, Kyrgyzstan and Uzbekistan · from January 2022 · listed exports to Russia in current US dollars, each row on its own scale</p>
-      <p class="exc-key resp-key"><span class="k-said">said (promise, playing down, objection)</span><span class="k-did">did (own measure, banks)</span></p>
-      <div id="resp-plot"></div>
       <div class="table-wrap"><table class="supertable" id="resp-table"></table></div>
     </div>
   </section>
@@ -314,8 +314,8 @@
     <div class="ch-text">
       <h2 id="des-h">Blacklists and trade</h2>
       <p class="finding" id="des-sub"></p>
-      <p class="finding">The bars are each country's monthly sales of battlefield goods to Russia. Each dot is a company
-        or bank there that the US, the UK or the EU blacklisted that month, coloured by who listed it.</p>
+      <p class="finding">Each blacklisting month is a mark on the "US, UK, EU steps" row of the chart that opens Part 4;
+        the list below names every organisation.</p>
       <p class="aside">Source: OpenSanctions (CC BY-NC 4.0), drawing on the US Treasury (OFAC), the US trade list with
         the BIS Entity List, EU financial sanctions and the UK list. Only Russia-related listings count, so terrorism and
         Global Magnitsky cases drop out. An organisation counts only if at least half the countries on its entry are
@@ -326,8 +326,6 @@
     </div>
     <div class="ch-figure">
       <p class="scope">Organisations in Kazakhstan, Kyrgyzstan and Uzbekistan · from 24 February 2022 · filters do not apply</p>
-      <p class="exc-key des-key"><span class="k-us">US</span><span class="k-uk">UK</span><span class="k-eu">EU</span></p>
-      <div id="des-plot"></div>
       <details class="table-view"><summary>Show the list</summary><div id="des-table"></div></details>
     </div>
   </section>
@@ -466,6 +464,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.29"></script>
-<script src="app.js?v=1.73"></script>
+<script src="app.js?v=1.76"></script>
 </body>
 </html>

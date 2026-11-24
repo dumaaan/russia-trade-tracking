@@ -2,6 +2,20 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.21.0 — 2026-11-24
+
+### Changed
+- **Did enforcement change trade? (Part 4 opener):** the dot strip of net effects is replaced by one
+  monthly line a country (sales to Russia, 3-month average) with every step marked under it, on two
+  rows: US, UK and EU steps, and the country's own government and banks. Kyrgyzstan is drawn large,
+  with the July–October 2025 A7A5 crackdown shaded and the April 2025 peak marked: the fall began
+  before the first step. Kazakhstan and Uzbekistan are drawn small in the same design. The
+  neighbour-comparison test moves into a folded table under the charts. Its unusual results were
+  mostly one episode: six steps in Kyrgyzstan between July and October 2025 share their months, so
+  they count as one fall, not six.
+- The responses and blacklisting chapters keep their tables; their charts are now marks in the
+  Part 4 opener.
+
 ## 1.20.0 — 2026-11-23
 
 ### Changed after a full design review (Tufte principles)
