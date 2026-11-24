@@ -609,3 +609,5 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
 .tl-svg .tl-ann { font-size: 13px; font-weight: 650; fill: var(--ink); }
 .tl-svg .tl-ann2 { font-size: 12.5px; fill: var(--ink-2); }
 .tl-svg .tl-peak { fill: var(--flow-ru); }
+.legs-table { max-width: 760px; margin-top: 22px; }
+.legs-table tr.legs-eu th, .legs-table tr.legs-eu td { color: var(--ink-3); font-weight: 400; }

@@ -784,48 +784,63 @@
 
   // ---------- section 1 ----------
   function flows() {
-    const c = state.flowsCountry;
-    const s = ["eu", "ru"].map((f) => ({ label: FLOW[f].label(c), endName: f === "eu" ? "from the EU" : "to Russia", color: FLOW[f].color, values: series(f, c) }));
-    // The finding, from the data: the pre-war level against the latest year, for each leg.
+    // One panel a country, two lines in plain dollars (EU in, Russia out), each panel on its own scale.
     const last = YEARS.length - 1, ly = YEARS[last];
-    const say = (vals, what) => {
-      const b = rawBase(vals), l = vals[last];
-      if (b == null || l == null) return `${what}: too little data for this selection.`;
-      const ok = usableBase(vals);
-      const pk = peakOf(vals), peaked = pk >= 0 && pk !== last && vals[pk] > l * 1.1 ? `, after peaking in ${YEARS[pk]}` : "";
-      if (!ok) return `${what} went from ${fmtMoney(b)} a year before the war to ${fmtMoney(l)} in ${ly}.`;
-      const g = grew(l / ok), pkd = peaked ? ` after a ${YEARS[pk]} peak` : "";
-      return g === "held steady"
-        ? `${what} held steady at pre-war levels, at ${fmtMoney(l)} in ${ly}${pkd}.`
-        : `${what} ${g} over pre-war levels, reaching ${fmtMoney(l)} in ${ly}${pkd}.`;
+    const C = D.countries.map((c) => {
+      const eu = series("eu", c), ru = series("ru", c);
+      const pre = rawBase(ru), pk = peakOf(ru);
+      const preE = rawBase(eu), pkE = peakOf(eu);
+      return { c, eu, ru, pre, pk, peak: pk >= 0 ? ru[pk] : null, lastv: ru[last], preE, pkE, peakE: pkE >= 0 ? eu[pkE] : null, lastE: eu[last] };
+    });
+    // words for "where the latest year stands against before the war"
+    const levelW = (m) => {
+      if (m == null || !isFinite(m)) return "";
+      if (m >= 1.9) { const k = Math.round(m); return k === 2 ? "still double the pre-war level" : `still about ${k <= 12 ? NUMW[k] : k} times the pre-war level`; }
+      if (m >= 1.1) return `still about ${round10((m - 1) * 100)}% above the pre-war level`;
+      if (m > 0.9) return "back at the pre-war level";
+      return `below the pre-war level`;
     };
+    const jumped = (x) => x.pre >= MIN_BASE && x.peak != null && x.peak / x.pre >= 1.9;
+    const fellSince = (x) => x.pk >= 0 && x.pk !== last && x.lastv != null && x.lastv < x.peak * 0.9;
     {
-      const ru = s[1].values, b = usableBase(ru), l = ru[last], pk = peakOf(ru);
-      const fell = b && l != null && pk >= 0 && pk !== last && ru[pk] > l * 1.1;
-      document.getElementById("flows-h").textContent = fell
-        ? `${c}'s sales to Russia ${grew(ru[pk] / b)} by ${YEARS[pk]}, then ${grew(l / ru[pk])}`
-        : b && l != null
-        ? `${c}'s sales to Russia ${grew(l / b)} after the invasion`
-        : l != null ? `${c} sold Russia ${fmtMoney(rawBase(ru) || 0)} a year of these goods before the war and ${fmtMoney(l)} in ${ly}` : "Both legs, year by year";
+      const up = C.filter((x) => jumped(x) && fellSince(x)), flat = C.filter((x) => !jumped(x));
+      const names = (a) => a.map((x) => `${x.c}'s`).join(" and ");
+      document.getElementById("flows-h").textContent = up.length
+        ? `${names(up)} sales to Russia jumped after the invasion and have fallen since` + (flat.length ? `; ${names(flat)} never took off` : "")
+        : "Both legs, country by country";
+      document.getElementById("flows-sub").textContent = C.map((x) => {
+        if (x.lastv == null || x.pre == null) return "";
+        if (x.pre < MIN_BASE) return `${x.c} sold Russia almost none of these goods before the war; in ${ly} it sold ${fmtMoney(x.lastv)}.`;
+        if (jumped(x)) return `${x.c}'s sales to Russia ${grew(x.peak / x.pre)} by ${YEARS[x.pk]}` + (fellSince(x) ? ` and have fallen since, but are ${levelW(x.lastv / x.pre)}` : "") + ` (${fmtMoney(x.lastv)} in ${ly}).`;
+        return `${x.c}'s sales to Russia never took off: ${fmtMoney(x.lastv)} in ${ly}.`;
+      }).filter(Boolean).join(" ");
     }
-    document.getElementById("flows-sub").textContent =
-      `${say(s[0].values, `EU sales to ${c}`)} ` + (() => {
-        const ru = s[1].values, b = rawBase(ru), l = ru[last];
-        return b != null && l != null ? `${c} sold Russia ${fmtMoney(l)} of these goods in ${ly}, against ${fmtMoney(b)} a year before the war.` : "";
-      })();
-    document.getElementById("flows-legend").replaceChildren();
-    const ev = eventsFor(c);
-    // On the chart, the three steps of the goods list (9, 45, 50 codes) are one mark; three marks
-    // within nine months crowd the top of the chart.
+    // the panels; the shared events only (the goods list's three steps are one mark)
+    const ev = D.events.filter((e) => !e.country).map((e) => ({ ...e, pos: datePos(e.date) }));
     const listEv = ev.filter((e) => /codes/.test(e.short || ""));
     const chartEv = listEv.length > 1
       ? [...ev.filter((e) => !listEv.includes(e)), { ...listEv[0], short: `List: ${listEv.map((e) => (e.short.match(/\d+/) || [""])[0]).join(" → ")} codes` }]
       : ev;
-    lineChart(document.getElementById("flows-chart"), {
-      series: s, fmt: fmtMoney, events: chartEv, endNames: true,
+    const grid = document.getElementById("flows-grid");
+    grid.replaceChildren(...C.map((x) => h("figure", {}, [h("figcaption", { text: x.c }), h("div", { class: "chart sm" })])));
+    C.forEach((x, k) => lineChart(grid.children[k].querySelector(".chart"), {
+      series: [
+        { label: `EU sales to ${x.c}`, endName: "from the EU", color: FLOW.eu.color, values: x.eu },
+        { label: `${x.c}'s sales to Russia`, endName: "to Russia", color: FLOW.ru.color, values: x.ru },
+      ],
+      fmt: fmtMoney, events: chartEv, endNames: true,
       topTickFmt: (t) => `${cur()}${t.toLocaleString("en-US")}M`,
-      aria: `${c}: EU-27 exports and exports to Russia, ${basketLabel()}, ${state.currency} million, 2019 to 2025`,
-    });
+      aria: `${x.c}: EU exports to it and its exports to Russia, ${basketLabel()}, ${state.currency} million a year`,
+    }));
+    // the sizes, so countries can be compared without a log scale
+    const cellPk = (v, i) => (v == null || i < 0 ? "—" : `${fmtMoney(v)} (${YEARS[i]})`);
+    document.getElementById("flows-sum").replaceChildren(
+      h("thead", {}, h("tr", {}, ["", `Before the war (${baseLabel()}, a year)`, "Peak", String(ly)].map((t) => h("th", { text: t })))),
+      h("tbody", {}, C.flatMap((x) => [
+        h("tr", {}, [h("th", { scope: "row", text: `${x.c} to Russia` }), h("td", { text: x.pre == null ? "—" : fmtMoney(x.pre) }), h("td", { text: cellPk(x.peak, x.pk) }), h("td", { class: "chg", text: x.lastv == null ? "—" : fmtMoney(x.lastv) })]),
+        h("tr", { class: "legs-eu" }, [h("th", { scope: "row", text: `EU to ${x.c}` }), h("td", { text: x.preE == null ? "—" : fmtMoney(x.preE) }), h("td", { text: cellPk(x.peakE, x.pkE) }), h("td", { text: x.lastE == null ? "—" : fmtMoney(x.lastE) })]),
+      ])),
+    );
     const lastPos = YEARS.length - 0.5;
     document.getElementById("flows-events").replaceChildren(...ev.map((e) =>
       h("li", {}, [
@@ -835,151 +850,8 @@
       ])
     ));
     table(document.getElementById("flows-table"),
-      ["Year", ...s.map((x) => `${x.label} (${state.currency} M)`)],
-      YEARS.map((yr, i) => [String(yr), ...s.map((x) => fmtM(x.values[i]))]));
-  }
-
-  // ---------- section 2 ----------
-  function comparison() {
-    const data = {};
-    for (const c of D.countries) {
-      const eu = series("eu", c), ru = series("ru", c);
-      data[c] = {
-        eu: indexOf(eu).map((v) => (v == null ? null : v / 100)), ru: indexOf(ru).map((v) => (v == null ? null : v / 100)),
-        ratio: YEARS.map((_, i) => (eu[i] && ru[i] != null ? (100 * ru[i]) / eu[i] : null)),
-      };
-    }
-    {
-      const [kz, kg] = D.countries, ly = YEARS.length - 1;
-      const rz = series("ru", kz), rg = series("ru", kg);
-      const size = rz[ly] && rg[ly] ? rz[ly] / rg[ly] : null;
-      const gz = data[kz].ru[ly], gg = data[kg].ru[ly];
-      const pz = peakOf(data[kz].ru), pg = peakOf(data[kg].ru);
-      document.getElementById("cmp-h").textContent = gz != null && gg != null && pz >= 0 && pg >= 0 && pz !== ly && pg !== ly
-        ? `${kz} ships more, ${kg} grew faster, and both have passed their peak`
-        : `${kz} ships more; ${kg} grew faster`;
-      document.getElementById("cmp-sub").textContent =
-        `In ${YEARS[ly]}, ${kz} sold Russia ${fmtMoney(rz[ly])} of these goods` +
-        (size && size >= 1.9 ? `, about ${Math.round(size) <= 12 ? NUMW[Math.round(size)] : Math.round(size)} times as much as ${kg}. ` : size ? `, against ${kg}'s ${fmtMoney(rg[ly])}. ` : ". ") +
-        (gz != null && gg != null ? `Since before the war, ${kg}'s sales ${grew(gg)} and ${kz}'s ${grew(gz)}.` : "") +
-        (gz != null && gg != null && pz >= 0 && pg >= 0 && pz !== ly && pg !== ly ? ` ${kg}'s peaked in ${YEARS[pg]}, ${kz}'s in ${YEARS[pz]}.` : "") +
-        D.countries.slice(2).map((c) => {
-          const r = series("ru", c), g = data[c].ru[ly];
-          return r[ly] == null ? "" : g != null ? ` ${c}'s sales ${grew(g)}, to ${fmtMoney(r[ly])}.` : ` ${c} sold ${fmtMoney(r[ly])}.`;
-        }).join("");
-    }
-    // The colour says the leg (as everywhere on the page); the marker, the dash and the name say the country.
-    const mk = (key) => D.countries.map((c) => ({
-      label: c, endName: c, color: key === "eu" ? FLOW.eu.color : FLOW.ru.color, marker: COUNTRY[c].marker, dash: COUNTRY[c].dash,
-      tint: COUNTRY[c].marker === "square" ? 0.5 : null, values: data[c][key],
-    }));
-    const capFor = (key) => {
-      const small = D.countries.filter((c) => data[c][key].every((v) => v == null) && series(key, c).some((v) => v != null));
-      return `times the ${baseLabel()}, log scale` + small.map((c) => `; ${c}: ${smallBaseNote(series(key, c))}`).join("");
-    };
-    document.getElementById("cmp-eu-cap").textContent = capFor("eu");
-    document.getElementById("cmp-ru-cap").textContent = capFor("ru");
-    document.getElementById("cmp-legend").replaceChildren();
-    // One log scale for both panels, so a step up means the same growth in each.
-    const allX = D.countries.flatMap((c) => [...data[c].eu, ...data[c].ru]).filter((v) => v > 0);
-    const dom = [Math.min(...allX, 1) * 0.8, Math.max(...allX, 1) * 1.15];
-    const xt = (t) => `×${t < 1 ? t : t.toLocaleString("en-US")}`;
-    lineChart(document.getElementById("cmp-eu"), { series: mk("eu"), fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom, endNames: true, aria: `EU-27 exports as a multiple of the ${baseLabel()}` });
-    lineChart(document.getElementById("cmp-ru"), { series: mk("ru"), fmt: fmtX, tickFmt: xt, log: true, baseline: 1, domain: dom, endNames: true, aria: `Exports to Russia as a multiple of the ${baseLabel()}` });
-    // The two legs against each other: one point a year, in money, not a ratio. One small scatterplot a
-    // country on one shared log scale, so each path reads on its own and every year can carry a label.
-    {
-      const box = document.getElementById("cmp-ratio");
-      const S = D.countries.map((c) => ({ label: c, marker: COUNTRY[c].marker, x: series("eu", c), y: series("ru", c) }));
-      const vals = S.flatMap((s) => [...s.x, ...s.y]).filter((v) => v > 0);
-      const domS = vals.length ? [Math.min(...vals) * 0.7, Math.max(...vals) * 1.4] : null;
-      box.replaceChildren(...S.map((s) => h("figure", { class: "scatter-fig" }, [h("figcaption", { text: s.label }), h("div", { class: "chart" })])));
-      S.forEach((s, i) => scatterChart(box.children[i].querySelector(".chart"), {
-        series: [s], domain: domS, allYears: true,
-        aria: `${s.label}: exports to Russia against EU exports to it, one point a year, log scales`,
-      }));
-    }
-    const head = ["Year"];
-    for (const c of D.countries) head.push(`${c}: EU exports, ×`, `${c}: to Russia, ×`, `${c}: EU exports, ${cur()}M`, `${c}: to Russia, ${cur()}M`);
-    table(document.getElementById("cmp-table"), head, YEARS.map((yr, i) => {
-      const row = [String(yr)];
-      for (const c of D.countries) row.push(fmtX(data[c].eu[i]), fmtX(data[c].ru[i]), fmtM(series("eu", c)[i]), fmtM(series("ru", c)[i]));
-      return row;
-    }));
-  }
-
-  // ---------- connected scatterplot: leg 1 (x) against leg 2 (y), log scales ----------
-  function scatterChart(container, opts) {
-    const W = container.clientWidth, H = container.clientHeight;
-    if (W < 120 || H < 80) return;
-    const m = { top: 14, right: 16, bottom: 34, left: 50 };
-    // Square plot area: both axes use one scale, so the equal-value line runs at 45 degrees.
-    const iw = Math.min(W - m.left - m.right, H - m.top - m.bottom), ih = iw;
-    const pts = opts.series.flatMap((s) => s.x.map((xv, i) => [xv, s.y[i]])).filter(([a, b]) => a > 0 && b > 0);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "" });
-    if (!pts.length) { container.replaceChildren(svg); return; }
-    const all = pts.flat();
-    const lo = opts.domain ? opts.domain[0] : Math.min(...all) * 0.7, hi = opts.domain ? opts.domain[1] : Math.max(...all) * 1.4;
-    const l0 = Math.log10(lo), l1 = Math.log10(hi);
-    const sx = (v) => m.left + ((Math.log10(v) - l0) / (l1 - l0)) * iw;
-    const sy = (v) => m.top + ih - ((Math.log10(v) - l0) / (l1 - l0)) * ih;
-    const ticks = logTicks(lo, hi).filter((t) => isPow10(t) || logTicks(lo, hi).length <= 5);
-    const tf = (t) => `${cur()}${t >= 1 ? t.toLocaleString("en-US") : t}M`;
-    for (const t of ticks) {
-      el("line", { x1: m.left, x2: m.left + iw, y1: sy(t), y2: sy(t), stroke: css("--grid") }, svg);
-      el("line", { x1: sx(t), x2: sx(t), y1: m.top, y2: m.top + ih, stroke: css("--grid") }, svg);
-      const a = el("text", { x: m.left - 6, y: sy(t) + 4, "text-anchor": "end" }, svg); a.textContent = tf(t);
-      const b = el("text", { x: sx(t), y: m.top + ih + 15, "text-anchor": "middle" }, svg); b.textContent = tf(t);
-    }
-    const xl = el("text", { x: m.left + iw, y: m.top + ih + 30, "text-anchor": "end", class: "axis-lbl" }, svg); xl.textContent = "from the EU →";
-    const yl = el("text", { x: m.left + 4, y: m.top + 10, class: "axis-lbl" }, svg); yl.textContent = "↑ to Russia";
-    // Equal value: on this line the country sends Russia as much as it buys from the EU.
-    el("line", { x1: sx(lo), y1: sy(lo), x2: sx(hi), y2: sy(hi), stroke: css("--axis"), "stroke-dasharray": "1 3" }, svg);
-    const eqAt = lo * Math.pow(hi / lo, 0.62);
-    const eq = el("text", { x: sx(eqAt) - 6, y: sy(eqAt) - 4, "text-anchor": "end", class: "ref-lbl" }, svg); eq.textContent = "equal value";
-    const ink = css("--text-primary"), surface = css("--surface-1");
-    for (const s of opts.series) {
-      const P = s.x.map((xv, i) => ({ i, xv, yv: s.y[i] })).filter((p) => p.xv > 0 && p.yv > 0);
-      const d = P.map((p, k) => `${k ? "L" : "M"}${sx(p.xv).toFixed(1)},${sy(p.yv).toFixed(1)}`).join("");
-      el("path", { d, fill: "none", stroke: ink, "stroke-width": 1.2, "stroke-opacity": s.tint ? 0.4 : 0.75 }, svg);
-      for (const p of P) {
-        const cx = sx(p.xv), cy = sy(p.yv);
-        const mark = s.marker === "square"
-          ? el("rect", { x: cx - 3.5, y: cy - 3.5, width: 7, height: 7, fill: ink, "fill-opacity": s.tint ? 0.7 : 1, stroke: surface, "stroke-width": 1.5, "paint-order": "stroke", tabindex: 0 }, svg)
-          : s.marker === "triangle"
-            ? el("path", { d: `M${cx},${cy - 5}L${cx + 4.5},${cy + 3.2}L${cx - 4.5},${cy + 3.2}Z`, fill: ink, stroke: surface, "stroke-width": 1.5, "paint-order": "stroke", tabindex: 0 }, svg)
-            : el("circle", { cx, cy, r: 3.5, fill: ink, stroke: surface, "stroke-width": 1.5, "paint-order": "stroke", tabindex: 0 }, svg);
-        const tipAt = (x, y) => showTip(x, y, `${s.label}, ${YEARS[p.i]}`, [
-          { color: css(FLOW.eu.color), value: fmtMoney(p.xv), label: "from the EU" },
-          { color: css(FLOW.ru.color), value: fmtMoney(p.yv), label: "to Russia" },
-        ]);
-        mark.addEventListener("pointermove", (e) => tipAt(e.clientX, e.clientY));
-        mark.addEventListener("pointerleave", hideTip);
-        mark.addEventListener("focus", () => { const r = mark.getBoundingClientRect(); tipAt(r.left, r.top); });
-        mark.addEventListener("blur", hideTip);
-        const yr = YEARS[p.i], lastP = p === P[P.length - 1];
-        const L = P[P.length - 1], far = Math.hypot(sx(L.xv) - cx, sy(L.yv) - cy) > 28; // keep clear of the end label
-        if (opts.allYears) {
-          // every year labelled, short form; a label that would sit on an earlier one is left out
-          const lx = cx + 6, ly = cy - 5;
-          s._lbl = s._lbl || [];
-          if (lastP || !s._lbl.some(([qx, qy]) => Math.abs(qx - lx) < 24 && Math.abs(qy - ly) < 11)) {
-            const t = el("text", { x: lx, y: ly, class: lastP ? "pt-yr end" : "pt-yr" }, svg);
-            t.textContent = lastP || p === P[0] ? String(yr) : `’${String(yr).slice(2)}`;
-            s._lbl.push([lx, ly]);
-          }
-          continue;
-        }
-        if (p === P[0] || (yr === 2022 && far) || lastP) {
-          // the end label goes to the left when another point of the line sits just to its right
-          const lblW = (lastP ? `${s.label}, ${yr}` : String(yr)).length * 6.6;
-          const left = lastP && (cx + 7 + lblW > W || P.some((q) => q !== p && sx(q.xv) > cx && sx(q.xv) - cx < 110 && Math.abs(sy(q.yv) - cy) < 12));
-          const t = el("text", { x: cx + (left ? -7 : 7), y: cy + (lastP ? 4 : yr === 2022 ? -6 : 13), "text-anchor": left ? "end" : "start", class: lastP ? "pt-yr end" : "pt-yr" }, svg);
-          t.textContent = lastP ? `${s.label}, ${yr}` : String(yr);
-        }
-      }
-    }
-    container.replaceChildren(svg);
+      ["Year", ...C.flatMap((x) => [`EU to ${x.c} (${state.currency} M)`, `${x.c} to Russia (${state.currency} M)`])],
+      YEARS.map((yr, i) => [String(yr), ...C.flatMap((x) => [fmtM(x.eu[i]), fmtM(x.ru[i])])]));
   }
 
   // ---------- mirror check ----------
@@ -3023,7 +2895,6 @@
   seg(document.getElementById("route-years"), YEARS.map((y) => ({ value: y, label: String(y) })), () => state.routeYear, (v) => { state.routeYear = v; routeAll(); });
 
   const countryOpts = D.countries.map((c) => ({ value: c, label: c }));
-  seg(document.getElementById("flows-country"), countryOpts, () => state.flowsCountry, (v) => { state.flowsCountry = v; flows(); });
   {
     // the explorer's code list: grouped by tier, short names
     const sel = document.getElementById("xp-code");
@@ -3072,7 +2943,6 @@
     const set = (id, parts) => { const n = document.getElementById(id); if (n) n.textContent = parts.filter(Boolean).join(" · "); };
     set("scope-legs", [goods, money, base]);
     set("scope-sup", [goods, money, "one log scale for all three"]);
-    set("scope-cmp", [goods, money, base]);
     set("scope-mirror", [goods, `pre-war ratio: ${baseLabel()}`]);
     set("scope-ctl", [goods, `pre-war share: ${baseLabel()}`]);
     set("scope-exc", ["All 49 codes (goods and price filters do not apply)", `against the ${baseLabel()}`, "one log scale"]);
@@ -3082,7 +2952,7 @@
   function renderFiltered() {
     document.getElementById("f-note").textContent = `The filters apply to every chart with a filter line above it. Prices: ${state.prices === "real" ? `${state.currency === "EUR" ? "euro-area HICP" : "US consumer prices (CPI-U)"}, ${REF_YEAR} = 100` : "as recorded each year"}.`;
     scopes();
-    routeAll(); flows(); comparison(); mirror(); tiers(); goods();
+    routeAll(); flows(); mirror(); tiers(); goods();
     if (D.mirrorCn) mirrorChina();
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();
@@ -3103,7 +2973,7 @@
   function renderAll() { renderFiltered(); crossChecks(); }
   renderAll();
   let rt;
-  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); comparison(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.cases) casesStudy(); if (D.members) membersStudy(); if (D.designationEffect) designationEffect(); enforcementTimeline(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { route.paths = null; routeAll(); flows(); mirror(); tiers(); if (D.mirrorCn) mirrorChina(); if (D.unitValues) uvStudy(); if (D.designations) designationStudy(); if (D.responses) responsesStudy(); if (D.cases) casesStudy(); if (D.members) membersStudy(); if (D.designationEffect) designationEffect(); enforcementTimeline(); if (D.estimate) estimateStudy(); codeExplorer(); if (D.eventStudy) eventStudy(); if (D.ban) banStudy(); if (D.control) controlStudy(); if (D.excess) excessStudy(); if (D.suppliers) supplierStudy(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { route.paths = null; renderAll(); });
   window.addEventListener("scroll", hideTip, { passive: true });
 })();

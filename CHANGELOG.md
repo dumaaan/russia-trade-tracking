@@ -2,6 +2,15 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.22.0 — 2026-11-24
+
+### Changed
+- **Both legs, country by country (Part 1):** the "Both legs" chart (one country at a time) and the
+  "Kazakhstan, Kyrgyzstan, Uzbekistan" chapter (two log-scale index charts and three connected
+  scatterplots) are one chapter: three panels side by side, each with two lines in plain dollars
+  (EU sales in, sales to Russia out), each on its own scale, and a table of the sizes before the
+  war, at the peak and in the latest year. The heading and text say the change in words.
+
 ## 1.21.0 — 2026-11-24
 
 ### Changed
