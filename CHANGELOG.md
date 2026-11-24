@@ -2,6 +2,16 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.23.0 — 2026-11-24
+
+### Changed
+- **Which EU countries ship the goods (Part 1):** a two-panel chart (the five border states, the other
+  22, each a line in dollars on its own scale) carries the story; the table shows the ten largest
+  shippers in the latest year (92% of the total in 2025) with four columns: the shape over time, the
+  pre-war size, the latest size and a bar to scale. All 27 member states are one click away. The peak,
+  rise and change columns and the court-cases column are gone (the line shows the peak; Part 4 has
+  the cases). On phones the table shows the latest size and the bar only.
+
 ## 1.22.0 — 2026-11-24
 
 ### Changed

@@ -2146,8 +2146,6 @@
       const t = Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 3);
       return t.length ? `Largest codes in ${peak}: ` + t.map(([c, v]) => `${fmtCode(c)} ${(chplByCode[c] || {}).description || ""} (${usd(v)})`).join("; ") : "";
     };
-    const nCases = {};
-    for (const r of D.cases || []) (nCases[r[3]] = nCases[r[3]] || new Set()).add(r[0]);
     let barMax = 1e-9; // set below from the member states' latest values
     const sizeBar = (v) => {
       const BW = 72, w = Math.max(v > 0 ? 1 : 0, (v / barMax) * BW);
@@ -2155,41 +2153,44 @@
       el("rect", { x: 0, y: 2, width: Math.min(w, BW), height: 6, class: "mem-bar-fill" }, svg);
       return svg;
     };
+    // Four columns a reader needs: who, the shape over time, the size before the war, the size now (with a
+    // bar on one scale). The peak shows in the line; the cases are in Part 4.
     const tr = (r, cls) => h("tr", cls ? { class: cls } : {}, [
-      h("th", { scope: "row", class: "lbl", text: r.label }),
+      h("th", { scope: "row", class: "lbl" }, [r.label, r.border && r.state ? h("span", { class: "mem-tag", text: "border" }) : null]),
       h("td", { class: "spark-cell" }, spark(r)),
       h("td", { text: usd(r.pre) }),
-      h("td", { text: `${usd(r.pkv)} (${r.pk})` }),
-      h("td", { text: usd(r.lastv) }),
-      h("td", { class: "bar-cell" }, r.noBar ? null : sizeBar(r.lastv)),
-      h("td", { class: "chg", text: r.pre >= 0.05 ? fx(r.pkv / r.pre) : "from near zero" }),
-      h("td", { class: "chg", text: r.pk === last ? "at the peak" : r.pkv > 0 ? pct(r.lastv / r.pkv) : "—" }),
-      h("td", r.cases ? { text: String(r.cases) } : { text: "" }), // a blank cell, not "none" twenty times
+      h("td", { class: "chg", text: usd(r.lastv) }),
+      h("td", { class: "bar-cell" }, sizeBar(r.lastv)),
     ]);
-    const group = (t) => h("tr", { class: "group" }, h("th", { colspan: 9, scope: "rowgroup", text: t }));
-    const state1 = (m) => Object.assign(rowOf(NAMES[m], (yy) => get(m, yy), BORDER.has(m), topNote(m)), { cases: nCases[m] ? nCases[m].size : 0 });
-    const borderRows = members.filter((m) => BORDER.has(m)).map(state1).sort((a, b) => b.pkv / Math.max(b.pre, 1e-9) - a.pkv / Math.max(a.pre, 1e-9));
-    // States that never reached $1M a year are one row: their own sparklines would only show noise.
-    const SMALL = 1;
-    const isSmall = (m) => !BORDER.has(m) && Math.max(...YEARS.map((yy) => get(m, yy))) < SMALL;
-    const smallSet = members.filter(isSmall);
-    const otherRows = members.filter((m) => !BORDER.has(m) && !isSmall(m)).map(state1).sort((a, b) => b.lastv - a.lastv);
-    if (smallSet.length) {
-      const sr = rowOf(`${capW(NUMW[smallSet.length] || String(smallSet.length))} others, each under $1M a year`, (yy) => sum((m) => smallSet.includes(m), (m) => get(m, yy)), false,
-        smallSet.map((m) => NAMES[m]).join(", "));
-      sr.cases = smallSet.reduce((a, m) => a + (nCases[m] ? nCases[m].size : 0), 0);
-      otherRows.push(sr);
+    void fx; void pct;
+    const state1 = (m) => Object.assign(rowOf(NAMES[m], (yy) => get(m, yy), BORDER.has(m), topNote(m)), { state: true });
+    const rowsAll = members.map(state1).sort((a, b) => b.lastv - a.lastv);
+    barMax = Math.max(...rowsAll.map((r) => r.lastv), 1e-9);
+    const head = () => h("thead", {}, h("tr", {}, ["", "2019–2025 (shape)", "Before the war, a year", String(last), `${last}, to scale`].map((t) => h("th", { scope: "col", text: t }))));
+    const TOP = 10;
+    const topShare = rowsAll.slice(0, TOP).reduce((s, r) => s + r.lastv, 0) / Math.max(rowsAll.reduce((s, r) => s + r.lastv, 0), 1e-9);
+    box.replaceChildren(
+      h("p", { class: "mem-cap", text: `The ${TOP} largest in ${last}: ${Math.round(100 * topShare)}% of all EU shipments` }),
+      h("div", { class: "table-wrap" }, h("table", { class: "supertable mem-table" }, [head(), h("tbody", {}, rowsAll.slice(0, TOP).map((r) => tr(r)))])),
+      h("details", { class: "table-view" }, [h("summary", { text: `Show all ${members.length} member states` }),
+        h("div", { class: "table-wrap" }, h("table", { class: "supertable mem-table" }, [head(), h("tbody", {}, rowsAll.map((r) => tr(r)))]))]),
+    );
+
+    // The story chart: the five border states against the other 22, each a line in dollars on its own scale.
+    {
+      const g = document.getElementById("mem-groups");
+      if (g) {
+        const usdF = (v) => (v == null ? "—" : usd(v));
+        const bS = YEARS.map((yy) => sum((m) => BORDER.has(m), (m) => get(m, yy))), oS = YEARS.map((yy) => sum((m) => !BORDER.has(m), (m) => get(m, yy)));
+        const panels = [[`The ${NUMW[BORDER.size] || BORDER.size} border states`, bS, "--c-kg"], [`The other ${nRest}`, oS, "--flow-eu"]];
+        g.replaceChildren(...panels.map(([t]) => h("figure", {}, [h("figcaption", { text: t }), h("div", { class: "chart sm" })])));
+        panels.forEach(([t, v, col], k) => lineChart(g.children[k].querySelector(".chart"), {
+          series: [{ label: t, color: col, values: v }], fmt: usdF,
+          topTickFmt: (q) => `$${q.toLocaleString("en-US")}M`, tickCount: 3,
+          aria: `${t}: EU exports of the listed goods to ${ROUTE[dest]}, current US dollars a year`,
+        }));
+      }
     }
-    barMax = Math.max(...[...borderRows, ...otherRows].map((r) => r.lastv), 1e-9);
-    const bTot = rowOf(`The ${NUMW[BORDER.size] || BORDER.size} border states`, (yy) => sum((m) => BORDER.has(m), (m) => get(m, yy)), true);
-    const oTot = rowOf(`The other ${nRest}`, (yy) => sum((m) => !BORDER.has(m), (m) => get(m, yy)), false);
-    const head = h("thead", {}, h("tr", {}, ["", "2019–2025, own scale", "2019–21 average", "Peak (year)", String(last), `${last}, one scale`, "Rise to the peak", `Change since the peak`, "Cases (Part 4)"].map((t) => h("th", { scope: "col", text: t }))));
-    const t = h("table", { class: "supertable mem-table" }, [head, h("tbody", {}, [
-      group("Totals"), tr(Object.assign(bTot, { noBar: true }), "mem-total"), tr(Object.assign(oTot, { noBar: true }), "mem-total"),
-      group("Border with Russia or Belarus"), ...borderRows.map((r) => tr(r)),
-      group(`Other member states, largest in ${last} first`), ...otherRows.map((r) => tr(r)),
-    ])]);
-    box.replaceChildren(h("div", { class: "table-wrap" }, t));
 
     // the numbers: every member state, every year
     const yHead = ["Member state", ...YEARS.map(String)];

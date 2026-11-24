@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.34">
+  <link rel="stylesheet" href="style.css?v=1.37">
 </head>
 <body>
 <a class="skip" href="#suppliers">Skip to the charts</a>
@@ -93,9 +93,6 @@
     <div class="ch-text">
       <h2 id="mem-h">Which EU countries ship the goods</h2>
       <p class="finding" id="mem-sub"></p>
-      <p class="finding">Each row is one member state. Its small line traces exports from 2019 to 2025; the shaded
-        part is the three years before the war, and the larger dot is the peak. Each line has its own scale; the
-        grey bar shows the latest year's size on one scale for all states.</p>
       <p class="aside">A rise does not prove a detour. Telecom networks, factories and mines in the three countries
         buy these goods too. The tooltip on each line names its largest codes in the peak year. The border states are Estonia,
         Finland, Latvia, Lithuania and Poland.</p>
@@ -104,6 +101,8 @@
     <div class="ch-figure">
       <p class="scope">All 49 codes · current US dollars · Eurostat Comext, by the member state that ships · filters do not apply</p>
       <div class="seg" role="radiogroup" aria-label="Route country" id="mem-dest"></div>
+      <p class="mem-cap">EU shipments to the route countries, dollars a year · each panel on its own scale</p>
+      <div class="grid2" id="mem-groups"></div>
       <div id="mem-plot"></div>
       <details class="table-view"><summary>Every year, every member state</summary><div id="mem-table"></div></details>
     </div>
@@ -445,6 +444,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.29"></script>
-<script src="app.js?v=1.77"></script>
+<script src="app.js?v=1.78"></script>
 </body>
 </html>

@@ -611,3 +611,12 @@ a.xp-link:hover { text-decoration-color: var(--ink); }
 .tl-svg .tl-peak { fill: var(--flow-ru); }
 .legs-table { max-width: 760px; margin-top: 22px; }
 .legs-table tr.legs-eu th, .legs-table tr.legs-eu td { color: var(--ink-3); font-weight: 400; }
+.mem-cap { margin: 18px 0 4px; font-size: 13.5px; font-weight: 650; color: var(--ink-2); }
+.mem-tag { display: inline-block; margin-left: 8px; padding: 0 5px; font-size: 11px; font-weight: 600; color: var(--c-kg); border: 1px solid var(--c-kg); border-radius: 3px; vertical-align: 1px; }
+#mem-groups .chart.sm { height: 170px; }
+.mem-table { max-width: 860px; }
+@media (max-width: 560px) {
+  /* phones: who, how much now, to scale; the shape and the pre-war size are in "Show all" on wider screens */
+  .mem-table { min-width: 0; }
+  .mem-table tr > :nth-child(2), .mem-table tr > :nth-child(3) { display: none; }
+}
