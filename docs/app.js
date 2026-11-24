@@ -2201,117 +2201,96 @@
 
 
   // ---------- EU enforcement cases that name the route ----------
+  // The usual standard for enforcement data: a league table by country (as in the European sanctions
+  // enforcement league tables) and one row per case (as in enforcement trackers). Ten cases are too few for
+  // a chart; the words carry the data.
   const CASE_STAGE = {
     investigation: { label: "investigation", g: "open" }, arrest: { label: "arrest", g: "open" },
     charge: { label: "charged", g: "charged" }, "sent to prosecutor": { label: "sent to prosecutor", g: "charged" },
-    conviction: { label: "conviction", g: "decided" }, fine: { label: "fine", g: "decided" },
+    conviction: { label: "convicted", g: "decided" }, fine: { label: "fined", g: "decided" },
   };
   function casesStudy() {
     const C = D.cases;
     if (!C) return;
     const EU = { AT: "Austria", BE: "Belgium", BG: "Bulgaria", CZ: "Czechia", DE: "Germany", EE: "Estonia", FI: "Finland", FR: "France", LT: "Lithuania", LV: "Latvia", NL: "Netherlands", PL: "Poland", SE: "Sweden", ...((D.members || {}).names || {}) };
     const RN = { KZ: "Kazakhstan", KG: "Kyrgyzstan", UZ: "Uzbekistan" };
-    const items = C.map((r) => ({ id: r[0], date: r[1], dk: r[2], c: r[3], stage: r[4], who: r[5], route: r[6].split(";"), also: r[7], goods: r[8], value: r[9], outcome: r[10], src: r[11], srcType: r[12], primary: r[13] === "yes" }))
+    const steps = C.map((r) => ({ id: r[0], date: r[1], dk: r[2], c: r[3], stage: r[4], who: r[5], route: r[6].split(";"), also: r[7], goods: r[8], value: r[9], outcome: r[10], src: r[11], srcType: r[12], primary: r[13] === "yes" }))
       .sort((a, b) => (a.date < b.date ? -1 : 1));
-    items.forEach((it, i) => { it.n = i + 1; });
-    const fmtD = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    const mon = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
     const listW = (a) => (a.length <= 1 ? a.join("") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
-    const PN = (c) => (c === "NL" ? "the Netherlands" : EU[c] || c); // name inside a sentence
-    const cap = (n) => capW(n <= 12 ? NUMW[n] : String(n));
-
-    // text, computed
-    const cases = [...new Set(items.map((x) => x.id))];
-    const named = (iso) => cases.filter((id) => items.some((x) => x.id === id && x.route.includes(iso))).length;
-    const decided = items.filter((x) => CASE_STAGE[x.stage] && CASE_STAGE[x.stage].g === "decided");
-    const convicted = items.filter((x) => x.stage === "conviction");
-    const convCountries = [...new Set(convicted.map((x) => x.c))];
+    const PN = (c) => (c === "NL" ? "the Netherlands" : EU[c] || c);
     const w = (n) => (n <= 12 ? NUMW[n] : String(n));
-    const nKZ = named("KZ"), nKG = named("KG"), nUZ = named("UZ");
-    document.getElementById("case-h").textContent = nKZ >= nKG && nKZ >= nUZ
-      ? `Kazakhstan appears in ${w(nKZ)} of the ${w(cases.length)} EU cases that name the route`
-      : `${cap(cases.length)} EU cases name the route through Central Asia`;
-    const convCases = new Set(convicted.map((x) => x.id));
-    const fined = decided.filter((x) => x.stage === "fine");
-    const fineCases = new Set(fined.map((x) => x.id).filter((id) => !convCases.has(id)));
-    const open = cases.filter((id) => !convCases.has(id) && !fineCases.has(id)).length;
-    let sub = `Kyrgyzstan appears in ${w(nKG)}, Uzbekistan in ${w(nUZ)}. ` +
-      `Courts in ${listW(convCountries.map(PN))} have convicted in ${w(convCases.size)} cases` +
-      (fineCases.size ? `; ${listW([...new Set(fined.map((x) => PN(x.c)))])} fined a company` : "") +
-      `; ${w(open)} ${open === 1 ? "is" : "are"} still open.`;
-    if (D.members) {
-      const last = Math.max(...D.members.rows.map((r) => r[2]));
-      const tot = {}; for (const [, m, y, v] of D.members.rows) if (y === last && v != null) tot[m] = (tot[m] || 0) + v;
-      const top5 = Object.keys(tot).sort((a, b) => tot[b] - tot[a]).slice(0, 5);
-      const withCase = new Set(items.map((x) => x.c));
-      const no = top5.filter((m) => !withCase.has(m));
-      if (no.length) sub += ` ${capW(listW(no.map(PN)))}, ${no.length === 1 ? "one" : w(no.length)} of the five largest shippers in ${last}, ${no.length === 1 ? "has" : "have"} no case here.`;
-    }
-    document.getElementById("case-sub").textContent = sub;
-
-    // timeline: one row an EU country, numbered marks, a thin line joins the steps of one case
-    const box = document.getElementById("case-plot");
-    const W = box.clientWidth || 700, small = W < 560;
-    const L = small ? 30 : 100, R = 14, rowH = 40, top = 14;
-    const countries = [...new Set(items.map((x) => x.c))];
-    const t0 = Date.UTC(+items[0].date.slice(0, 4), 0, 1);
-    const lastD = new Date(items[items.length - 1].date + "T00:00:00Z");
-    const t1 = Date.UTC(lastD.getUTCFullYear() + 1, 0, 1);
-    const x = (d) => L + ((Date.parse(d + "T00:00:00Z") - t0) / (t1 - t0)) * (W - L - R);
-    const H = top + countries.length * rowH + 20;
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", class: "case-svg", role: "img", "aria-label": `${items.length} enforcement steps in ${countries.length} EU countries, by date` });
-    for (let yy = new Date(t0).getUTCFullYear(); yy <= new Date(t1).getUTCFullYear(); yy++) {
-      const xx = x(`${yy}-01-01`);
-      el("line", { x1: xx, x2: xx, y1: top - 4, y2: H - 16, class: "uv-grid" }, svg);
-      if (yy < new Date(t1).getUTCFullYear()) { const t = el("text", { x: xx + 3, y: H - 3, class: "uv-tick" }, svg); t.textContent = String(yy); }
-    }
-    countries.forEach((c, k) => {
-      const cy = top + k * rowH + rowH / 2;
-      const lab = el("text", { x: 0, y: cy + 4, class: "uv-lbl" }, svg); lab.textContent = small ? c : EU[c] || c;
-      el("line", { x1: L, x2: W - R, y1: cy, y2: cy, class: "case-row" }, svg);
-      const mine = items.filter((it) => it.c === c);
-      for (const id of new Set(mine.map((it) => it.id))) {
-        const steps = mine.filter((it) => it.id === id);
-        if (steps.length > 1) el("line", { x1: x(steps[0].date), x2: x(steps[steps.length - 1].date), y1: cy, y2: cy, class: "case-link" }, svg);
-      }
-      const placed = [];
-      for (const it of mine) {
-        const cx = x(it.date);
-        let dy = 0; while (placed.some((p) => Math.abs(p.cx - cx) < 24 && p.dy === dy)) dy += 1;
-        placed.push({ cx, dy });
-        const cyy = cy - dy * 24;
-        const g0 = (CASE_STAGE[it.stage] || CASE_STAGE.investigation).g;
-        const g = el("g", { tabindex: 0, class: "resp-mark" }, svg);
-        const fill = g0 === "decided" ? css("--ink") : g0 === "charged" ? css("--ink-3") : css("--paper");
-        // the source type (court page or news report) is in the table only: four encodings on one mark were too many
-        el("circle", { cx, cy: cyy, r: 8, fill, stroke: g0 === "open" ? css("--ink-2") : fill, "stroke-width": 1.6 }, g);
-        const t = el("text", { x: cx, y: cyy + 3.5, "text-anchor": "middle", class: "resp-num", fill: g0 === "open" ? css("--ink") : css("--paper") }, g);
-        t.textContent = String(it.n);
-        const tip = (px, py) => showTip(px, py, `${it.n}. ${EU[it.c]}, ${fmtD(it.date)}${it.dk === "first reported" ? " (first report)" : ""}`,
-          [{ color: fill === css("--paper") ? css("--ink-2") : fill, value: (CASE_STAGE[it.stage] || {}).label || it.stage, label: `${it.goods}; route: ${it.route.map((r) => RN[r]).join(", ")}` }], it.outcome);
-        g.addEventListener("pointermove", (e) => tip(e.clientX, e.clientY));
-        g.addEventListener("pointerleave", hideTip);
-        g.addEventListener("focus", () => { const q = g.getBoundingClientRect(); tip(q.left, q.top); });
-        g.addEventListener("blur", hideTip);
-      }
+    // one record a case: its steps in order, the latest step decides its status
+    const cases = [...new Set(steps.map((s) => s.id))].map((id) => {
+      const st = steps.filter((s) => s.id === id), last = st[st.length - 1];
+      const g = (CASE_STAGE[last.stage] || {}).g || "open";
+      const penalty = g === "decided" ? last.outcome.split(/;|\. /)[0].replace(/\.$/, "") : "";
+      return { id, c: last.c, steps: st, last, decided: g === "decided", penalty, route: [...new Set(st.flatMap((s) => s.route))] };
     });
-    box.replaceChildren(svg);
+    const decided = cases.filter((x) => x.decided), open = cases.filter((x) => !x.decided);
+    // shipments by member state, latest year (all three route countries)
+    const ship = {};
+    let sy = null;
+    if (D.members) {
+      sy = Math.max(...D.members.rows.map((r) => r[2]));
+      for (const [, m, y, v] of D.members.rows) if (y === sy && v != null) ship[m] = (ship[m] || 0) + v;
+    }
+    const byShip = Object.keys(ship).sort((p, q) => ship[q] - ship[p]);
+    const withCase = new Set(cases.map((x) => x.c));
+    const bigNone = byShip.slice(0, 5).filter((m) => !withCase.has(m));
+    const rank = (m) => byShip.indexOf(m) + 1;
+    const ordW = (n) => ["", "largest", "second-largest", "third-largest", "fourth-largest", "fifth-largest"][n] || `number ${n}`;
+    document.getElementById("case-h").textContent = bigNone.length
+      ? `${capW(listW(bigNone.map(PN)))}, among the largest shippers, ${bigNone.length > 1 ? "have" : "has"} no public case that names the route`
+      : `${capW(w(cases.length))} EU cases name the route through Central Asia`;
+    document.getElementById("case-sub").textContent =
+      `${capW(w(cases.length))} cases in ${w(new Set(cases.map((x) => x.c)).size)} member states say goods went to Russia through Central Asia; ` +
+      `${w(decided.length)} ended in a conviction or a fine and ${w(open.length)} are still open. ` +
+      (bigNone.length ? `${capW(listW(bigNone.map(PN)))}, the ${listW(bigNone.map((m) => ordW(rank(m)).replace("-largest", bigNone.length > 1 ? "-" : "-largest")))}${bigNone.length > 1 ? "largest shippers" : " shipper"} in ${sy}, ${bigNone.length > 1 ? "have" : "has"} none. ` : "") +
+      `These are only the cases made public: EU states report thousands of sanctions investigations but name few.`;
 
-    // the table
-    const head = h("thead", {}, h("tr", {}, ["#", "Date", "EU country", "Step", "Route named", "Goods", "Value", "Outcome", "Source"].map((t) => h("th", { text: t }))));
-    const body = items.map((it) => h("tr", {}, [
-      h("td", { text: String(it.n) }),
-      h("td", { text: fmtD(it.date) + (it.dk === "first reported" ? " (first report)" : "") }),
-      h("td", { class: "lbl", text: EU[it.c] || it.c }),
-      h("td", { class: "lbl", text: (CASE_STAGE[it.stage] || {}).label || it.stage }),
-      h("td", { class: "lbl", text: it.route.map((r) => RN[r]).join(", ") + (it.also ? `; also ${it.also}` : "") }),
-      h("td", { class: "lbl", text: it.goods }),
-      h("td", { text: it.value }),
-      h("td", { class: "lbl resp-what", text: `${it.who}. ${it.outcome}` }),
-      h("td", { class: "lbl" }, [h("a", { href: it.src, target: "_blank", rel: "noopener", text: it.srcType }), it.primary ? "" : " (secondary)"]),
+    // A. the league table by member state: who ships, who prosecutes
+    const rowsL = byShip.filter((m, i) => i < 8 || withCase.has(m));
+    const maxS = Math.max(...rowsL.map((m) => ship[m] || 0), 1e-9);
+    const usdS = (v) => (v >= 100 ? `$${Math.round(v)}M` : v >= 1 ? `$${v.toFixed(1)}M` : `$${Math.round(v * 1000)}k`);
+    const count = (m, f) => cases.filter((x) => x.c === m && f(x)).length;
+    const blank = (n) => (n ? String(n) : "");
+    document.getElementById("case-plot").replaceChildren(h("table", { class: "supertable case-league" }, [
+      h("thead", {}, h("tr", {}, ["", `Shipped to the three, ${sy}`, "", "Cases", "Convicted or fined", "Still open"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, rowsL.map((m) => h("tr", { class: withCase.has(m) ? "" : "case-none" }, [
+        h("th", { scope: "row", text: EU[m] || m }),
+        h("td", { text: ship[m] != null ? usdS(ship[m]) : "—" }),
+        h("td", { class: "bar-cell" }, h("div", { class: "case-bar", style: { width: `${(100 * (ship[m] || 0) / maxS).toFixed(1)}%` } })),
+        h("td", { class: "chg", text: withCase.has(m) ? String(count(m, () => true)) : "none" }),
+        h("td", { text: blank(count(m, (x) => x.decided)) }),
+        h("td", { text: blank(count(m, (x) => !x.decided)) }),
+      ]))),
     ]));
-    document.getElementById("case-table").replaceChildren(head, h("tbody", {}, body));
-  }
 
+    // B. the case list: one row a case, decided first, newest first; the full outcome folded under each row
+    const STEPW = { investigation: "investigation opened", arrest: "arrest", charge: "charged", "sent to prosecutor": "sent to prosecutor", conviction: "convicted", fine: "fined" };
+    const row = (x) => {
+      const what = `${x.steps[x.steps.length - 1].goods}, through ${listW(x.route.map((r) => RN[r]))}`;
+      const dates = x.steps.map((s) => `${STEPW[s.stage] || s.stage} ${mon(s.date)}${s.dk === "report" ? " (first report)" : ""}`).join(" · ");
+      const src = x.steps[x.steps.length - 1];
+      return h("tr", {}, [
+        h("th", { scope: "row", text: EU[x.c] || x.c }),
+        h("td", { class: "lbl" }, [h("div", { class: "case-what", text: what }), h("div", { class: "case-dates", text: dates }),
+          h("details", { class: "case-more" }, [h("summary", { text: "details" }), ...x.steps.map((s) => h("p", { text: `${mon(s.date)}, ${s.who}: ${s.outcome}${s.value && s.value !== "not stated" ? ` Value: ${s.value}.` : ""}` }))])]),
+        h("td", { class: "lbl case-pen", text: x.decided ? x.penalty : (CASE_STAGE[x.last.stage] || {}).label || x.last.stage }),
+        h("td", { class: "lbl" }, [h("a", { href: src.src, target: "_blank", rel: "noopener", text: src.primary ? "official" : "news" }), h("span", { class: "case-srcw", text: ` ${src.srcType}` })]),
+      ]);
+    };
+    const newest = (p, q) => (p.last.date < q.last.date ? 1 : -1);
+    const grp = (t, n) => h("tr", { class: "group" }, h("th", { colspan: 4, scope: "rowgroup", text: `${t} (${n})` }));
+    document.getElementById("case-table").replaceChildren(
+      h("thead", {}, h("tr", {}, ["", "Case", "Result so far", "Source"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, [
+        grp("Convicted or fined", decided.length), ...decided.sort(newest).map(row),
+        grp("Still open", open.length), ...open.sort(newest).map(row),
+      ]),
+    );
+  }
 
   // ---------- do designations work? waves against all other months ----------
   function designationEffect() {
@@ -2747,6 +2726,67 @@
   };
   const CODE_USE = { "845710": "Precision metal parts for arms", "851762": "Field networks, drone telemetry" };
 
+  // ---------- which goods: one ranked bar list a country (the main view) ----------
+  // The finding is about shares, so the main view shows shares: the largest codes to Russia in the latest
+  // year as bars in dollars, with the pre-war value as a thin mark. The full code table is folded below.
+  function goodsBars() {
+    const box = document.getElementById("goods-bars");
+    if (!box) return;
+    const ly = YEARS.length - 1, yr = YEARS[ly], TOP = 8;
+    const weap = new Set((D.weapons || []).map((w) => w[0]));
+    const nameOf = (code) => SHORT[code] || (chplByCode[code] || {}).description || fmtCode(code);
+    const C = D.countries.map((c) => {
+      const vals = {};
+      for (const r of D.codes) if (r[0] === "ru" && r[1] === c && inBasket(r[3], state.basket) && r[4] != null) (vals[r[3]] = vals[r[3]] || YEARS.map(() => 0))[YEARS.indexOf(r[2])] += r[4];
+      const rows = Object.entries(vals).map(([code, v]) => {
+        const s = v.map((x, i) => (isAvail("ru", c, YEARS[i]) ? conv(x, YEARS[i]) : null));
+        return { code, now: s[ly] || 0, pre: rawBase(s) || 0 };
+      }).filter((r) => r.now > 0).sort((a, b) => b.now - a.now);
+      const total = rows.reduce((t, r) => t + r.now, 0);
+      const top = rows.slice(0, TOP), rest = rows.slice(TOP);
+      if (rest.length) top.push({ code: null, now: rest.reduce((t, r) => t + r.now, 0), pre: rest.reduce((t, r) => t + r.pre, 0), n: rest.length });
+      return { c, rows, top, total };
+    });
+    // the heading and text, in words, from the largest country
+    const K = C.reduce((p, q) => (q.total > p.total ? q : p), C[0]);
+    // in a sentence: lower-case the first letter only, keep acronyms (CNC), and use short names without commas
+    const IN_TEXT = { "851762": "routers", "848250": "cylindrical bearings" };
+    const lower = (s) => (/^[A-Z]{2}/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
+    const nameIn = (code) => IN_TEXT[code] || lower(nameOf(code));
+    if (K && K.rows.length >= 2) {
+      const two = (K.rows[0].now + K.rows[1].now) / K.total;
+      document.getElementById("goods-h").textContent = two >= 0.5
+        ? `Two kinds of goods, ${nameIn(K.rows[0].code)} and ${nameIn(K.rows[1].code)}, made up ${shareW(two)} of ${K.c}'s sales to Russia in ${yr}`
+        : `${capW(nameIn(K.rows[0].code))} led ${K.c}'s sales to Russia in ${yr}, with ${shareW(K.rows[0].now / K.total)} of the total`;
+    }
+    document.getElementById("goods-sub").textContent = C.filter((x) => x !== K && x.rows.length).map((x) => {
+      const t3 = x.rows.slice(0, 3).reduce((t, r) => t + r.now, 0) / x.total;
+      return x.rows[0].now / x.total >= 0.6
+        ? `In ${x.c}, one code, ${nameIn(x.rows[0].code)}, made up ${shareW(x.rows[0].now / x.total)}.`
+        : `In ${x.c}, the three largest codes made up ${shareW(t3)}.`;
+    }).join(" ");
+    // the bars: one panel a country, each on its own scale
+    box.replaceChildren(...C.map((x) => {
+      const max = Math.max(...x.top.map((r) => Math.max(r.now, r.pre)), 1e-9);
+      const pct = (v) => `${Math.min(100, (100 * v) / max).toFixed(2)}%`;
+      return h("figure", { class: "gb-panel" }, [
+        h("figcaption", {}, [x.c, h("span", { text: `${fmtMoney(x.total)} in ${yr}` })]),
+        ...x.top.map((r) => h("div", { class: `gb-row${r.code ? "" : " gb-rest"}` }, [
+          h("div", { class: "gb-name" }, [
+            r.code ? nameOf(r.code) : `All other codes (${r.n})`,
+            r.code && D.art12f.includes(r.code) ? h("span", { class: "ban-key", text: "EU ban" }) : null,
+            r.code && weap.has(r.code) ? h("span", { class: "weapon-key", text: "in weapons" }) : null,
+          ]),
+          h("div", { class: "gb-track", title: `${fmtCode(r.code || "")} ${r.code ? nameOf(r.code) : "other codes"}: ${fmtMoney(r.now)} in ${yr}, ${fmtMoney(r.pre)} a year before the war` }, [
+            h("div", { class: "gb-bar", style: { width: pct(r.now) } }),
+            r.pre > 0 ? h("div", { class: "gb-pre", style: { left: pct(r.pre) } }) : null,
+          ]),
+          h("div", { class: "gb-val" }, [h("b", { text: fmtMoney(r.now) }), ` · ${shareW(r.now / x.total)}`]),
+        ])),
+      ]);
+    }));
+  }
+
   function goods() {
     const { goodsCountry: c, goodsFlow: f } = state;
     const ly = YEARS.length - 1;
@@ -2765,12 +2805,8 @@
     }
     const total = Object.values(rowsByTier).flat().reduce((t, r) => t + (r.v[ly] || 0), 0);
     const all = Object.values(rowsByTier).flat().sort((a, b) => (b.v[ly] || 0) - (a.v[ly] || 0));
-    document.getElementById("goods-h").textContent = all.length && all[0].v[ly]
-      ? (all[0].v[ly] / total >= 0.2
-        ? `${(SHORT[all[0].code] || all[0].code).toLowerCase().replace(/^./, (x) => x.toUpperCase())} alone made up ${shareW(all[0].v[ly] / total)} of the ${YEARS[ly]} total`
-        : `${(SHORT[all[0].code] || all[0].code).toLowerCase().replace(/^./, (x) => x.toUpperCase())} led the ${YEARS[ly]} list, with ${shareW(all[0].v[ly] / total)} of the total`)
-      : "Which goods";
-    document.getElementById("goods-sub").textContent =
+    void all; void total;
+    document.getElementById("goods-cap").textContent =
       `${FLOW[f].label(c)} by code, in millions of ${priceLabel()}. Codes sit in the tiers of the EU list, with each tier's use given in its own row. Within a tier, the trend lines share a scale. Codes worth less than ${cur()}${MIN_BASE}M a year before the war get no multiple (—).`;
 
     const fmt = (x) => (x == null ? "—" : x === 0 ? "" : x < 0.05 ? "<0.1" : x >= 100 ? x.toFixed(0) : x.toFixed(1));
@@ -2953,7 +2989,7 @@
   function renderFiltered() {
     document.getElementById("f-note").textContent = `The filters apply to every chart with a filter line above it. Prices: ${state.prices === "real" ? `${state.currency === "EUR" ? "euro-area HICP" : "US consumer prices (CPI-U)"}, ${REF_YEAR} = 100` : "as recorded each year"}.`;
     scopes();
-    routeAll(); flows(); mirror(); tiers(); goods();
+    routeAll(); flows(); mirror(); tiers(); goods(); goodsBars();
     if (D.mirrorCn) mirrorChina();
     if (D.unitValues) uvStudy();
     if (D.designations) designationStudy();

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
-  <link rel="stylesheet" href="style.css?v=1.37">
+  <link rel="stylesheet" href="style.css?v=1.41">
 </head>
 <body>
 <a class="skip" href="#suppliers">Skip to the charts</a>
@@ -126,14 +126,20 @@
     <div class="ch-text">
       <h2 id="goods-h">Which goods</h2>
       <p class="finding" id="goods-sub"></p>
-      <div class="controls">
-        <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
-        <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
-      </div>
+      <p class="finding">Each bar is one kind of goods sold to Russia in the latest year, largest first. The thin mark
+        is what it was a year before the war. Each country has its own scale.</p>
     </div>
     <div class="ch-figure">
       <p class="scope" id="scope-goods"></p>
-      <div class="table-wrap"><table class="supertable goods-table" id="goods-super"></table></div>
+      <div class="gb-grid" id="goods-bars"></div>
+      <details class="table-view goods-ref"><summary>Every code, every year</summary>
+        <p class="aside" id="goods-cap"></p>
+        <div class="controls">
+          <div class="seg" role="radiogroup" aria-label="Country" id="goods-country"></div>
+          <div class="seg" role="radiogroup" aria-label="Flow" id="goods-flow"></div>
+        </div>
+        <div class="table-wrap"><table class="supertable goods-table" id="goods-super"></table></div>
+      </details>
       <p class="src-note">Uses: <a href="https://finance.ec.europa.eu/document/download/5a2494db-d874-4e2b-bf2a-ec5a191d2dc0_en">EU List of Common High Priority Items, February 2024</a>; for 8457.10 and 8517.62, <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32026R0506">Regulation (EU) 2026/506, recital 34</a>.</p>
     </div>
   </section>
@@ -274,19 +280,17 @@
     <div class="ch-text">
       <h2 id="case-h">EU cases that name the route</h2>
       <p class="finding" id="case-sub"></p>
-      <p class="finding">Each mark is one step in a case where EU authorities say goods went to Russia through
-        Kazakhstan, Kyrgyzstan or Uzbekistan. Open marks are investigations and arrests, grey marks are charges, and
-        solid marks are convictions and fines. A line joins the steps of one case; the number leads to the table.</p>
-      <p class="aside">This is a sample, not a full count. Most investigations stay private, and not every judgment
-        is published. The table says for each step whether our source is the authority's or court's own page or a news
-        report or law-firm summary. When we could not find the date of the event, the mark sits at the
-        first report. We left out goods that only claimed a Central Asian origin, and goods bound for Belarus.</p>
+      <p class="aside">Cases come from the authorities' and courts' own pages, news reports and law-firm trackers of
+        European sanctions enforcement. Most sanctions investigations are never made public, and not every judgment is
+        published, so this is a sample, not a full count. We left out goods that only claimed a Central Asian origin, and
+        goods bound for Belarus.</p>
     </div>
     <div class="ch-figure">
       <p class="scope">EU member states · enforcement steps from 2023 · filters do not apply</p>
-      <p class="exc-key case-key"><span class="k-open">investigation or arrest</span><span class="k-charged">charged</span><span class="k-decided">conviction or fine</span></p>
-      <div id="case-plot"></div>
-      <div class="table-wrap"><table class="supertable" id="case-table"></table></div>
+      <h3 class="ctl-group">Who ships, and who prosecutes</h3>
+      <div class="table-wrap" id="case-plot"></div>
+      <h3 class="ctl-group">The cases</h3>
+      <div class="table-wrap"><table class="supertable case-list" id="case-table"></table></div>
     </div>
   </section>
 
@@ -444,6 +448,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="map/world.js?v=1"></script>
 <script src="data.js?v=1.29"></script>
-<script src="app.js?v=1.78"></script>
+<script src="app.js?v=1.80"></script>
 </body>
 </html>

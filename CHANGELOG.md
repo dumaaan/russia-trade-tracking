@@ -2,6 +2,19 @@
 
 All method changes are listed here with a date, so that readers can see why a number changed.
 
+## 1.24.0 — 2026-11-24
+
+### Changed
+- **Which goods (Part 1):** the main view is one ranked bar list a country: the eight largest codes sold
+  to Russia in the latest year plus "all other codes", in dollars, with each bar's share in words and a
+  thin mark for the pre-war value. The code-by-year table (47 sparklines) is folded under "Every code,
+  every year", with its country and flow choices. The section went from about 2,500 px to under 1,000 px.
+- **EU cases that name the route (Part 4):** following the usual standard for enforcement data, the
+  timeline of numbered marks is replaced by a league table by member state (shipments to the three
+  countries in the latest year, cases, convicted or fined, still open) and a list with one row a case
+  (not one a step), grouped into convicted or fined and still open, with the full outcome folded under
+  each row. The text says that these are only the cases made public.
+
 ## 1.23.0 — 2026-11-24
 
 ### Changed
